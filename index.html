@@ -15,12 +15,10 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
 
-    <!-- Icons & Utils -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
@@ -46,30 +44,29 @@
             background-image: var(--bg-grad);
             color: var(--text);
         }
-        /* Day: Ethereal Light */
+        /* Day: Pure Air */
         body[data-theme="day"] {
-            --bg-grad: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
-            --text: #1e293b; --text-sec: #475569; --primary: #d97706; --line: rgba(0,0,0,0.1);
+            --bg-grad: linear-gradient(180deg, #cce0ff 0%, #eef2ff 100%);
+            --text: #1e293b; --text-sec: #475569; --primary: #f59e0b; --line: rgba(0,0,0,0.08);
             --card-bg: rgba(255, 255, 255, 0.85);
-            --rail-color: rgba(0, 0, 0, 0.1);
-            --glow-color: rgba(251, 191, 36, 0.5);
+            --rail-color: rgba(0, 0, 0, 0.08);
+            --glow-color: rgba(251, 191, 36, 0.4);
         }
-        /* Night: Deep Void */
+        /* Night: Deep Nebula */
         body[data-theme="night"] {
-            --bg-grad: linear-gradient(180deg, #020617 0%, #0f172a 100%);
-            --text: #f1f5f9; --text-sec: #94a3b8; --primary: #818cf8; --line: rgba(255,255,255,0.15);
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --rail-color: rgba(255, 255, 255, 0.15);
+            --bg-grad: linear-gradient(180deg, #020617 0%, #0f172a 60%, #1e1b4b 100%);
+            --text: #f8fafc; --text-sec: #94a3b8; --primary: #818cf8; --line: rgba(255,255,255,0.12);
+            --card-bg: rgba(15, 23, 42, 0.8);
+            --rail-color: rgba(255, 255, 255, 0.12);
             --glow-color: rgba(99, 102, 241, 0.5);
         }
         body[data-theme="dawn"] { --bg-grad: linear-gradient(180deg, #fff1f2 0%, #e0e7ff 100%); --text: #334155; --text-sec: #64748b; --primary: #f43f5e; --line: rgba(0,0,0,0.1); --card-bg: rgba(255, 255, 255, 0.8); --rail-color: rgba(0, 0, 0, 0.1); --glow-color: rgba(251, 113, 133, 0.5); }
-        body[data-theme="dusk"] { --bg-grad: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); --text: #e2e8f0; --text-sec: #94a3b8; --primary: #fbbf24; --line: rgba(255,255,255,0.2); --card-bg: rgba(49, 46, 129, 0.6); --rail-color: rgba(255, 255, 255, 0.2); --glow-color: rgba(251, 191, 36, 0.4); }
+        body[data-theme="dusk"] { --bg-grad: linear-gradient(180deg, #1e1b4b 0%, #4c1d95 100%); --text: #e2e8f0; --text-sec: #94a3b8; --primary: #fbbf24; --line: rgba(255,255,255,0.2); --card-bg: rgba(30, 27, 75, 0.7); --rail-color: rgba(255, 255, 255, 0.2); --glow-color: rgba(251, 191, 36, 0.4); }
 
-        /* --- Orbit System (High & Centered) --- */
+        /* --- Orbit System --- */
         .orbit-wrapper {
             position: fixed; 
-            left: -40vh; /* Offset left to center arc over HUD */
-            bottom: -55vh; 
+            left: -40vh; bottom: -55vh; 
             width: 140vh; height: 140vh; 
             pointer-events: none; z-index: 0;
             display: flex; justify-content: center; align-items: center;
@@ -85,7 +82,7 @@
         }
         
         .celestial-body {
-            position: absolute; width: 26vh; height: 26vh; 
+            position: absolute; width: 30vh; height: 30vh; /* Large for glow */
             left: 50%; top: 0; 
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
@@ -94,7 +91,10 @@
         #sun-container { top: 0; }
         #moon-container { top: 100%; transform: translate(-50%, -50%) rotate(180deg); }
 
-        .geo-stroke { fill: none; stroke: currentColor; stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+        /* Minimalist Halo Art */
+        .halo-blur-1 { filter: blur(10px); opacity: 0.6; }
+        .halo-blur-2 { filter: blur(20px); opacity: 0.4; }
+        .halo-blur-3 { filter: blur(40px); opacity: 0.2; }
 
         #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
@@ -111,8 +111,7 @@
         /* --- HUD (Centered) --- */
         #focus-hud {
             position: fixed; 
-            top: 50%; /* Absolute Center */
-            left: 1.5rem; width: 7rem;
+            top: 50%; left: 1.5rem; width: 7rem;
             transform: translateY(-50%); 
             z-index: 40; pointer-events: none;
             display: flex; flex-direction: column; align-items: flex-start;
@@ -123,18 +122,26 @@
             color: var(--text); transition: transform 0.3s, color 0.5s; 
             text-shadow: 0 0 30px var(--glow-color); mix-blend-mode: overlay;
         }
-        body[data-theme="night"] .hud-day { mix-blend-mode: normal; text-shadow: 0 0 20px var(--glow-color); }
+        body[data-theme="night"] .hud-day { mix-blend-mode: normal; text-shadow: 0 0 25px var(--glow-color); }
         .hud-time { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Lato', sans-serif; display: block; line-height: 1; margin-top: 0.5rem; text-shadow: 0 0 10px var(--glow-color); }
         .hud-meta { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); font-family: 'Lato', sans-serif; opacity: 0.8; margin-top: 0.2rem; }
 
-        /* --- Vertical Filter --- */
-        .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; pointer-events: auto; padding-left: 4px; }
-        .filter-dot { width: 10px; height: 10px; border-radius: 50%; cursor: pointer; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        /* --- Large Traffic Light Filter --- */
+        .filter-bar { 
+            display: flex; flex-direction: column; gap: 16px; /* Larger gap */
+            margin-top: 32px; /* Push down */
+            pointer-events: auto; padding-left: 6px; 
+        }
+        .filter-dot { 
+            width: 14px; height: 14px; /* Larger size */
+            border-radius: 50%; cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 0 8px rgba(0,0,0,0.1);
+        }
         .filter-dot.active { transform: scale(1.4); border-color: white; }
-        .f-anni { background-color: #fbbf24; box-shadow: 0 0 10px #fbbf24; } /* Matches Anni Node */
-        .f-holiday { background-color: #4ade80; box-shadow: 0 0 10px #4ade80; } /* Matches Holiday Node */
-        .f-normal { background-color: #e5e7eb; box-shadow: 0 0 10px #e5e7eb; } /* Matches Normal Node */
-        .filter-dot:not(.active) { opacity: 0.3; transform: scale(0.8); box-shadow: none; }
+        .f-anni { background-color: #fbbf24; box-shadow: 0 0 12px #fbbf24; } 
+        .f-holiday { background-color: #4ade80; box-shadow: 0 0 12px #4ade80; } 
+        .f-normal { background-color: #e5e7eb; box-shadow: 0 0 12px #e5e7eb; } 
+        .filter-dot:not(.active) { opacity: 0.3; transform: scale(0.9); box-shadow: none; border-color: transparent; }
 
         /* --- Timeline Rail --- */
         .timeline-rail-outer {
@@ -142,7 +149,6 @@
             mask-image: linear-gradient(to bottom, transparent 10%, black 30%, black 70%, transparent 90%);
             -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 30%, black 70%, transparent 90%);
         }
-        /* Rail Alignment */
         .timeline-rail-container { position: absolute; left: 9rem; top: 0; bottom: 0; width: 1px; }
         .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: var(--rail-color); width: 1px; }
         .timeline-rail-flow { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, transparent, var(--primary), transparent); background-size: 100% 500px; background-repeat: repeat-y; opacity: 0.4; animation: flowLight 6s linear infinite; }
@@ -165,7 +171,6 @@
             padding-block: 30px; box-sizing: border-box;
         }
 
-        /* Node Alignment - Tied to Rail */
         .timeline-node-wrapper { 
             position: absolute; left: 9rem; top: 50%; transform: translate(-50%, -50%); 
             z-index: 20; display: flex; align-items: center; justify-content: center; 
@@ -183,7 +188,7 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.02);
             transition: all 0.3s ease; cursor: pointer; border-radius: 16px; 
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            display: flex; overflow: hidden; min-height: 110px; position: relative;
+            display: flex; overflow: hidden; min-height: 100px; position: relative;
         }
         
         /* Card Variants */
@@ -191,14 +196,12 @@
         .card-anni-past { background-color: rgba(219, 234, 254, 0.85) !important; border-color: rgba(147, 197, 253, 0.5) !important; }
         .card-holiday { background-color: rgba(220, 252, 231, 0.9) !important; border-color: rgba(134, 239, 172, 0.6) !important; }
         
-        /* Night overrides */
         body[data-theme="night"] .card-anni-future { background-color: rgba(133, 77, 14, 0.7) !important; border-color: rgba(234, 179, 8, 0.4) !important; }
         body[data-theme="night"] .card-anni-past { background-color: rgba(30, 58, 138, 0.6) !important; border-color: rgba(96, 165, 250, 0.3) !important; }
         body[data-theme="night"] .card-holiday { background-color: rgba(20, 83, 45, 0.7) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
 
-        /* 1:1 Square Thumbnail */
         .card-thumb-col { 
-            width: 110px; flex-shrink: 0; position: relative; overflow: hidden; 
+            width: 100px; flex-shrink: 0; position: relative; overflow: hidden; 
             border-right: 1px solid var(--line); display: block; aspect-ratio: 1/1;
         }
         .card-thumb-img { width: 100%; height: 100%; object-fit: cover; }
@@ -213,11 +216,9 @@
         body[data-theme="night"] .anni-past-badge { color: #bfdbfe; background: rgba(30, 58, 138, 0.5); }
         body[data-theme="night"] .holiday-badge { color: #bbf7d0; background: rgba(21, 128, 61, 0.5); }
         
-        /* Active State */
+        .entry-item.active-focus .timeline-node { width: 18px; height: 18px; background-color: var(--primary); border-color: var(--primary); box-shadow: 0 0 25px var(--glow-color); }
         .entry-item.active-focus .entry-card { transform: scale(1.02); border-color: var(--primary); box-shadow: 0 12px 40px var(--glow-color); }
-        /* Node Color logic is handled in JS to match filter colors */
 
-        /* Placeholders */
         .list-placeholder {
             position: absolute; left: 0; right: 0; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.75rem; color: var(--text-sec); pointer-events: none;
@@ -233,20 +234,36 @@
             #focus-hud { left: 1rem; width: 7rem; }
         }
 
-        /* Markdown Editor */
-        #editor-content {
-            white-space: pre-wrap; /* Preserve whitespace */
-            font-family: 'Lato', monospace;
-            font-size: 0.95rem;
-            line-height: 1.6;
+        /* Editor & Markdown */
+        .editor-tools-wrapper {
+            display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px;
+            background: var(--line); padding: 8px; border-radius: 12px;
         }
-        /* Markdown Content Styling */
-        .md-render h1 { font-size: 1.4em; font-weight: 800; margin: 0.5em 0 0.2em; color: var(--text); }
-        .md-render h2 { font-size: 1.2em; font-weight: 700; margin: 0.5em 0 0.2em; color: var(--text-sec); }
-        .md-render p { margin-bottom: 0.5em; line-height: 1.5; font-family: 'Cormorant Garamond', serif; font-size: 1.1em; }
-        .md-render strong { font-weight: 700; color: var(--primary); }
-        .md-render img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
-        .md-render ul { list-style-type: disc; padding-left: 1.2em; }
+        .editor-row { display: flex; gap: 8px; overflow-x: auto; align-items: center; }
+        .block-btn { 
+            padding: 6px 10px; border-radius: 8px; background: var(--card-bg); color: var(--text); 
+            font-size: 0.75rem; font-weight: bold; white-space: nowrap; border: 1px solid transparent;
+            transition: all 0.2s; display: flex; align-items: center; gap: 4px;
+        }
+        .block-btn:hover { background: var(--primary); color: white; }
+        .block-btn i { width: 14px; height: 14px; }
+
+        #editor-content {
+            white-space: pre-wrap; font-family: 'Lato', monospace; font-size: 0.95rem; line-height: 1.6;
+            background: transparent; padding: 10px; border-radius: 8px; border: 1px solid transparent;
+        }
+        #editor-content:focus { border-color: var(--line); }
+
+        #prompt-bubble {
+            background: var(--card-bg); border: 1px solid var(--primary); 
+            padding: 12px; border-radius: 12px 12px 12px 0;
+            position: absolute; bottom: 90px; right: 24px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 0.8rem; color: var(--text);
+            transform: scale(0); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-origin: bottom right; pointer-events: none;
+            max-width: 200px; z-index: 100;
+        }
 
         .hidden-view { display: none !important; }
         .active-view { display: block !important; animation: fadeIn 0.6s ease-out; }
@@ -257,6 +274,14 @@
         .calendar-cell.has-entry::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; background-color: var(--primary); border-radius: 50%; }
         .modal-content { background-color: var(--card-bg); backdrop-filter: blur(30px); border: 1px solid var(--line); z-index: 10000; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
         .simon-sig { font-family: 'Oswald', sans-serif; font-weight: 300; letter-spacing: 0.1em; opacity: 0.5; font-size: 0.7rem; text-align: center; margin-top: 2rem; color: var(--text-sec); }
+        
+        .md-render h1 { font-size: 1.4em; font-weight: 800; margin: 0.5em 0 0.2em; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+        .md-render h2 { font-size: 1.2em; font-weight: 700; margin: 0.5em 0 0.2em; color: var(--text-sec); }
+        .md-render p { margin-bottom: 0.5em; line-height: 1.5; font-family: 'Cormorant Garamond', serif; font-size: 1.1em; }
+        .md-render strong { font-weight: 700; color: var(--primary); }
+        .md-render img { max-width: 100%; border-radius: 8px; margin: 8px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .md-render ul { list-style-type: disc; padding-left: 1.2em; margin-bottom: 0.5em; }
+        .md-render blockquote { border-left: 3px solid var(--primary); padding-left: 12px; font-style: italic; color: var(--text-sec); margin: 8px 0; }
     </style>
 </head>
 <body data-theme="day" class="antialiased h-screen flex flex-col select-none">
@@ -267,43 +292,35 @@
     <!-- Celestial Orbit System -->
     <div class="orbit-wrapper">
         <div class="orbit-wheel" id="orbit-wheel" style="transform: rotate(0deg);">
-            <!-- Sun: Divine Abstract -->
-            <div id="sun-container" class="celestial-body text-yellow-500 mix-blend-overlay">
-                <svg viewBox="0 0 200 200" class="w-full h-full" style="filter: drop-shadow(0 0 50px rgba(253,224,71,0.8));">
-                    <!-- Rotating Dashed Rings -->
-                    <g class="animate-[spin_60s_linear_infinite] origin-center opacity-40">
-                        <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="10 10"/>
-                        <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="20 20"/>
-                    </g>
+            <!-- Sun: Halo Abstract -->
+            <div id="sun-container" class="celestial-body text-amber-400 mix-blend-overlay">
+                <svg viewBox="0 0 200 200" class="w-full h-full" style="filter: drop-shadow(0 0 60px rgba(251,191,36,0.8));">
+                    <!-- Halo Rings -->
+                    <circle cx="100" cy="100" r="85" stroke="currentColor" stroke-width="1" fill="none" class="halo-blur-2"/>
+                    <circle cx="100" cy="100" r="60" stroke="currentColor" stroke-width="2" fill="none" class="halo-blur-1"/>
                     <!-- Core -->
-                    <circle cx="100" cy="100" r="40" fill="url(#sunGrad)" />
-                    <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                    <circle cx="100" cy="100" r="40" fill="url(#sunCore)"/>
                     <defs>
-                        <radialGradient id="sunGrad">
-                            <stop offset="30%" stop-color="#fff" stop-opacity="0.9"/>
-                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.8"/>
+                        <radialGradient id="sunCore">
+                            <stop offset="20%" stop-color="#fff" />
+                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.8" />
                         </radialGradient>
                     </defs>
                 </svg>
             </div>
 
-            <!-- Moon: Geometric Minimalist -->
-            <div id="moon-container" class="celestial-body text-gray-200 mix-blend-screen" style="filter: drop-shadow(0 0 40px rgba(255,255,255,0.4));">
+            <!-- Moon: Halo Abstract -->
+            <div id="moon-container" class="celestial-body text-blue-100 mix-blend-screen" style="filter: drop-shadow(0 0 50px rgba(255,255,255,0.5));">
                 <svg viewBox="0 0 200 200" class="w-full h-full">
-                    <!-- Halo -->
-                    <circle cx="100" cy="100" r="60" fill="url(#moonHalo)" opacity="0.3" />
-                    <!-- Crescent -->
-                    <path d="M130 50 C 90 50, 60 90, 60 140 C 60 170, 75 190, 90 200 C 50 180, 30 130, 30 80 C 30 30, 70 10, 120 10 Z" 
-                          fill="url(#moonGrad)" />
+                    <circle cx="100" cy="100" r="70" fill="url(#moonGlow)" class="halo-blur-1"/>
+                    <circle cx="100" cy="100" r="50" fill="#fff" />
+                    <!-- Shadow to create crescent -->
+                    <circle cx="130" cy="80" r="45" fill="#0f172a" class="mix-blend-multiply opacity-80"/>
                     <defs>
-                        <radialGradient id="moonHalo">
-                            <stop offset="0%" stop-color="#fff" stop-opacity="0.8"/>
+                         <radialGradient id="moonGlow">
+                            <stop offset="0%" stop-color="#fff" stop-opacity="0.6"/>
                             <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
                         </radialGradient>
-                        <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#f8fafc"/>
-                            <stop offset="100%" stop-color="#94a3b8"/>
-                        </linearGradient>
                     </defs>
                 </svg>
             </div>
@@ -336,6 +353,7 @@
         <div class="hud-time-wrapper"><div class="hud-time" id="hud-time">--:--</div></div>
         <div class="hud-meta" id="hud-month-year">--- ----</div>
         
+        <!-- Larger Hit Area Vertical Filter -->
         <div class="filter-bar">
             <div class="filter-dot f-anni active" onclick="UI.toggleFilter('anni')" title="Anniversary"></div>
             <div class="filter-dot f-holiday active" onclick="UI.toggleFilter('holiday')" title="Holiday"></div>
@@ -400,7 +418,7 @@
         <i data-lucide="pen-tool" class="w-6 h-6 sm:w-7 sm:h-7"></i>
     </button>
 
-    <!-- Editor Modal with Markdown Support -->
+    <!-- Editor Modal -->
     <div id="editor-modal" class="modal-overlay fixed inset-0 hidden z-50">
         <div class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="UI.closeEditor()"></div>
         <div class="modal-content absolute bottom-0 w-full sm:max-w-2xl sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:rounded-2xl shadow-2xl transform translate-y-full flex flex-col" id="editor-panel">
@@ -443,27 +461,33 @@
                     </div>
                 </div>
 
-                <!-- Block Toolbar -->
-                <div class="editor-toolbar-row no-scrollbar">
-                    <button class="block-btn" onclick="UI.editorInsertMD('# ')">H1</button>
-                    <button class="block-btn" onclick="UI.editorInsertMD('## ')">H2</button>
-                    <button class="block-btn" onclick="UI.editorInsertMD('> ')">Quote</button>
-                    <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')">To-Do</button>
-                    <div class="w-px h-4 bg-[var(--line)] mx-1"></div>
-                    <button class="block-btn text-[var(--primary)]" onclick="DataManager.fetchDailyNews()"><i data-lucide="lightbulb" class="w-3 h-3 inline mr-1"></i>Inspire</button>
+                <!-- Enhanced Toolbar -->
+                <div class="editor-tools-wrapper">
+                    <div class="editor-row no-scrollbar">
+                        <button class="block-btn" onclick="UI.editorInsertMD('# ')"><i data-lucide="heading-1"></i> H1</button>
+                        <button class="block-btn" onclick="UI.editorInsertMD('## ')"><i data-lucide="heading-2"></i> H2</button>
+                        <button class="block-btn" onclick="UI.editorInsertMD('> ')"><i data-lucide="quote"></i></button>
+                        <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')"><i data-lucide="check-square"></i></button>
+                    </div>
+                    <div class="editor-row no-scrollbar border-t border-[var(--line)]/20 pt-2">
+                        <button class="block-btn" onclick="UI.triggerImageUpload()"><i data-lucide="image"></i> Image</button>
+                        <button class="block-btn text-[var(--primary)]" onclick="DataManager.fetchInspiration()" id="btn-inspire">
+                            <i data-lucide="sparkles"></i> Inspire
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Textarea for Markdown Editing -->
-                <textarea id="editor-content" class="flex-1 w-full outline-none text-lg leading-relaxed text-[var(--text)] font-serif min-h-[150px] bg-transparent resize-none p-2" placeholder="Write your story using Markdown..."></textarea>
+                <textarea id="editor-content" class="flex-1 w-full outline-none bg-transparent resize-none p-2" placeholder="Write your story..."></textarea>
                 
                 <div id="image-preview-area" class="mt-4 hidden">
                     <img id="preview-img" class="max-h-32 rounded-lg shadow-md border border-[var(--line)]">
-                    <button onclick="DataManager.generateStoryFromImage()" class="mt-2 bg-[var(--primary)] text-white px-3 py-1 rounded text-xs font-bold shadow">✨ Write Story</button>
-                    <button onclick="UI.clearImage()" class="text-xs text-red-500 mt-1 font-bold uppercase ml-2">Remove</button>
+                    <div class="flex gap-2 mt-2">
+                         <button onclick="DataManager.generateStoryFromImage()" class="bg-[var(--primary)] text-white px-3 py-1 rounded text-xs font-bold shadow flex items-center gap-1" id="btn-vision">
+                             <i data-lucide="wand-2" class="w-3 h-3"></i> Analyze & Write
+                         </button>
+                         <button onclick="UI.clearImage()" class="text-xs text-red-500 font-bold uppercase px-2 py-1">Remove</button>
+                    </div>
                 </div>
-            </div>
-            <div class="p-3 border-t border-[var(--line)]/30 bg-[var(--bg)]/50 flex gap-4 items-center justify-between sm:justify-start">
-                 <button class="p-2 rounded text-[var(--primary)] bg-[var(--primary)]/10" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-5 h-5"></i> Add Image</button>
             </div>
             <input type="file" id="image-input" accept="image/*" class="hidden" onchange="UI.handleImageUpload(this)">
         </div>
@@ -478,28 +502,46 @@
                 <button onclick="UI.closeInfo()"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6 space-y-6 text-[var(--text)] max-h-[80vh] overflow-y-auto">
-                <div class="flex justify-center gap-4 border-b border-[var(--line)] pb-4">
-                    <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-en">English</button>
-                    <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-zh">中文</button>
+                <!-- Tabs for Info Content -->
+                <div class="flex border-b border-[var(--line)] mb-4">
+                    <button class="flex-1 py-2 font-bold text-sm border-b-2 border-[var(--primary)] text-[var(--primary)]">Settings</button>
+                    <button class="flex-1 py-2 font-bold text-sm border-b-2 border-transparent opacity-50 hover:opacity-100" onclick="document.getElementById('feature-guide').classList.remove('hidden'); this.classList.add('border-[var(--primary)]', 'text-[var(--primary)]', 'opacity-100'); this.previousElementSibling.classList.remove('border-[var(--primary)]', 'text-[var(--primary)]'); this.previousElementSibling.classList.add('opacity-50')">Features</button>
                 </div>
-                <div class="space-y-4">
-                    <div><h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="hourglass" class="w-4 h-4"></i> <span data-i18n="timeline_title">Timeline Flow</span></h3><p class="text-sm opacity-80 leading-relaxed" data-i18n="timeline_desc">Fluid perspective journal.</p></div>
-                    <div><h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="ai_title">AI Oracle</span></h3><p class="text-sm opacity-80 leading-relaxed" data-i18n="ai_desc">Fortune teller.</p></div>
-                </div>
-                <div class="pt-4 border-t border-[var(--line)]">
-                    <h3 class="font-bold text-[var(--text)] mb-3 text-sm flex items-center gap-2" data-i18n="data_title">Data Management</h3>
-                    <div class="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--line)] mb-4">
-                        <h4 class="text-xs font-bold uppercase text-[var(--text-sec)] mb-2" data-i18n="storage_title">Storage Usage</h4>
-                        <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden"><div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div></div>
-                        <div class="flex justify-between text-[10px] font-num text-[var(--text)]"><span id="entry-count">0 Entries</span><span id="storage-size">0 KB / 5 MB</span></div>
+
+                <!-- Settings Content -->
+                <div id="settings-content">
+                    <div class="flex justify-center gap-4 border-b border-[var(--line)] pb-4">
+                        <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-en">English</button>
+                        <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-zh">中文</button>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mb-4">
-                        <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="download" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_backup">Backup</span></button>
-                        <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="upload" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_restore">Restore</span></button>
+                    <div class="pt-4 border-t border-[var(--line)]">
+                        <h3 class="font-bold text-[var(--text)] mb-3 text-sm flex items-center gap-2" data-i18n="data_title">Data Management</h3>
+                        <div class="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--line)] mb-4">
+                            <h4 class="text-xs font-bold uppercase text-[var(--text-sec)] mb-2" data-i18n="storage_title">Storage Usage</h4>
+                            <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden"><div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div></div>
+                            <div class="flex justify-between text-[10px] font-num text-[var(--text)]"><span id="entry-count">0 Entries</span><span id="storage-size">0 KB / 5 MB</span></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="download" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_backup">Backup</span></button>
+                            <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="upload" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_restore">Restore</span></button>
+                        </div>
+                        <input type="file" id="import-input" accept=".json" class="hidden" onchange="DataManager.importBackup(this)">
+                        <button onclick="DataManager.nukeData()" class="w-full py-2 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors border border-red-200" data-i18n="btn_reset">Reset All Data</button>
                     </div>
-                    <input type="file" id="import-input" accept=".json" class="hidden" onchange="DataManager.importBackup(this)">
-                    <button onclick="DataManager.nukeData()" class="w-full py-2 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors border border-red-200" data-i18n="btn_reset">Reset All Data</button>
                 </div>
+
+                <!-- Feature Guide (Hidden by default) -->
+                <div id="feature-guide" class="hidden space-y-4 text-sm leading-relaxed opacity-90">
+                    <h3 class="font-bold text-[var(--primary)]">Feature Guide</h3>
+                    <ul class="list-disc pl-4 space-y-2">
+                        <li><strong>Epic Particles:</strong> Day/Night & Weather react to your diary entries.</li>
+                        <li><strong>Halo Celestial:</strong> Sun/Moon stay above the HUD for best visibility.</li>
+                        <li><strong>Filter Bar:</strong> Use the colored dots under the date to toggle Anniversaries (Yellow), Holidays (Green), or Diaries (White).</li>
+                        <li><strong>Markdown:</strong> The editor supports MD. Try # H1, > Quote.</li>
+                        <li><strong>AI Vision:</strong> Upload an image in the editor and click "Analyze & Write".</li>
+                    </ul>
+                </div>
+
                 <div class="simon-sig pt-4 border-t border-[var(--line)]">developed by simon</div>
             </div>
         </div>
@@ -527,8 +569,49 @@
                 <button onclick="UI.generateReport()" class="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-transform" data-i18n="btn_consult">Consult</button>
                 <div id="summary-ai-content" class="md-render text-sm leading-relaxed font-serif border-t border-[var(--line)] pt-4 mt-4 empty:hidden"></div>
                 <div class="mt-2 border-t border-[var(--line)] pt-2">
-                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key (Optional)">
+                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key">
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--line)] transition-all animate-in zoom-in-95 duration-300">
+            <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl sm:text-3xl font-bold font-display text-[var(--text)] leading-tight" id="detail-title"></h2>
+                    <button onclick="UI.closeDetail()" class="p-1 bg-[var(--line)]/20 rounded-full"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button>
+                </div>
+                <div class="flex gap-3 mb-6 text-xs font-num text-[var(--text-sec)] uppercase tracking-widest items-center">
+                    <span id="detail-date"></span> <span class="text-[var(--primary)]" id="detail-time"></span>
+                    <div id="detail-icons" class="flex gap-2 ml-auto text-[var(--text)]"></div>
+                </div>
+                <div id="detail-image-container" class="mb-6 hidden">
+                    <img id="detail-image" class="w-full rounded-xl shadow-md object-cover max-h-64">
+                </div>
+                <div id="detail-content" class="md-render text-lg leading-loose text-[var(--text)] font-serif opacity-90"></div>
+            </div>
+            <div class="p-4 border-t border-[var(--line)]/30 flex justify-between bg-[var(--card-bg)]/50">
+                <button onclick="UI.confirmDeleteEntry()" class="text-red-500 p-2 flex gap-2 items-center"><i data-lucide="trash-2" class="w-5 h-5"></i> <span class="text-xs font-bold uppercase" data-i18n="btn_delete">Delete</span></button>
+                <button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] p-2 flex gap-2 items-center"><span class="text-xs font-bold uppercase" data-i18n="btn_edit">Edit</span> <i data-lucide="edit-3" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center animate-in zoom-in-95 duration-200">
+            <div class="mx-auto w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[var(--text)] mb-2" data-i18n="delete_title">Delete Memory?</h3>
+            <p class="text-sm text-[var(--text-sec)] mb-6" data-i18n="delete_desc">This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold" data-i18n="btn_cancel">Cancel</button>
+                <button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold shadow-md hover:bg-red-600" data-i18n="btn_delete">Delete</button>
             </div>
         </div>
     </div>
@@ -585,14 +668,21 @@
                 this.resize(); window.addEventListener('resize', () => this.resize());
                 this.createParticles(); this.running = true; this.animate();
             },
-            resize: function() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; },
-            createParticles: function() { this.particles = []; const count = this.width < 600 ? 30 : 60; for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); },
+            resize: function() {
+                this.width = window.innerWidth; this.height = window.innerHeight;
+                this.canvas.width = this.width; this.canvas.height = this.height;
+            },
+            createParticles: function() {
+                this.particles = []; const count = this.width < 600 ? 40 : 70;
+                for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height));
+            },
             setTheme: function(theme) { this.theme = theme; },
             setWeather: function(weather) { this.weather = weather; },
             animate: function() {
                 if(!this.running) return;
                 this.ctx.clearRect(0, 0, this.width, this.height);
-                this.ctx.globalCompositeOperation = (this.theme === 'day' && this.weather !== 'rain') ? 'screen' : 'source-over';
+                if (this.theme === 'day' && this.weather !== 'rain') { this.ctx.globalCompositeOperation = 'screen'; } 
+                else { this.ctx.globalCompositeOperation = 'source-over'; }
                 this.particles.forEach(p => { p.update(this.width, this.height, this.theme, this.weather); p.draw(this.ctx, this.theme, this.weather); });
                 requestAnimationFrame(() => this.animate());
             }
@@ -602,16 +692,29 @@
             constructor(w, h) { this.init(w, h); }
             init(w, h) {
                 this.x = Math.random() * w; this.y = Math.random() * h;
-                this.size = Math.random() * 2 + 0.5; this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
-                this.opacity = Math.random() * 0.4 + 0.1; this.beamHeight = Math.random() * 400 + 200; this.phase = Math.random() * Math.PI * 2;
+                this.size = Math.random() * 2 + 0.5; 
+                this.speedX = (Math.random() - 0.5) * 0.1; 
+                this.speedY = (Math.random() - 0.5) * 0.1;
+                this.opacity = Math.random() * 0.4 + 0.1; 
+                this.beamWidth = Math.random() * 100 + 50;
+                this.beamHeight = Math.random() * 500 + 200;
+                this.beamAngle = 25 * (Math.PI / 180); 
+                this.phase = Math.random() * Math.PI * 2;
+                
+                // Galaxy colors
+                const cols = ['255,255,255', '220,200,255', '200,240,255'];
+                this.color = cols[Math.floor(Math.random()*cols.length)];
             }
             update(w, h, theme, weather) {
                 if (theme === 'day') {
-                    if (weather === 'rain') { this.y += 15 + Math.random() * 5; this.x -= 1; } 
-                    else if (weather === 'cloud') { this.x += 0.1; } 
-                    else { this.x += 0.2; this.y += 0.1; }
+                    if (weather === 'rain') { this.y += 20 + Math.random() * 5; this.x -= 1; } 
+                    else if (weather === 'cloud') { this.x += 0.05; this.opacity = 0.1 + Math.sin(this.phase)*0.05; this.phase+=0.01;} 
+                    else { this.x += 0.1; this.y += 0.05; } // Sunbeams
                 } else {
-                    this.phase += 0.02; this.opacity = 0.45 + Math.sin(this.phase) * 0.35; this.x += 0.05; 
+                    // Milky way drift
+                    this.x -= 0.05; 
+                    this.phase += 0.02; 
+                    this.opacity = 0.3 + Math.sin(this.phase) * 0.3; 
                 }
                 if(this.x < -200) this.x = w + 200; if(this.x > w + 200) this.x = -200;
                 if(this.y < -200) this.y = h + 200; if(this.y > h + 200) this.y = -200;
@@ -620,17 +723,24 @@
                 ctx.beginPath();
                 if (theme === 'day') {
                     if (weather === 'rain') {
-                        ctx.strokeStyle = `rgba(255, 255, 255, 0.5)`; ctx.lineWidth = 1; ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - 2, this.y + 20); ctx.stroke();
+                        ctx.strokeStyle = `rgba(255, 255, 255, 0.6)`; ctx.lineWidth = 1.5; ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - 3, this.y + 25); ctx.stroke();
                     } else if (weather === 'cloud') {
-                         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * 0.2})`; ctx.arc(this.x, this.y, this.size * 15, 0, Math.PI * 2); ctx.fill();
+                         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * 0.3})`; ctx.filter = 'blur(15px)'; ctx.arc(this.x, this.y, this.size * 20, 0, Math.PI * 2); ctx.fill(); ctx.filter = 'none';
                     } else {
-                        ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(20 * Math.PI/180);
+                        // Sunbeams (Tyndall)
+                        ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.beamAngle);
                         let grad = ctx.createLinearGradient(0, 0, 0, this.beamHeight);
-                        grad.addColorStop(0, `rgba(255, 255, 255, 0)`); grad.addColorStop(0.5, `rgba(255, 223, 0, ${this.opacity * 0.15})`); grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                        ctx.fillStyle = grad; ctx.fillRect(-20, 0, 40, this.beamHeight); ctx.restore();
+                        grad.addColorStop(0, `rgba(255, 255, 255, 0)`); 
+                        grad.addColorStop(0.3, `rgba(255, 215, 0, ${this.opacity * 0.2})`); 
+                        grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                        ctx.fillStyle = grad; ctx.fillRect(-this.beamWidth/2, 0, this.beamWidth, this.beamHeight); ctx.restore();
                     }
                 } else {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2); ctx.fill();
+                    // Galaxy Stars
+                    ctx.fillStyle = `rgba(${this.color}, ${this.opacity})`;
+                    ctx.shadowBlur = this.size * 2; ctx.shadowColor = `rgba(${this.color}, 0.8)`;
+                    ctx.arc(this.x, this.y, this.size * (Math.random()>0.9?1.5:0.8), 0, Math.PI * 2); ctx.fill();
+                    ctx.shadowBlur = 0;
                 }
             }
         }
@@ -674,30 +784,29 @@
                     if (img && img.startsWith('data:')) { this.compressImage(img, 800, 0.7, save); } else { save(img); }
                 } else { alert('Title and Date required'); }
             },
-            fetchDailyNews: async function() {
+            fetchInspiration: async function() {
+                const btn = document.getElementById('btn-inspire'); const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-3 h-3"></i>`; lucide.createIcons();
                 const k = document.getElementById('user-api-key').value || DEFAULT_KEY;
-                const prompt = `Summarize 3 top tech/business news headlines for today (${new Date().toLocaleDateString()}) concisely to inspire a diary entry. Language: ${UI.state.lang==='zh'?'Chinese':'English'}. Format as HTML list.`;
+                const prompt = `Generate a short, beautiful, healing micro-story or poetic reflection (under 50 words). Language: ${UI.state.lang==='zh'?'Chinese':'English'}.`;
                 try {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
-                    const json = await res.json(); 
-                    const txt = json.candidates[0].content.parts[0].text;
-                    UI.editorInsertMD(`\n> **Daily Inspiration**\n${txt}\n`);
-                } catch(e) { alert("AI News failed."); }
+                    const json = await res.json(); const txt = json.candidates[0].content.parts[0].text;
+                    UI.editorInsertMD(`\n> ${txt}\n`);
+                } catch(e) { alert("Connection failed."); } finally { btn.innerHTML = originalHtml; lucide.createIcons(); }
             },
             generateStoryFromImage: async function() {
-                const img = UI.state.tempImage; if (!img || !img.startsWith('data:image/')) return alert("Please upload an image first.");
+                const btn = document.getElementById('btn-vision'); const originalHtml = btn.innerHTML;
+                btn.innerHTML = `<i data-lucide="loader-2" class="animate-spin w-3 h-3"></i> Analyzing...`; lucide.createIcons();
+                const img = UI.state.tempImage; if (!img || !img.startsWith('data:image/')) { btn.innerHTML=originalHtml; return alert("Upload image first."); }
                 const k = document.getElementById('user-api-key').value || DEFAULT_KEY;
                 const base64Data = img.split(',')[1]; const mimeType = img.split(',')[0].split(':')[1].split(';')[0];
-                const prompt = `Look at this image and write a short, poetic diary entry about it. Capture the mood and details. Language: ${UI.state.lang==='zh'?'Chinese':'English'}.`;
+                const prompt = `Write a short, poetic diary entry based on this image. Capture the mood. Language: ${UI.state.lang==='zh'?'Chinese':'English'}.`;
                 try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { 
-                        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: prompt},{inlineData: {mimeType: mimeType, data: base64Data}}]}]}) 
-                    });
-                    const json = await res.json();
-                    if (json.error) throw new Error(json.error.message);
-                    const txt = json.candidates[0].content.parts[0].text;
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: prompt},{inlineData: {mimeType: mimeType, data: base64Data}}]}]}) });
+                    const json = await res.json(); const txt = json.candidates[0].content.parts[0].text;
                     UI.editorInsertMD(`\n${txt}\n`);
-                } catch(e) { console.error(e); alert("AI Vision failed. Check API Key."); }
+                } catch(e) { console.error(e); alert("Vision failed."); } finally { btn.innerHTML = originalHtml; lucide.createIcons(); }
             },
             exportBackup: function() { const b = new Blob([JSON.stringify(this.data, null, 2)], {type: 'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `timeline_backup.json`; a.click(); URL.revokeObjectURL(u); },
             importBackup: function(input) { if(input.files[0]) { const r = new FileReader(); r.onload = (e) => { try { const i = JSON.parse(e.target.result); if(Array.isArray(i) && confirm(`Import ${i.length} entries?`)) { this.data = i; this.persist(); alert("Restored!"); UI.closeInfo(); } } catch(err) { alert("Invalid JSON"); } }; r.readAsText(input.files[0]); } input.value = ''; },
@@ -758,7 +867,6 @@
                     div.dataset.weather = i.weather || 'sun';
                     
                     let nodeClass = ''; let cardClass = ''; let extraHtml = '';
-                    // Logic for node color based on type (yellow, green, white)
                     if (i.isHoliday) {
                         cardClass = 'card-holiday'; 
                         extraHtml = `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase tracking-wider">Festival</div>`;
@@ -786,7 +894,6 @@
                     let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
                     const sum = i.content.replace(/<[^>]*>/g, '').substring(0, 120) + (i.content.length > 120 ? '...' : '');
                     
-                    // Inline style for dynamic node color
                     div.innerHTML = `
                         <style>.timeline-node.${nodeClass} { background-color: var(--node-color) !important; border-color: var(--node-color) !important; }</style>
                         <div class="timeline-node-wrapper"><div class="timeline-node ${nodeClass}" style="background-color: var(--node-color); border-color: var(--node-color);"></div></div>
@@ -963,7 +1070,6 @@
                     const ic=document.getElementById('detail-image-container'); 
                     if(i.img){
                         document.getElementById('detail-image').src=i.img; ic.classList.remove('hidden');
-                        // Add image to markdown content flow as well if user prefers
                     }else{ic.classList.add('hidden');} 
                     document.getElementById('detail-modal').classList.remove('hidden'); lucide.createIcons(); 
                 }
