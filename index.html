@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <!-- PWA & Mobile Capability -->
     <meta name="theme-color" content="#0f2027">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -16,11 +15,15 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
 
+    <!-- Icons & Utils -->
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 
     <style>
         /* --- Core Config --- */
@@ -43,54 +46,46 @@
             background-image: var(--bg-grad);
             color: var(--text);
         }
+        /* Day: Ethereal Light */
         body[data-theme="day"] {
-            --bg-grad: linear-gradient(180deg, #e0f7fa 0%, #b3e5fc 100%);
-            --text: #263238; --text-sec: #546e7a; --primary: #d4af37; --line: rgba(0,0,0,0.1);
-            --card-bg: rgba(255, 255, 255, 0.75);
+            --bg-grad: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 100%);
+            --text: #1e293b; --text-sec: #475569; --primary: #d97706; --line: rgba(0,0,0,0.1);
+            --card-bg: rgba(255, 255, 255, 0.85);
             --rail-color: rgba(0, 0, 0, 0.1);
-            --glow-color: rgba(255, 223, 0, 0.4);
+            --glow-color: rgba(251, 191, 36, 0.5);
         }
+        /* Night: Deep Void */
         body[data-theme="night"] {
-            --bg-grad: linear-gradient(180deg, #0f2027 0%, #203a43 60%, #2c5364 100%);
-            --text: #eceff1; --text-sec: #b0bec5; --primary: #81d4fa; --line: rgba(255,255,255,0.15);
-            --card-bg: rgba(30, 40, 50, 0.7);
+            --bg-grad: linear-gradient(180deg, #020617 0%, #0f172a 100%);
+            --text: #f1f5f9; --text-sec: #94a3b8; --primary: #818cf8; --line: rgba(255,255,255,0.15);
+            --card-bg: rgba(30, 41, 59, 0.75);
             --rail-color: rgba(255, 255, 255, 0.15);
-            --glow-color: rgba(100, 200, 255, 0.5);
+            --glow-color: rgba(99, 102, 241, 0.5);
         }
-        body[data-theme="dawn"] { --bg-grad: linear-gradient(180deg, #fff1eb 0%, #ace0f9 100%); --text: #455a64; --text-sec: #78909c; --primary: #ff8a65; --line: rgba(0,0,0,0.1); --card-bg: rgba(255, 255, 255, 0.7); --rail-color: rgba(0, 0, 0, 0.1); --glow-color: rgba(255, 150, 150, 0.4); }
-        body[data-theme="dusk"] { --bg-grad: linear-gradient(180deg, #a18cd1 0%, #fbc2eb 100%); --text: #2d3436; --text-sec: #636e72; --primary: #6c5ce7; --line: rgba(255,255,255,0.3); --card-bg: rgba(255, 255, 255, 0.4); --rail-color: rgba(255, 255, 255, 0.4); --glow-color: rgba(160, 100, 255, 0.4); }
+        body[data-theme="dawn"] { --bg-grad: linear-gradient(180deg, #fff1f2 0%, #e0e7ff 100%); --text: #334155; --text-sec: #64748b; --primary: #f43f5e; --line: rgba(0,0,0,0.1); --card-bg: rgba(255, 255, 255, 0.8); --rail-color: rgba(0, 0, 0, 0.1); --glow-color: rgba(251, 113, 133, 0.5); }
+        body[data-theme="dusk"] { --bg-grad: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%); --text: #e2e8f0; --text-sec: #94a3b8; --primary: #fbbf24; --line: rgba(255,255,255,0.2); --card-bg: rgba(49, 46, 129, 0.6); --rail-color: rgba(255, 255, 255, 0.2); --glow-color: rgba(251, 191, 36, 0.4); }
 
-        /* --- Orbit System (Fixed Positioning) --- */
-        /* Calculation for "Above HUD":
-           HUD is around top: 50%.
-           We want the arc top to be around top: 25-30%.
-           If bottom is -35vh, and height is 135vh. Top of circle is at 100vh (bottom relative).
-           100vh (from bottom) = 0vh (from top). 
-           Wait, wrapper height 135vh. bottom -35vh. Top edge is at bottom 100vh. Which is top 0.
-           Let's push it lower to fit within screen.
-           bottom: -50vh, height 130vh => top edge at bottom 80vh (top 20vh). This is good.
-        */
+        /* --- Orbit System (High & Centered) --- */
         .orbit-wrapper {
             position: fixed; 
-            left: -40vh; /* Shift left to align arc center roughly with left text area */
-            bottom: -50vh; 
-            width: 130vh; height: 130vh; 
+            left: -40vh; /* Offset left to center arc over HUD */
+            bottom: -55vh; 
+            width: 140vh; height: 140vh; 
             pointer-events: none; z-index: 0;
             display: flex; justify-content: center; align-items: center;
             transition: all 1s ease;
         }
-        /* Desktop adjustment */
-        @media (min-width: 640px) { .orbit-wrapper { left: -30vh; bottom: -50vh; } }
+        @media (min-width: 640px) { .orbit-wrapper { left: -30vh; bottom: -60vh; } }
         
         .orbit-wheel {
             width: 100%; height: 100%;
             border-radius: 50%; position: relative;
-            transition: transform 2.5s cubic-bezier(0.2, 0.6, 0.3, 1); 
+            transition: transform 3s cubic-bezier(0.4, 0, 0.2, 1); 
             will-change: transform;
         }
         
         .celestial-body {
-            position: absolute; width: 22vh; height: 22vh; 
+            position: absolute; width: 26vh; height: 26vh; 
             left: 50%; top: 0; 
             transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
@@ -99,8 +94,8 @@
         #sun-container { top: 0; }
         #moon-container { top: 100%; transform: translate(-50%, -50%) rotate(180deg); }
 
-        .geo-stroke { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: square; vector-effect: non-scaling-stroke; }
-        .geo-fill { fill: currentColor; opacity: 0.8; }
+        .geo-stroke { fill: none; stroke: currentColor; stroke-width: 0.8; vector-effect: non-scaling-stroke; }
+
         #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
         /* --- Header --- */
@@ -113,10 +108,10 @@
         .nav-btn { padding: 6px 16px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; font-family: 'Lato', sans-serif; letter-spacing: 0.05em; transition: all 0.3s; color: var(--text-sec); }
         .nav-btn.active { background: var(--card-bg); color: var(--text); box-shadow: 0 2px 5px rgba(0,0,0,0.05); transform: scale(1.05); }
 
-        /* --- HUD (Vertical Center) --- */
+        /* --- HUD (Centered) --- */
         #focus-hud {
             position: fixed; 
-            top: 50%; /* Vertical Center */
+            top: 50%; /* Absolute Center */
             left: 1.5rem; width: 7rem;
             transform: translateY(-50%); 
             z-index: 40; pointer-events: none;
@@ -124,148 +119,142 @@
             transition: opacity 0.3s ease;
         }
         .hud-day { 
-            font-size: 3.8rem; font-weight: 900; line-height: 0.9; font-family: 'Lato', sans-serif; 
+            font-size: 4rem; font-weight: 900; line-height: 0.9; font-family: 'Lato', sans-serif; 
             color: var(--text); transition: transform 0.3s, color 0.5s; 
             text-shadow: 0 0 30px var(--glow-color); mix-blend-mode: overlay;
         }
         body[data-theme="night"] .hud-day { mix-blend-mode: normal; text-shadow: 0 0 20px var(--glow-color); }
-        .hud-time { font-size: 1.6rem; font-weight: 700; color: var(--primary); font-family: 'Lato', sans-serif; display: block; line-height: 1; margin-top: 0.5rem; text-shadow: 0 0 10px var(--glow-color); }
+        .hud-time { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Lato', sans-serif; display: block; line-height: 1; margin-top: 0.5rem; text-shadow: 0 0 10px var(--glow-color); }
         .hud-meta { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); font-family: 'Lato', sans-serif; opacity: 0.8; margin-top: 0.2rem; }
+
+        /* --- Vertical Filter --- */
+        .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; pointer-events: auto; padding-left: 4px; }
+        .filter-dot { width: 10px; height: 10px; border-radius: 50%; cursor: pointer; transition: all 0.3s; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+        .filter-dot.active { transform: scale(1.4); border-color: white; }
+        .f-anni { background-color: #fbbf24; box-shadow: 0 0 10px #fbbf24; } /* Matches Anni Node */
+        .f-holiday { background-color: #4ade80; box-shadow: 0 0 10px #4ade80; } /* Matches Holiday Node */
+        .f-normal { background-color: #e5e7eb; box-shadow: 0 0 10px #e5e7eb; } /* Matches Normal Node */
+        .filter-dot:not(.active) { opacity: 0.3; transform: scale(0.8); box-shadow: none; }
 
         /* --- Timeline Rail --- */
         .timeline-rail-outer {
             position: fixed; left: 0; top: 0; bottom: 0; width: 100%; pointer-events: none; z-index: 1;
-            mask-image: linear-gradient(to bottom, transparent 5%, black 20%, black 80%, transparent 95%);
-            -webkit-mask-image: linear-gradient(to bottom, transparent 5%, black 20%, black 80%, transparent 95%);
+            mask-image: linear-gradient(to bottom, transparent 10%, black 30%, black 70%, transparent 90%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent 10%, black 30%, black 70%, transparent 90%);
         }
-        .timeline-rail-container { position: absolute; left: 8.5rem; top: 0; bottom: 0; width: 1px; }
+        /* Rail Alignment */
+        .timeline-rail-container { position: absolute; left: 9rem; top: 0; bottom: 0; width: 1px; }
         .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: var(--rail-color); width: 1px; }
         .timeline-rail-flow { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, transparent, var(--primary), transparent); background-size: 100% 500px; background-repeat: repeat-y; opacity: 0.4; animation: flowLight 6s linear infinite; }
         @keyframes flowLight { 0% { background-position: 0 -500px; } 100% { background-position: 0 0; } }
         .micro-ticks { position: absolute; top: 0; bottom: 0; left: -1px; width: 3px; background-image: radial-gradient(circle, var(--line) 1px, transparent 1px); background-size: 3px 30px; opacity: 0.5; }
 
-        /* --- Main Scroll Container --- */
+        /* --- Main Scroll --- */
         #main-container {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            overflow-y: scroll; 
-            scroll-behavior: smooth;
-            scroll-snap-type: y mandatory;
-            -webkit-overflow-scrolling: touch;
+            overflow-y: scroll; scroll-behavior: smooth; scroll-snap-type: y mandatory; -webkit-overflow-scrolling: touch;
         }
 
         /* --- Entry Items --- */
-        #diary-list {
-            padding-top: 50vh; 
-            padding-bottom: 50vh; 
-            position: relative; z-index: 10;
-        }
+        #diary-list { padding-top: 50vh; padding-bottom: 50vh; position: relative; z-index: 10; }
 
         .entry-item { 
             position: relative; width: 100%; 
-            scroll-snap-align: center; 
-            scroll-snap-stop: always;
+            scroll-snap-align: center; scroll-snap-stop: always;
             display: flex; align-items: center;
-            padding-block: 30px;
-            box-sizing: border-box;
+            padding-block: 30px; box-sizing: border-box;
         }
 
+        /* Node Alignment - Tied to Rail */
+        .timeline-node-wrapper { 
+            position: absolute; left: 9rem; top: 50%; transform: translate(-50%, -50%); 
+            z-index: 20; display: flex; align-items: center; justify-content: center; 
+        }
+        .timeline-node { width: 10px; height: 10px; border-radius: 50%; background-color: var(--card-bg); transition: all 0.3s ease; border: 2px solid var(--line); }
+
         .entry-card-wrapper { 
-            flex: 1; padding-left: 9.5rem; padding-right: 1.5rem; 
-            min-width: 0; 
-            transition: transform 0.3s ease-out, opacity 0.3s ease-out; 
+            flex: 1; padding-left: 10.5rem; padding-right: 1.5rem; 
+            min-width: 0; transition: transform 0.3s ease-out, opacity 0.3s ease-out; 
             transform-origin: left center;
         }
 
-        /* Improved Card Design */
         .entry-card { 
             background-color: var(--card-bg); border: 1px solid var(--line); 
             box-shadow: 0 4px 20px rgba(0,0,0,0.02);
             transition: all 0.3s ease; cursor: pointer; border-radius: 16px; 
             backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            display: flex; overflow: hidden; min-height: 100px; position: relative;
+            display: flex; overflow: hidden; min-height: 110px; position: relative;
         }
-        /* FIXED: Display block to ensure visibility when img exists */
-        .card-thumb-col { 
-            width: 80px; flex-shrink: 0; position: relative; overflow: hidden; 
-            border-right: 1px solid var(--line); 
-            display: block; /* Fixed */
-        }
-        .card-thumb-img { width: 100%; height: 100%; object-fit: cover; opacity: 0.9; }
-        .card-main-col { flex: 1; padding: 1rem 1.2rem; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-        .card-mood { position: absolute; top: 0.8rem; right: 0.8rem; color: var(--text-sec); opacity: 0.5; transform: scale(0.9); }
         
-        .timeline-node-wrapper { 
-            position: absolute; 
-            left: 8.5rem; 
-            top: 50%; 
-            transform: translate(-50%, -50%); 
-            z-index: 20; display: flex; align-items: center; justify-content: center; 
-        }
-        .timeline-node { width: 10px; height: 10px; border-radius: 50%; background-color: var(--card-bg); transition: all 0.2s ease; border: 2px solid var(--line); }
+        /* Card Variants */
+        .card-anni-future { background-color: rgba(254, 249, 195, 0.9) !important; border-color: rgba(253, 224, 71, 0.6) !important; }
+        .card-anni-past { background-color: rgba(219, 234, 254, 0.85) !important; border-color: rgba(147, 197, 253, 0.5) !important; }
+        .card-holiday { background-color: rgba(220, 252, 231, 0.9) !important; border-color: rgba(134, 239, 172, 0.6) !important; }
         
-        .entry-item.active-focus .timeline-node { 
-            width: 18px; height: 18px; 
-            background-color: var(--primary); border-color: var(--primary); 
-            box-shadow: 0 0 20px var(--glow-color); 
-        }
-        .entry-item.active-focus .entry-card { 
-            transform: scale(1.02); border-color: var(--primary); 
-            box-shadow: 0 10px 30px var(--glow-color); 
-        }
+        /* Night overrides */
+        body[data-theme="night"] .card-anni-future { background-color: rgba(133, 77, 14, 0.7) !important; border-color: rgba(234, 179, 8, 0.4) !important; }
+        body[data-theme="night"] .card-anni-past { background-color: rgba(30, 58, 138, 0.6) !important; border-color: rgba(96, 165, 250, 0.3) !important; }
+        body[data-theme="night"] .card-holiday { background-color: rgba(20, 83, 45, 0.7) !important; border-color: rgba(34, 197, 94, 0.3) !important; }
 
-        /* Gallery Grid */
-        #gallery-grid-view {
-            padding: 1rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-            gap: 0.8rem;
+        /* 1:1 Square Thumbnail */
+        .card-thumb-col { 
+            width: 110px; flex-shrink: 0; position: relative; overflow: hidden; 
+            border-right: 1px solid var(--line); display: block; aspect-ratio: 1/1;
         }
-        .gallery-item {
-            aspect-ratio: 1/1;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            border: 1px solid var(--line);
-            cursor: pointer;
-        }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-        .gallery-item:hover img { transform: scale(1.1); }
-        .gallery-date {
-            position: absolute; bottom: 0; left: 0; width: 100%;
-            background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
-            color: white; font-size: 0.6rem; padding: 4px; text-align: center;
-            font-family: 'Lato', sans-serif;
-        }
+        .card-thumb-img { width: 100%; height: 100%; object-fit: cover; }
+        .card-main-col { flex: 1; padding: 1.2rem; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+        .card-mood { position: absolute; top: 0.8rem; right: 0.8rem; color: var(--text-sec); opacity: 0.6; transform: scale(0.9); background: var(--line); padding: 4px; border-radius: 6px; }
+        
+        .anni-badge { display: inline-block; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 2px 6px; border-radius: 4px; margin-bottom: 6px; width: fit-content; }
+        .anni-future-badge { color: #713f12; background: rgba(253, 224, 71, 0.6); }
+        .anni-past-badge { color: #1d4ed8; background: rgba(191, 219, 254, 0.5); }
+        .holiday-badge { color: #14532d; background: rgba(134, 239, 172, 0.6); }
+        body[data-theme="night"] .anni-future-badge { color: #fef08a; background: rgba(161, 98, 7, 0.5); }
+        body[data-theme="night"] .anni-past-badge { color: #bfdbfe; background: rgba(30, 58, 138, 0.5); }
+        body[data-theme="night"] .holiday-badge { color: #bbf7d0; background: rgba(21, 128, 61, 0.5); }
+        
+        /* Active State */
+        .entry-item.active-focus .entry-card { transform: scale(1.02); border-color: var(--primary); box-shadow: 0 12px 40px var(--glow-color); }
+        /* Node Color logic is handled in JS to match filter colors */
 
         /* Placeholders */
         .list-placeholder {
-            position: absolute; left: 0; right: 0; height: 100px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.3em; 
-            font-size: 0.75rem; color: var(--text-sec); pointer-events: none;
+            position: absolute; left: 0; right: 0; height: 100px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.3em; font-size: 0.75rem; color: var(--text-sec); pointer-events: none;
             transition: opacity 0.5s ease; z-index: 5;
         }
-        #future-placeholder { top: 25vh; }
-        #origin-placeholder { bottom: 25vh; }
+        #future-placeholder { top: 20vh; }
+        #origin-placeholder { bottom: 20vh; }
 
         @media (max-width: 640px) {
-            .timeline-rail-container, .timeline-node-wrapper { left: 8.5rem; }
+            .timeline-rail-container { left: 8.5rem; }
+            .timeline-node-wrapper { left: 8.5rem; }
             .entry-card-wrapper { padding-left: 9.5rem; padding-right: 1rem; }
             #focus-hud { left: 1rem; width: 7rem; }
         }
-        @media (min-width: 641px) {
-            .timeline-rail-container, .timeline-node-wrapper { left: 12rem; }
-            .entry-card-wrapper { padding-left: 14rem; }
-            #focus-hud { left: 3rem; }
-        }
 
-        /* Helper */
+        /* Markdown Editor */
+        #editor-content {
+            white-space: pre-wrap; /* Preserve whitespace */
+            font-family: 'Lato', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        /* Markdown Content Styling */
+        .md-render h1 { font-size: 1.4em; font-weight: 800; margin: 0.5em 0 0.2em; color: var(--text); }
+        .md-render h2 { font-size: 1.2em; font-weight: 700; margin: 0.5em 0 0.2em; color: var(--text-sec); }
+        .md-render p { margin-bottom: 0.5em; line-height: 1.5; font-family: 'Cormorant Garamond', serif; font-size: 1.1em; }
+        .md-render strong { font-weight: 700; color: var(--primary); }
+        .md-render img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
+        .md-render ul { list-style-type: disc; padding-left: 1.2em; }
+
         .hidden-view { display: none !important; }
         .active-view { display: block !important; animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .calendar-cell { aspect-ratio: 1/1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 0.95rem; position: relative; color: var(--text); }
+        .calendar-cell { aspect-ratio: 1/1; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 0.95rem; position: relative; color: var(--text); }
+        .calendar-lunar { font-size: 0.6rem; opacity: 0.6; margin-top: 2px; font-family: sans-serif; font-weight: 300; }
         .calendar-cell.current-day { border: 2px solid var(--primary); }
-        .calendar-cell.has-entry::after { content: ''; position: absolute; bottom: 6px; width: 5px; height: 5px; background-color: var(--primary); border-radius: 50%; }
+        .calendar-cell.has-entry::after { content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px; background-color: var(--primary); border-radius: 50%; }
         .modal-content { background-color: var(--card-bg); backdrop-filter: blur(30px); border: 1px solid var(--line); z-index: 10000; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
         .simon-sig { font-family: 'Oswald', sans-serif; font-weight: 300; letter-spacing: 0.1em; opacity: 0.5; font-size: 0.7rem; text-align: center; margin-top: 2rem; color: var(--text-sec); }
     </style>
@@ -278,37 +267,44 @@
     <!-- Celestial Orbit System -->
     <div class="orbit-wrapper">
         <div class="orbit-wheel" id="orbit-wheel" style="transform: rotate(0deg);">
-            <!-- Sun: Abstract Geometric -->
+            <!-- Sun: Divine Abstract -->
             <div id="sun-container" class="celestial-body text-yellow-500 mix-blend-overlay">
-                <svg viewBox="0 0 200 200" class="w-full h-full" style="filter: drop-shadow(0 0 30px rgba(253,224,71,0.6));">
-                    <defs>
-                         <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" stop-color="#fcd34d" stop-opacity="0.8"/>
-                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.4"/>
-                        </linearGradient>
-                    </defs>
-                    <circle cx="100" cy="100" r="80" class="geo-stroke opacity-20" stroke-dasharray="1 4"/>
-                    <circle cx="100" cy="100" r="65" class="geo-stroke opacity-40" stroke-width="0.5"/>
-                    <g class="animate-[spin_20s_linear_infinite]">
-                         <rect x="98" y="10" width="4" height="20" class="geo-fill" rx="2"/><rect x="98" y="170" width="4" height="20" class="geo-fill" rx="2"/>
-                         <rect x="10" y="98" width="20" height="4" class="geo-fill" rx="2"/><rect x="170" y="98" width="20" height="4" class="geo-fill" rx="2"/>
+                <svg viewBox="0 0 200 200" class="w-full h-full" style="filter: drop-shadow(0 0 50px rgba(253,224,71,0.8));">
+                    <!-- Rotating Dashed Rings -->
+                    <g class="animate-[spin_60s_linear_infinite] origin-center opacity-40">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="10 10"/>
+                        <circle cx="100" cy="100" r="70" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="20 20"/>
                     </g>
-                    <circle cx="100" cy="100" r="35" fill="url(#sunGrad)"/>
+                    <!-- Core -->
+                    <circle cx="100" cy="100" r="40" fill="url(#sunGrad)" />
+                    <circle cx="100" cy="100" r="50" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                    <defs>
+                        <radialGradient id="sunGrad">
+                            <stop offset="30%" stop-color="#fff" stop-opacity="0.9"/>
+                            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.8"/>
+                        </radialGradient>
+                    </defs>
                 </svg>
             </div>
 
-            <!-- Moon: Abstract Minimalist -->
-            <div id="moon-container" class="celestial-body text-gray-200 mix-blend-screen" style="filter: drop-shadow(0 0 25px rgba(255,255,255,0.3));">
+            <!-- Moon: Geometric Minimalist -->
+            <div id="moon-container" class="celestial-body text-gray-200 mix-blend-screen" style="filter: drop-shadow(0 0 40px rgba(255,255,255,0.4));">
                 <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <!-- Halo -->
+                    <circle cx="100" cy="100" r="60" fill="url(#moonHalo)" opacity="0.3" />
+                    <!-- Crescent -->
+                    <path d="M130 50 C 90 50, 60 90, 60 140 C 60 170, 75 190, 90 200 C 50 180, 30 130, 30 80 C 30 30, 70 10, 120 10 Z" 
+                          fill="url(#moonGrad)" />
                     <defs>
-                        <linearGradient id="moonGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#e5e7eb" /><stop offset="100%" stop-color="#9ca3af" stop-opacity="0.5"/>
+                        <radialGradient id="moonHalo">
+                            <stop offset="0%" stop-color="#fff" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="transparent" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="moonGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#f8fafc"/>
+                            <stop offset="100%" stop-color="#94a3b8"/>
                         </linearGradient>
                     </defs>
-                    <circle cx="100" cy="100" r="40" fill="url(#moonGrad)" />
-                    <circle cx="80" cy="80" r="8" fill="rgba(0,0,0,0.1)" /><circle cx="115" cy="110" r="12" fill="rgba(0,0,0,0.05)" /><circle cx="90" cy="130" r="5" fill="rgba(0,0,0,0.08)" />
-                    <circle cx="100" cy="100" r="55" class="geo-stroke opacity-30" stroke-width="1"/>
-                    <path d="M145 100 A 45 45 0 0 1 100 145" class="geo-stroke opacity-50" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -334,49 +330,41 @@
         </div>
     </header>
 
-    <!-- Focus HUD -->
+    <!-- Focus HUD with Vertical Filter -->
     <div id="focus-hud" class="hidden sm:flex">
         <div class="hud-day" id="hud-day">--</div>
         <div class="hud-time-wrapper"><div class="hud-time" id="hud-time">--:--</div></div>
         <div class="hud-meta" id="hud-month-year">--- ----</div>
+        
+        <div class="filter-bar">
+            <div class="filter-dot f-anni active" onclick="UI.toggleFilter('anni')" title="Anniversary"></div>
+            <div class="filter-dot f-holiday active" onclick="UI.toggleFilter('holiday')" title="Holiday"></div>
+            <div class="filter-dot f-normal active" onclick="UI.toggleFilter('normal')" title="Diary"></div>
+        </div>
     </div>
 
     <!-- Main Content -->
     <main id="main-container" class="flex-1 relative z-10">
         <div class="max-w-3xl mx-auto px-3 sm:px-4 relative min-h-full">
-            
             <!-- TIMELINE VIEW -->
             <div id="view-timeline" class="active-view relative">
-                <div id="future-placeholder" class="list-placeholder">
-                    <span data-i18n="future">Future Unwritten</span>
-                </div>
-                <div id="origin-placeholder" class="list-placeholder">
-                    <span data-i18n="origin">The Beginning</span>
-                </div>
-
-                <div class="timeline-rail-outer">
-                    <div class="timeline-rail-container">
-                        <div class="timeline-rail-line"></div>
-                        <div class="timeline-rail-flow"></div>
-                        <div class="micro-ticks"></div>
-                    </div>
-                </div>
-
+                <div id="future-placeholder" class="list-placeholder"><span data-i18n="future">Future Unwritten</span></div>
+                <div id="origin-placeholder" class="list-placeholder"><span data-i18n="origin">The Beginning</span></div>
+                <div class="timeline-rail-outer"><div class="timeline-rail-container"><div class="timeline-rail-line"></div><div class="timeline-rail-flow"></div><div class="micro-ticks"></div></div></div>
                 <div id="diary-list"></div>
             </div>
 
             <!-- CALENDAR VIEW -->
             <div id="view-calendar" class="hidden-view pb-24 pt-24">
                 <div class="bg-[var(--card-bg)] rounded-2xl p-4 sm:p-8 shadow-xl border border-[var(--line)]/50 min-h-[50vh]">
-                    <!-- Sub Navigation -->
-                    <div class="flex justify-center mb-6">
-                         <div class="nav-capsule scale-90">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="nav-capsule scale-90">
                              <button onclick="UI.switchSubView('grid')" id="btn-sub-grid" class="nav-btn active"><i data-lucide="calendar" class="w-4 h-4"></i></button>
                              <button onclick="UI.switchSubView('gallery')" id="btn-sub-gallery" class="nav-btn"><i data-lucide="image" class="w-4 h-4"></i></button>
                          </div>
+                        <button onclick="DataManager.updateHolidays()" class="text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)] px-3 py-1.5 rounded-full hover:bg-[var(--primary)] hover:text-white transition-colors">Update Holidays</button>
                     </div>
                     
-                    <!-- Calendar Grid -->
                     <div id="calendar-container">
                         <div class="flex justify-between items-center mb-6 border-b border-[var(--line)] pb-4">
                             <button onclick="UI.changeMonth(-1)" class="p-2 hover:bg-[var(--line)] rounded-full active:scale-90 transition-all"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
@@ -389,16 +377,11 @@
                         <div class="grid grid-cols-7 gap-2 sm:gap-4 text-center mb-2 text-[10px] sm:text-xs font-bold font-num text-[var(--text-sec)] uppercase tracking-widest"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
                         <div class="grid grid-cols-7 gap-2 sm:gap-4" id="calendar-grid"></div>
                     </div>
-
-                    <!-- Gallery View -->
                     <div id="gallery-container" class="hidden">
                         <div id="gallery-grid-view"></div>
-                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden">
-                            <p class="italic opacity-70 text-sm" data-i18n="empty_gallery">No images found.</p>
-                        </div>
+                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm" data-i18n="empty_gallery">No images found.</p></div>
                     </div>
                 </div>
-
                 <div class="mt-8" id="archive-list-section">
                     <div class="flex justify-between items-center mb-4 px-2">
                         <h3 class="font-display text-lg font-bold text-[var(--text)] flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4 text-[var(--primary)]"></i> <span data-i18n="archive_title">Archive</span></h3>
@@ -411,12 +394,13 @@
         </div>
     </main>
 
-    <!-- FAB -->
-    <button onclick="UI.openEditor()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 sm:w-16 sm:h-16 bg-[var(--primary)] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[rgba(255,255,255,0.2)] backdrop-blur-sm z-40 active:scale-90 transition-transform">
+    <!-- FAB & Prompt Bubble -->
+    <div id="prompt-bubble" class="hidden">Thinking of something?</div>
+    <button onclick="UI.openEditor()" onmouseenter="UI.showPromptBubble()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 sm:w-16 sm:h-16 bg-[var(--primary)] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[rgba(255,255,255,0.2)] backdrop-blur-sm z-40 active:scale-90 transition-transform">
         <i data-lucide="pen-tool" class="w-6 h-6 sm:w-7 sm:h-7"></i>
     </button>
 
-    <!-- Editor Modal -->
+    <!-- Editor Modal with Markdown Support -->
     <div id="editor-modal" class="modal-overlay fixed inset-0 hidden z-50">
         <div class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="UI.closeEditor()"></div>
         <div class="modal-content absolute bottom-0 w-full sm:max-w-2xl sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:rounded-2xl shadow-2xl transform translate-y-full flex flex-col" id="editor-panel">
@@ -431,73 +415,57 @@
             <div class="p-4 sm:p-8 flex-1 overflow-y-auto flex flex-col">
                 <input type="hidden" id="editor-id">
                 <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl sm:text-3xl font-bold mb-6 outline-none placeholder-[var(--text-sec)]/40 text-[var(--text)] font-display">
-                <div class="flex gap-4 mb-6 overflow-x-auto no-scrollbar">
-                    <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
-                        <button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button>
-                        <button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button>
-                        <button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button>
+                
+                <div class="flex flex-col gap-4 mb-4">
+                    <div class="flex flex-wrap gap-4 items-center">
+                         <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
+                            <button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button>
+                            <button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button>
+                            <button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button>
+                        </div>
+                        <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
+                            <button onclick="UI.selectWeather('sun')" class="weather-btn p-2 rounded" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button>
+                            <button onclick="UI.selectWeather('cloud')" class="weather-btn p-2 rounded" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button>
+                            <button onclick="UI.selectWeather('rain')" class="weather-btn p-2 rounded" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
+                        </div>
                     </div>
-                    <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
-                        <button onclick="UI.selectWeather('sun')" class="weather-btn p-2 rounded" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button>
-                        <button onclick="UI.selectWeather('cloud')" class="weather-btn p-2 rounded" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button>
-                        <button onclick="UI.selectWeather('rain')" class="weather-btn p-2 rounded" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
+                    <div class="flex items-center gap-4 p-2 bg-[var(--line)]/10 rounded-lg">
+                        <div class="flex items-center gap-2">
+                            <input type="checkbox" id="editor-anni" class="w-4 h-4 rounded border-[var(--line)] text-[var(--primary)] focus:ring-[var(--primary)]" onchange="document.getElementById('anni-type-wrapper').style.display = this.checked ? 'block' : 'none'">
+                            <label for="editor-anni" class="text-xs font-bold uppercase text-[var(--text-sec)] tracking-wider">Anniversary</label>
+                        </div>
+                        <div id="anni-type-wrapper" style="display:none;">
+                            <select id="editor-anni-type" class="bg-transparent text-xs font-bold text-[var(--text)] border border-[var(--line)] rounded px-2 py-1">
+                                <option value="once">Once</option>
+                                <option value="annual">Annual</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-                <div id="editor-content" contenteditable="true" class="flex-1 w-full outline-none text-lg leading-relaxed text-[var(--text)] font-serif min-h-[150px] empty:before:content-[attr(placeholder)] empty:before:text-[var(--text-sec)]/40" placeholder="Write your story here..."></div>
+
+                <!-- Block Toolbar -->
+                <div class="editor-toolbar-row no-scrollbar">
+                    <button class="block-btn" onclick="UI.editorInsertMD('# ')">H1</button>
+                    <button class="block-btn" onclick="UI.editorInsertMD('## ')">H2</button>
+                    <button class="block-btn" onclick="UI.editorInsertMD('> ')">Quote</button>
+                    <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')">To-Do</button>
+                    <div class="w-px h-4 bg-[var(--line)] mx-1"></div>
+                    <button class="block-btn text-[var(--primary)]" onclick="DataManager.fetchDailyNews()"><i data-lucide="lightbulb" class="w-3 h-3 inline mr-1"></i>Inspire</button>
+                </div>
+
+                <!-- Textarea for Markdown Editing -->
+                <textarea id="editor-content" class="flex-1 w-full outline-none text-lg leading-relaxed text-[var(--text)] font-serif min-h-[150px] bg-transparent resize-none p-2" placeholder="Write your story using Markdown..."></textarea>
+                
                 <div id="image-preview-area" class="mt-4 hidden">
                     <img id="preview-img" class="max-h-32 rounded-lg shadow-md border border-[var(--line)]">
-                    <button onclick="UI.clearImage()" class="text-xs text-red-500 mt-1 font-bold uppercase">Remove Image</button>
+                    <button onclick="DataManager.generateStoryFromImage()" class="mt-2 bg-[var(--primary)] text-white px-3 py-1 rounded text-xs font-bold shadow">✨ Write Story</button>
+                    <button onclick="UI.clearImage()" class="text-xs text-red-500 mt-1 font-bold uppercase ml-2">Remove</button>
                 </div>
             </div>
             <div class="p-3 border-t border-[var(--line)]/30 bg-[var(--bg)]/50 flex gap-4 items-center justify-between sm:justify-start">
-                 <div class="flex gap-2">
-                     <button class="p-2 rounded hover:bg-[var(--line)]/20 text-[var(--text-sec)]" onmousedown="event.preventDefault(); UI.execCmd('bold')"><i data-lucide="bold" class="w-5 h-5"></i></button>
-                     <button class="p-2 rounded hover:bg-[var(--line)]/20 text-[var(--text-sec)]" onmousedown="event.preventDefault(); UI.execCmd('italic')"><i data-lucide="italic" class="w-5 h-5"></i></button>
-                 </div>
-                 <button class="p-2 rounded text-[var(--primary)] bg-[var(--primary)]/10" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-5 h-5"></i></button>
+                 <button class="p-2 rounded text-[var(--primary)] bg-[var(--primary)]/10" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-5 h-5"></i> Add Image</button>
             </div>
             <input type="file" id="image-input" accept="image/*" class="hidden" onchange="UI.handleImageUpload(this)">
-        </div>
-    </div>
-
-    <!-- Detail Modal -->
-    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--line)] transition-all animate-in zoom-in-95 duration-300">
-            <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold font-display text-[var(--text)] leading-tight" id="detail-title"></h2>
-                    <button onclick="UI.closeDetail()" class="p-1 bg-[var(--line)]/20 rounded-full"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button>
-                </div>
-                <div class="flex gap-3 mb-6 text-xs font-num text-[var(--text-sec)] uppercase tracking-widest items-center">
-                    <span id="detail-date"></span> <span class="text-[var(--primary)]" id="detail-time"></span>
-                    <div id="detail-icons" class="flex gap-2 ml-auto text-[var(--text)]"></div>
-                </div>
-                <div id="detail-image-container" class="mb-6 hidden">
-                    <img id="detail-image" class="w-full rounded-xl shadow-md object-cover max-h-64">
-                </div>
-                <div id="detail-content" class="text-lg leading-loose text-[var(--text)] font-serif opacity-90"></div>
-            </div>
-            <div class="p-4 border-t border-[var(--line)]/30 flex justify-between bg-[var(--card-bg)]/50">
-                <button onclick="UI.confirmDeleteEntry()" class="text-red-500 p-2 flex gap-2 items-center"><i data-lucide="trash-2" class="w-5 h-5"></i> <span class="text-xs font-bold uppercase" data-i18n="btn_delete">Delete</span></button>
-                <button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] p-2 flex gap-2 items-center"><span class="text-xs font-bold uppercase" data-i18n="btn_edit">Edit</span> <i data-lucide="edit-3" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center animate-in zoom-in-95 duration-200">
-            <div class="mx-auto w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold text-[var(--text)] mb-2" data-i18n="delete_title">Delete Memory?</h3>
-            <p class="text-sm text-[var(--text-sec)] mb-6" data-i18n="delete_desc">This action cannot be undone.</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold" data-i18n="btn_cancel">Cancel</button>
-                <button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold shadow-md hover:bg-red-600" data-i18n="btn_delete">Delete</button>
-            </div>
         </div>
     </div>
 
@@ -515,34 +483,19 @@
                     <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-zh">中文</button>
                 </div>
                 <div class="space-y-4">
-                    <div>
-                        <h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="hourglass" class="w-4 h-4"></i> <span data-i18n="timeline_title">Timeline Flow</span></h3>
-                        <p class="text-sm opacity-80 leading-relaxed" data-i18n="timeline_desc">Fluid perspective journal.</p>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="ai_title">AI Oracle</span></h3>
-                        <p class="text-sm opacity-80 leading-relaxed" data-i18n="ai_desc">Fortune teller.</p>
-                    </div>
+                    <div><h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="hourglass" class="w-4 h-4"></i> <span data-i18n="timeline_title">Timeline Flow</span></h3><p class="text-sm opacity-80 leading-relaxed" data-i18n="timeline_desc">Fluid perspective journal.</p></div>
+                    <div><h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="ai_title">AI Oracle</span></h3><p class="text-sm opacity-80 leading-relaxed" data-i18n="ai_desc">Fortune teller.</p></div>
                 </div>
                 <div class="pt-4 border-t border-[var(--line)]">
                     <h3 class="font-bold text-[var(--text)] mb-3 text-sm flex items-center gap-2" data-i18n="data_title">Data Management</h3>
                     <div class="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--line)] mb-4">
                         <h4 class="text-xs font-bold uppercase text-[var(--text-sec)] mb-2" data-i18n="storage_title">Storage Usage</h4>
-                        <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden">
-                            <div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div>
-                        </div>
-                        <div class="flex justify-between text-[10px] font-num text-[var(--text)]">
-                            <span id="entry-count">0 Entries</span>
-                            <span id="storage-size">0 KB / 5 MB</span>
-                        </div>
+                        <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden"><div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div></div>
+                        <div class="flex justify-between text-[10px] font-num text-[var(--text)]"><span id="entry-count">0 Entries</span><span id="storage-size">0 KB / 5 MB</span></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mb-4">
-                        <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors">
-                            <i data-lucide="download" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_backup">Backup</span>
-                        </button>
-                        <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors">
-                            <i data-lucide="upload" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_restore">Restore</span>
-                        </button>
+                        <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="download" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_backup">Backup</span></button>
+                        <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="upload" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_restore">Restore</span></button>
                     </div>
                     <input type="file" id="import-input" accept=".json" class="hidden" onchange="DataManager.importBackup(this)">
                     <button onclick="DataManager.nukeData()" class="w-full py-2 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors border border-red-200" data-i18n="btn_reset">Reset All Data</button>
@@ -563,109 +516,84 @@
                 <button onclick="UI.closeWeeklySummary()" class="absolute top-4 right-4 text-white/80"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_zodiac">Zodiac</label>
-                        <input type="text" id="user-zodiac" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="e.g. Scorpio">
-                    </div>
-                    <div>
-                        <label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_birth">Birth Date</label>
-                        <input type="text" id="user-bazi" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="YYYY-MM-DD">
-                    </div>
+                <div class="flex justify-center gap-2 mb-4">
+                    <button onclick="UI.setPersona('western')" id="persona-western" class="px-3 py-1 text-xs font-bold rounded-full bg-[var(--primary)] text-white">🔮 Western</button>
+                    <button onclick="UI.setPersona('eastern')" id="persona-eastern" class="px-3 py-1 text-xs font-bold rounded-full bg-[var(--line)] text-[var(--text)]">☯️ Eastern</button>
                 </div>
-                <button onclick="UI.generateReport()" class="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-transform" data-i18n="btn_consult">Consult the Stars</button>
-                <div id="summary-ai-content" class="text-sm leading-relaxed font-serif border-t border-[var(--line)] pt-4 mt-4 empty:hidden"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_zodiac">Zodiac</label><input type="text" id="user-zodiac" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="e.g. Scorpio"></div>
+                    <div><label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_birth">Birth Date</label><input type="text" id="user-bazi" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="YYYY-MM-DD"></div>
+                </div>
+                <button onclick="UI.generateReport()" class="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-transform" data-i18n="btn_consult">Consult</button>
+                <div id="summary-ai-content" class="md-render text-sm leading-relaxed font-serif border-t border-[var(--line)] pt-4 mt-4 empty:hidden"></div>
                 <div class="mt-2 border-t border-[var(--line)] pt-2">
-                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key (Optional override)">
+                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key (Optional)">
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        const DEFAULT_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
+
         const I18N = {
             en: {
-                timeline_title: "Timeline Flow",
-                timeline_desc: "A fluid, perspective-based journal that mimics the flow of time. Scroll through your memories with a 3D depth effect, where the central moment comes into focus.",
-                ai_title: "AI Oracle",
-                ai_desc: "Click the sparkles to summon the Oracle. It analyzes your last 7 days, extracts clear goals, and uses your birth data to provide astrological guidance.",
-                future: "Future Unwritten",
-                origin: "The Beginning",
-                nav_timeline: "TIMELINE",
-                nav_calendar: "CALENDAR",
-                info_title: "About Timeline",
-                data_title: "Data Management",
-                storage_title: "Storage Usage",
-                btn_backup: "Backup",
-                btn_restore: "Restore",
-                btn_reset: "Reset All Data",
-                btn_save: "Save",
-                btn_delete: "Delete",
-                btn_cancel: "Cancel",
-                btn_edit: "Edit",
-                btn_export: "EXPORT MD",
-                btn_consult: "Consult the Stars",
-                label_zodiac: "Zodiac",
-                label_birth: "Birth Date",
-                archive_title: "Archive",
-                empty_month: "No entries for this period.",
-                empty_gallery: "No images found.",
-                delete_title: "Delete Memory?",
-                delete_desc: "This action cannot be undone."
+                timeline_title: "Timeline Flow", timeline_desc: "A fluid, perspective-based journal.",
+                ai_title: "AI Oracle", ai_desc: "Fortune teller.",
+                future: "Future Unwritten", origin: "The Beginning",
+                nav_timeline: "TIMELINE", nav_calendar: "CALENDAR",
+                info_title: "About Timeline", data_title: "Data Management", storage_title: "Storage Usage",
+                btn_backup: "Backup", btn_restore: "Restore", btn_reset: "Reset All Data",
+                btn_save: "Save", btn_delete: "Delete", btn_cancel: "Cancel", btn_edit: "Edit",
+                btn_export: "EXPORT MD", btn_consult: "Consult",
+                label_zodiac: "Zodiac", label_birth: "Birth Date", archive_title: "Archive",
+                empty_month: "No entries.", empty_gallery: "No images.",
+                delete_title: "Delete Memory?", delete_desc: "Undone."
             },
             zh: {
-                timeline_title: "时光流",
-                timeline_desc: "一个模仿时间流动的透视日记本。通过3D景深效果滚动记忆，让每一个当下的瞬间成为焦点。",
-                ai_title: "AI 预言家",
-                ai_desc: "点击星光按钮召唤先知。AI 将总结你过去7天的故事，提取清晰的目标清单，并结合你的生辰给出星象指引。",
-                future: "未来篇章",
-                origin: "起源之时",
-                nav_timeline: "时间轴",
-                nav_calendar: "日历",
-                info_title: "关于时光流",
-                data_title: "数据管理",
-                storage_title: "存储空间",
-                btn_backup: "备份",
-                btn_restore: "恢复",
-                btn_reset: "重置所有数据",
-                btn_save: "保存回忆",
-                btn_delete: "删除",
-                btn_cancel: "取消",
-                btn_edit: "编辑",
-                btn_export: "导出 MD",
-                btn_consult: "开启命理推演",
-                label_zodiac: "你的星座",
-                label_birth: "出生日期/八字",
-                archive_title: "归档",
-                empty_month: "这段时间没有记录。",
-                empty_gallery: "暂无图片。",
-                delete_title: "删除这段回忆？",
-                delete_desc: "此操作无法撤销。"
+                timeline_title: "时光流", timeline_desc: "透视日记本。",
+                ai_title: "AI 预言家", ai_desc: "星光指引。",
+                future: "未来篇章", origin: "起源之时",
+                nav_timeline: "时间轴", nav_calendar: "日历",
+                info_title: "关于时光流", data_title: "数据管理", storage_title: "存储空间",
+                btn_backup: "备份", btn_restore: "恢复", btn_reset: "重置",
+                btn_save: "保存", btn_delete: "删除", btn_cancel: "取消", btn_edit: "编辑",
+                btn_export: "导出 MD", btn_consult: "推演",
+                label_zodiac: "星座", label_birth: "生日/八字", archive_title: "归档",
+                empty_month: "无记录。", empty_gallery: "无图片。",
+                delete_title: "删除回忆？", delete_desc: "无法撤销。"
             }
         };
 
+        const HOLIDAYS_2025 = [
+            { name: "春节", date: "2025-01-29", desc: "农历新年，最重要的传统节日。" },
+            { name: "元宵节", date: "2025-02-12", desc: "农历正月十五。" },
+            { name: "清明节", date: "2025-04-04", desc: "传统祭祀节日。" },
+            { name: "端午节", date: "2025-05-31", desc: "农历五月初五。" },
+            { name: "七夕节", date: "2025-08-29", desc: "农历七月初七。" },
+            { name: "中秋节", date: "2025-10-06", desc: "农历八月十五。" },
+            { name: "重阳节", date: "2025-10-29", desc: "农历九月初九。" },
+            { name: "国庆节", date: "2025-10-01", desc: "国庆日。" }
+        ];
+
+        const QUESTIONS = [ "What made you smile?", "Any new ideas?", "What are you grateful for?", "What challenged you?", "Who did you meet?", "Describe the weather." ];
+
         const ParticleSystem = {
-            canvas: null, ctx: null, particles: [], width: 0, height: 0, theme: 'day', running: false,
+            canvas: null, ctx: null, particles: [], width: 0, height: 0, theme: 'day', weather: 'sun', running: false,
             init: function() {
                 this.canvas = document.getElementById('world-canvas'); this.ctx = this.canvas.getContext('2d');
                 this.resize(); window.addEventListener('resize', () => this.resize());
                 this.createParticles(); this.running = true; this.animate();
             },
-            resize: function() {
-                this.width = window.innerWidth; this.height = window.innerHeight;
-                this.canvas.width = this.width; this.canvas.height = this.height;
-            },
-            createParticles: function() {
-                this.particles = []; const count = this.width < 600 ? 25 : 45;
-                for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height));
-            },
+            resize: function() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; },
+            createParticles: function() { this.particles = []; const count = this.width < 600 ? 30 : 60; for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); },
             setTheme: function(theme) { this.theme = theme; },
+            setWeather: function(weather) { this.weather = weather; },
             animate: function() {
                 if(!this.running) return;
                 this.ctx.clearRect(0, 0, this.width, this.height);
-                if (this.theme === 'day') { this.ctx.globalCompositeOperation = 'overlay'; } 
-                else { this.ctx.globalCompositeOperation = 'source-over'; }
-                this.particles.forEach(p => { p.update(this.width, this.height, this.theme); p.draw(this.ctx, this.theme); });
+                this.ctx.globalCompositeOperation = (this.theme === 'day' && this.weather !== 'rain') ? 'screen' : 'source-over';
+                this.particles.forEach(p => { p.update(this.width, this.height, this.theme, this.weather); p.draw(this.ctx, this.theme, this.weather); });
                 requestAnimationFrame(() => this.animate());
             }
         };
@@ -674,53 +602,102 @@
             constructor(w, h) { this.init(w, h); }
             init(w, h) {
                 this.x = Math.random() * w; this.y = Math.random() * h;
-                this.size = Math.random() * 2 + 0.5; 
-                this.speedX = (Math.random() - 0.5) * 0.15; 
-                this.speedY = (Math.random() - 0.5) * 0.15;
-                this.opacity = Math.random() * 0.4 + 0.1; 
-                this.beamWidth = Math.random() * 80 + 40;
-                this.beamHeight = Math.random() * 400 + 200;
-                this.beamAngle = 20 * (Math.PI / 180); 
-                this.phase = Math.random() * Math.PI * 2;
-                this.twinkleSpeed = Math.random() * 0.05 + 0.01;
+                this.size = Math.random() * 2 + 0.5; this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
+                this.opacity = Math.random() * 0.4 + 0.1; this.beamHeight = Math.random() * 400 + 200; this.phase = Math.random() * Math.PI * 2;
             }
-            update(w, h, theme) {
-                if (theme === 'day') { this.x += 0.2; this.y += 0.1; } 
-                else { this.phase += this.twinkleSpeed; this.opacity = 0.45 + Math.sin(this.phase) * 0.35; this.x += this.speedX * 0.2; }
+            update(w, h, theme, weather) {
+                if (theme === 'day') {
+                    if (weather === 'rain') { this.y += 15 + Math.random() * 5; this.x -= 1; } 
+                    else if (weather === 'cloud') { this.x += 0.1; } 
+                    else { this.x += 0.2; this.y += 0.1; }
+                } else {
+                    this.phase += 0.02; this.opacity = 0.45 + Math.sin(this.phase) * 0.35; this.x += 0.05; 
+                }
                 if(this.x < -200) this.x = w + 200; if(this.x > w + 200) this.x = -200;
                 if(this.y < -200) this.y = h + 200; if(this.y > h + 200) this.y = -200;
             }
-            draw(ctx, theme) {
+            draw(ctx, theme, weather) {
                 ctx.beginPath();
                 if (theme === 'day') {
-                    ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.beamAngle);
-                    let grad = ctx.createLinearGradient(0, 0, 0, this.beamHeight);
-                    grad.addColorStop(0, `rgba(255, 255, 255, 0)`);
-                    grad.addColorStop(0.5, `rgba(255, 255, 255, ${this.opacity * 0.15})`); 
-                    grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                    ctx.fillStyle = grad; ctx.fillRect(-this.beamWidth/2, 0, this.beamWidth, this.beamHeight);
-                    ctx.restore();
+                    if (weather === 'rain') {
+                        ctx.strokeStyle = `rgba(255, 255, 255, 0.5)`; ctx.lineWidth = 1; ctx.moveTo(this.x, this.y); ctx.lineTo(this.x - 2, this.y + 20); ctx.stroke();
+                    } else if (weather === 'cloud') {
+                         ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity * 0.2})`; ctx.arc(this.x, this.y, this.size * 15, 0, Math.PI * 2); ctx.fill();
+                    } else {
+                        ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(20 * Math.PI/180);
+                        let grad = ctx.createLinearGradient(0, 0, 0, this.beamHeight);
+                        grad.addColorStop(0, `rgba(255, 255, 255, 0)`); grad.addColorStop(0.5, `rgba(255, 223, 0, ${this.opacity * 0.15})`); grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
+                        ctx.fillStyle = grad; ctx.fillRect(-20, 0, 40, this.beamHeight); ctx.restore();
+                    }
                 } else {
-                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                    ctx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`; ctx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2); ctx.fill();
                 }
             }
         }
 
         const DataManager = {
             key: 'timeline_entries', data: [],
-            init: function() { try { const s = localStorage.getItem(this.key); this.data = s ? JSON.parse(s) : []; if(!this.data.length) this.seedData(); } catch(e){ this.data = []; } this.updateStats(); },
-            seedData: function() { this.add({ title: "The Beginning", content: "My chronicle starts here.", mood: "smile", weather: "sun", ts: Date.now(), h: 9 }); },
+            init: function() { try { const s = localStorage.getItem(this.key); this.data = s ? JSON.parse(s) : []; if(!this.data.length) this.seedData(); else this.checkAndAddHolidays(); } catch(e){ this.data = []; } this.updateStats(); },
+            seedData: function() { this.add({ title: "The Beginning", content: "My chronicle starts here.", mood: "smile", weather: "sun", ts: Date.now(), h: 9, anni: false, anniType: 'once' }); this.checkAndAddHolidays(); },
+            checkAndAddHolidays: function() { 
+                 HOLIDAYS_2025.forEach(h => {
+                    const hDate = new Date(h.date).toDateString();
+                    if (!this.data.some(e => e.title === h.name && new Date(e.ts).toDateString() === hDate)) {
+                         this.data.push({ id: Date.now() + Math.random(), title: h.name, content: h.desc, mood: 'smile', weather: 'sun', ts: new Date(h.date+"T09:00:00").getTime(), h: 9, anni: false, isHoliday: true });
+                    }
+                 });
+                 this.data.sort((a, b) => b.ts - a.ts);
+                 this.persist();
+            },
+            updateHolidays: function() { this.checkAndAddHolidays(); alert("Holidays Updated!"); UI.renderCalendar(); UI.renderTimeline(); },
             getAll: function() { return this.data; },
             getById: function(id) { return this.data.find(e => String(e.id) === String(id)); },
             add: function(entry) { entry.id = Date.now(); this.data.unshift(entry); this.persist(); return entry; },
             update: function(id, updates) { const idx = this.data.findIndex(e => String(e.id) === String(id)); if (idx !== -1) { this.data[idx] = { ...this.data[idx], ...updates }; this.persist(); } },
             delete: function(id) { const initialLen = this.data.length; this.data = this.data.filter(e => String(e.id) !== String(id)); if(this.data.length !== initialLen) { this.persist(); return true; } return false; },
             persist: function() { try { localStorage.setItem(this.key, JSON.stringify(this.data)); this.updateStats(); UI.refreshAll(); } catch (e) { alert("Storage Full!"); } },
+            compressImage: function(base64, maxWidth, quality, callback) {
+                const img = new Image(); img.src = base64;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); let w = img.width; let h = img.height;
+                    if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
+                    callback(canvas.toDataURL('image/jpeg', quality));
+                };
+            },
             saveFromEditor: function() {
-                const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value; const c = document.getElementById('editor-content').innerHTML; const d = document.getElementById('editor-date').value; const tm = document.getElementById('editor-time').value; const img = UI.state.tempImage;
-                if(t && d) { const [y,m,day] = d.split('-').map(Number); const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; const ts = new Date(y,m-1,day,hr,min).getTime(); const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: img };
-                if (id) this.update(id, payload); else this.add(payload); UI.closeEditor(); } else { alert('Title and Date required'); }
+                const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value; const c = document.getElementById('editor-content').value; const d = document.getElementById('editor-date').value; const tm = document.getElementById('editor-time').value; const img = UI.state.tempImage; const anni = document.getElementById('editor-anni').checked; const anniType = document.getElementById('editor-anni-type').value;
+                if(t && d) { 
+                    const [y,m,day] = d.split('-').map(Number); const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; const ts = new Date(y,m-1,day,hr,min).getTime(); 
+                    const save = (processedImg) => { const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: processedImg, anni, anniType }; if (id) this.update(id, payload); else this.add(payload); UI.closeEditor(); };
+                    if (img && img.startsWith('data:')) { this.compressImage(img, 800, 0.7, save); } else { save(img); }
+                } else { alert('Title and Date required'); }
+            },
+            fetchDailyNews: async function() {
+                const k = document.getElementById('user-api-key').value || DEFAULT_KEY;
+                const prompt = `Summarize 3 top tech/business news headlines for today (${new Date().toLocaleDateString()}) concisely to inspire a diary entry. Language: ${UI.state.lang==='zh'?'Chinese':'English'}. Format as HTML list.`;
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
+                    const json = await res.json(); 
+                    const txt = json.candidates[0].content.parts[0].text;
+                    UI.editorInsertMD(`\n> **Daily Inspiration**\n${txt}\n`);
+                } catch(e) { alert("AI News failed."); }
+            },
+            generateStoryFromImage: async function() {
+                const img = UI.state.tempImage; if (!img || !img.startsWith('data:image/')) return alert("Please upload an image first.");
+                const k = document.getElementById('user-api-key').value || DEFAULT_KEY;
+                const base64Data = img.split(',')[1]; const mimeType = img.split(',')[0].split(':')[1].split(';')[0];
+                const prompt = `Look at this image and write a short, poetic diary entry about it. Capture the mood and details. Language: ${UI.state.lang==='zh'?'Chinese':'English'}.`;
+                try {
+                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { 
+                        method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: prompt},{inlineData: {mimeType: mimeType, data: base64Data}}]}]}) 
+                    });
+                    const json = await res.json();
+                    if (json.error) throw new Error(json.error.message);
+                    const txt = json.candidates[0].content.parts[0].text;
+                    UI.editorInsertMD(`\n${txt}\n`);
+                } catch(e) { console.error(e); alert("AI Vision failed. Check API Key."); }
             },
             exportBackup: function() { const b = new Blob([JSON.stringify(this.data, null, 2)], {type: 'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `timeline_backup.json`; a.click(); URL.revokeObjectURL(u); },
             importBackup: function(input) { if(input.files[0]) { const r = new FileReader(); r.onload = (e) => { try { const i = JSON.parse(e.target.result); if(Array.isArray(i) && confirm(`Import ${i.length} entries?`)) { this.data = i; this.persist(); alert("Restored!"); UI.closeInfo(); } } catch(err) { alert("Invalid JSON"); } }; r.readAsText(input.files[0]); } input.value = ''; },
@@ -730,7 +707,7 @@
         };
 
         const UI = {
-            state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0 },
+            state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true} },
             init: function() {
                 DataManager.init(); ParticleSystem.init(); lucide.createIcons(); this.initScrollObserver(); this.refreshAll();
                 if(localStorage.getItem('user_zodiac')) document.getElementById('user-zodiac').value = localStorage.getItem('user_zodiac');
@@ -739,6 +716,11 @@
                 this.updateCelestialPosition(12);
             },
             refreshAll: function() { this.renderTimeline(); this.renderCalendar(); },
+            toggleFilter: function(type) {
+                this.state.filters[type] = !this.state.filters[type];
+                document.querySelector(`.f-${type}`).classList.toggle('active', this.state.filters[type]);
+                this.renderTimeline();
+            },
             switchView: function(v) {
                 const tl = document.getElementById('view-timeline'), cal = document.getElementById('view-calendar'), bt = document.getElementById('btn-timeline'), bc = document.getElementById('btn-calendar'), hud = document.getElementById('focus-hud');
                 if(v === 'timeline') {
@@ -752,70 +734,87 @@
                 }
             },
             switchSubView: function(v) {
-                const grid = document.getElementById('calendar-container');
-                const gallery = document.getElementById('gallery-container');
-                const btnG = document.getElementById('btn-sub-grid');
-                const btnP = document.getElementById('btn-sub-gallery');
-                
-                if (v === 'grid') {
-                    grid.classList.remove('hidden'); gallery.classList.add('hidden');
-                    btnG.classList.add('active'); btnP.classList.remove('active');
-                } else {
-                    grid.classList.add('hidden'); gallery.classList.remove('hidden');
-                    btnG.classList.remove('active'); btnP.classList.add('active');
-                    this.renderGallery();
-                }
+                const grid = document.getElementById('calendar-container'); const gallery = document.getElementById('gallery-container'); const btnG = document.getElementById('btn-sub-grid'); const btnP = document.getElementById('btn-sub-gallery');
+                if (v === 'grid') { grid.classList.remove('hidden'); gallery.classList.add('hidden'); btnG.classList.add('active'); btnP.classList.remove('active'); } 
+                else { grid.classList.add('hidden'); gallery.classList.remove('hidden'); btnG.classList.remove('active'); btnP.classList.add('active'); this.renderGallery(); }
             },
             renderTimeline: function() {
-                const c = document.getElementById('diary-list'); c.innerHTML = ''; const entries = DataManager.getAll().sort((a, b) => b.ts - a.ts);
-                if(entries.length === 0) { c.innerHTML = `<div class="text-center opacity-50 py-20 flex flex-col items-center gap-2"><i data-lucide="feather" class="w-8 h-8 opacity-50"></i><span>Tap the Pen to start.</span></div>`; lucide.createIcons(); return; }
+                const c = document.getElementById('diary-list'); c.innerHTML = ''; 
+                let entries = DataManager.getAll().sort((a, b) => b.ts - a.ts);
+                entries = entries.filter(e => {
+                    if(e.isHoliday) return this.state.filters.holiday;
+                    if(e.anni) return this.state.filters.anni;
+                    return this.state.filters.normal;
+                });
+
+                if(entries.length === 0) { c.innerHTML = `<div class="text-center opacity-50 py-20 flex flex-col items-center gap-2"><i data-lucide="feather" class="w-8 h-8 opacity-50"></i><span>Tap to start.</span></div>`; lucide.createIcons(); return; }
+                const now = new Date(); const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+
                 entries.forEach(i => {
                     const d = new Date(i.ts); const div = document.createElement('div'); div.className = `entry-item`;
                     div.dataset.ts = i.ts; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate();
                     div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear();
                     div.dataset.time = this.formatTime(d);
+                    div.dataset.weather = i.weather || 'sun';
+                    
+                    let nodeClass = ''; let cardClass = ''; let extraHtml = '';
+                    // Logic for node color based on type (yellow, green, white)
+                    if (i.isHoliday) {
+                        cardClass = 'card-holiday'; 
+                        extraHtml = `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase tracking-wider">Festival</div>`;
+                        nodeClass = 'node-holiday'; // Need CSS for this
+                        div.style.setProperty('--node-color', '#4ade80');
+                    } else if (i.anni) {
+                        let targetDate = new Date(i.ts); let diff = 0;
+                        if (i.anniType === 'annual') {
+                            const currentYear = now.getFullYear(); targetDate.setFullYear(currentYear);
+                            if (targetDate.getTime() < todayStart) { targetDate.setFullYear(currentYear + 1); }
+                            diff = Math.ceil((targetDate - now) / (1000 * 60 * 60 * 24));
+                            extraHtml = `<div class="anni-badge anni-future-badge">IN ${Math.abs(diff)} DAYS</div>`;
+                            cardClass='card-anni-future'; 
+                        } else {
+                            diff = Math.ceil((now - d) / (1000 * 60 * 60 * 24));
+                            if (diff > 0) { extraHtml = `<div class="anni-badge anni-past-badge">${diff} DAYS AGO</div>`; cardClass='card-anni-past'; } 
+                            else { extraHtml = `<div class="anni-badge anni-future-badge">IN ${Math.abs(diff)} DAYS</div>`; cardClass='card-anni-future'; }
+                        }
+                        nodeClass = 'node-anni'; 
+                        div.style.setProperty('--node-color', '#fbbf24');
+                    } else {
+                        div.style.setProperty('--node-color', '#e5e7eb');
+                    }
+
                     let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
                     const sum = i.content.replace(/<[^>]*>/g, '').substring(0, 120) + (i.content.length > 120 ? '...' : '');
                     
+                    // Inline style for dynamic node color
                     div.innerHTML = `
-                        <div class="timeline-node-wrapper"><div class="timeline-node"></div></div>
-                        <div class="entry-card-wrapper">
-                            <div class="entry-card" onclick="UI.openDetailById(${i.id})" style="${!i.img ? 'padding-left:1.2rem' : ''}">
-                                ${thumbHtml}
-                                <div class="card-main-col">
-                                    <div class="card-mood"><i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i></div>
-                                    <h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-1 pr-6">${i.title}</h3>
-                                    <p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${sum}</p>
-                                </div>
-                            </div>
-                        </div>
-                    `;
+                        <style>.timeline-node.${nodeClass} { background-color: var(--node-color) !important; border-color: var(--node-color) !important; }</style>
+                        <div class="timeline-node-wrapper"><div class="timeline-node ${nodeClass}" style="background-color: var(--node-color); border-color: var(--node-color);"></div></div>
+                        <div class="entry-card-wrapper"><div class="entry-card ${cardClass}" onclick="UI.openDetailById(${i.id})" style="${!i.img ? 'padding-left:1.2rem' : ''}">${thumbHtml}<div class="card-main-col"><div class="card-mood"><i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i></div>${extraHtml}<h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2 pr-6">${i.title}</h3><p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${sum}</p></div></div></div>`;
                     c.appendChild(div);
                 });
                 lucide.createIcons(); setTimeout(() => this.handleScroll(), 50);
             },
-            renderGallery: function() {
-                 const container = document.getElementById('gallery-grid-view');
-                 const empty = document.getElementById('gallery-empty');
+            renderArchiveList: function(entries) {
+                 const container = document.getElementById('month-entries'); 
+                 const emptyState = document.getElementById('month-empty-state'); 
                  container.innerHTML = '';
-                 const images = DataManager.getAll().filter(e => e.img);
-                 
-                 if(images.length === 0) {
-                     empty.classList.remove('hidden');
-                 } else {
-                     empty.classList.add('hidden');
-                     images.forEach(e => {
-                         const d = new Date(e.ts);
-                         const div = document.createElement('div');
-                         div.className = 'gallery-item';
-                         div.onclick = () => UI.openDetail(e);
-                         div.innerHTML = `
-                             <img src="${e.img}" loading="lazy">
-                             <div class="gallery-date">${d.toLocaleDateString()}</div>
-                         `;
+                 if (entries.length === 0) { container.classList.add('hidden'); emptyState.classList.remove('hidden'); } 
+                 else { container.classList.remove('hidden'); emptyState.classList.add('hidden'); 
+                     entries.forEach(entry => {
+                         const date = new Date(entry.ts); const div = document.createElement('div');
+                         div.className = 'flex items-center gap-4 p-3 bg-[var(--bg)]/30 rounded-lg border border-[var(--line)]/50 cursor-pointer hover:bg-[var(--line)]/20 transition-colors mb-2';
+                         div.onclick = () => UI.openDetail(entry);
+                         div.innerHTML = `<div class="text-lg font-bold font-num opacity-70 w-8 text-center">${date.getDate()}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate text-[var(--text)]">${entry.title}</div></div><i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>`;
                          container.appendChild(div);
                      });
+                     lucide.createIcons();
                  }
+            },
+            renderGallery: function() {
+                 const container = document.getElementById('gallery-grid-view'); const empty = document.getElementById('gallery-empty'); container.innerHTML = '';
+                 const images = DataManager.getAll().filter(e => e.img);
+                 if(images.length === 0) { empty.classList.remove('hidden'); } else { empty.classList.add('hidden'); images.forEach(e => { const d = new Date(e.ts); const div = document.createElement('div'); div.className = 'gallery-item'; div.onclick = () => UI.openDetail(e); div.innerHTML = `<img src="${e.img}" loading="lazy"><div class="gallery-date">${d.toLocaleDateString()}</div>`; container.appendChild(div); }); }
             },
             initScrollObserver: function() {
                 const main = document.getElementById('main-container'); let ticking = false;
@@ -831,58 +830,117 @@
                 entries.forEach(el => {
                     const rect = el.getBoundingClientRect(); const diff = Math.abs(rect.top + rect.height / 2 - viewCenter);
                     const card = el.querySelector('.entry-card-wrapper'); const node = el.querySelector('.timeline-node');
+                    el.classList.remove('active-focus');
+                    if (card) { card.style.transform = `scale(1)`; card.style.opacity = 1; } 
+                    if (node) { node.style.transform = `scale(1)`; node.style.boxShadow = ''; }
                     const distRatio = Math.min(diff / (window.innerHeight * 0.5), 1);
-                    const scale = 1 - (distRatio * 0.4); const op = 1 - (distRatio * 0.6); const tx = distRatio * 20;
-                    if (card) { card.style.transform = `scale(${scale}) translateX(${tx}px)`; card.style.opacity = Math.max(0.3, op); }
-                    if (node) { const ns = 1 - (distRatio * 0.5); node.style.transform = `scale(${ns})`; node.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; node.style.borderColor = 'var(--card-bg)'; node.style.background = 'var(--card-bg)'; }
+                    const scale = 1 - (distRatio * 0.3); const op = 1 - (distRatio * 0.5); 
+                    if (card) { card.style.transform = `scale(${scale})`; card.style.opacity = Math.max(0.3, op); }
                     if(diff < minDiff) { minDiff = diff; closest = el; }
                 });
                 if(closest) {
-                    const node = closest.querySelector('.timeline-node');
-                    if(node) { node.style.transform = 'scale(1.4)'; node.style.boxShadow = '0 0 0 4px var(--bg-grad), 0 0 15px 2px var(--primary)'; node.style.borderColor = 'white'; node.style.background = 'var(--primary)'; }
+                    closest.classList.add('active-focus');
                     const day = String(closest.dataset.day).padStart(2, '0'); const elDay = document.getElementById('hud-day');
-                    if (elDay.innerText !== day) { elDay.innerText = day; elDay.style.transform = "scale(1.2)"; elDay.style.color = "var(--primary)"; setTimeout(() => { elDay.style.transform = "scale(1)"; elDay.style.color = "var(--text)"; }, 200); }
-                    document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; document.getElementById('hud-time').innerText = closest.dataset.time;
+                    if (elDay && elDay.innerText !== day) { elDay.innerText = day; elDay.style.transform = "scale(1.2)"; elDay.style.color = "var(--primary)"; setTimeout(() => { elDay.style.transform = "scale(1)"; elDay.style.color = "var(--text)"; }, 200); }
+                    if(document.getElementById('hud-month-year')) document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; 
+                    if(document.getElementById('hud-time')) document.getElementById('hud-time').innerText = closest.dataset.time;
                     this.updateCelestialPosition(parseInt(closest.dataset.hour));
+                    ParticleSystem.setWeather(closest.dataset.weather || 'sun');
                 }
             },
             updateCelestialPosition: function(hour) {
-                // TWO-STATE LOGIC for Maximum Visibility
-                // Day (06:00 - 18:00) -> Sun at Top (0 deg)
-                // Night (18:00 - 06:00) -> Moon at Top (180 deg)
-                
                 const isNight = (hour >= 18 || hour < 6);
                 const targetAngle = isNight ? 180 : 0;
-                
-                // Calculate shortest path for rotation to prevent spinning wildly
                 let delta = targetAngle - (this.state.currentRotation % 360);
                 if (delta > 180) delta -= 360;
                 if (delta < -180) delta += 360;
-                
                 this.state.currentRotation += delta;
                 document.getElementById('orbit-wheel').style.transform = `rotate(${-this.state.currentRotation}deg)`;
-                
                 let theme = 'day';
-                if(hour >= 6 && hour < 17) theme = 'day';
-                else if(hour >= 17 && hour < 19) theme = 'dusk';
-                else if(hour >= 19 || hour < 5) theme = 'night';
-                else theme = 'dawn';
-
-                if(document.body.getAttribute('data-theme') !== theme) {
-                    document.body.setAttribute('data-theme', theme);
-                    ParticleSystem.setTheme(theme);
-                }
+                if(hour >= 6 && hour < 17) theme = 'day'; else if(hour >= 17 && hour < 19) theme = 'dusk'; else if(hour >= 19 || hour < 5) theme = 'night'; else theme = 'dawn';
+                if(document.body.getAttribute('data-theme') !== theme) { document.body.setAttribute('data-theme', theme); ParticleSystem.setTheme(theme); }
             },
-            // UI Utils (Same as before)
+            editorInsertMD: function(syntax) {
+                const editor = document.getElementById('editor-content');
+                const start = editor.selectionStart;
+                const end = editor.selectionEnd;
+                const text = editor.value;
+                const before = text.substring(0, start);
+                const after = text.substring(end, text.length);
+                editor.value = before + syntax + after;
+                editor.focus();
+                editor.selectionStart = start + syntax.length;
+                editor.selectionEnd = start + syntax.length;
+            },
+            showPromptBubble: function() {
+                const bubble = document.getElementById('prompt-bubble');
+                bubble.innerText = QUESTIONS[Math.floor(Math.random()*QUESTIONS.length)];
+                bubble.classList.remove('hidden');
+                setTimeout(() => bubble.style.transform = "scale(1)", 100);
+                setTimeout(() => { bubble.style.transform = "scale(0)"; setTimeout(()=>bubble.classList.add('hidden'), 300); }, 4000);
+            },
             openInfo: function() { DataManager.updateStats(); document.getElementById('info-modal').classList.remove('hidden'); },
             closeInfo: function() { document.getElementById('info-modal').classList.add('hidden'); },
             closeSettings: function() { document.getElementById('settings-modal').classList.add('hidden'); },
-            setLanguage: function(lang) { this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; }); document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; this.renderCalendar(); this.renderTimeline(); },
+            setLanguage: function(lang) { 
+                this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; 
+                document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; }); 
+                document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
+                document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
+                this.renderCalendar(); this.renderTimeline(); 
+            },
             changeMonth: function(o) { const d = new Date(this.state.calendarDate); d.setMonth(d.getMonth() + o); this.state.calendarDate = d; this.renderCalendar(); },
             resetCalendarToday: function() { this.state.calendarDate = new Date(); this.renderCalendar(); },
-            renderCalendar: function() { const g = document.getElementById('calendar-grid'); g.innerHTML = ''; const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); document.getElementById('cal-year-display').innerText = y; const fd = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(); const e = DataManager.getAll(); for(let i=0; i<fd; i++) g.appendChild(document.createElement('div')); for(let i=1; i<=dim; i++) { const d = document.createElement('div'); d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; d.textContent = i; const today = new Date(); if(y===today.getFullYear() && m===today.getMonth() && i===today.getDate()) d.classList.add('current-day'); const de = e.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); if(de.length>0) { d.classList.add('has-entry', 'font-bold'); d.onclick=()=>this.openDetail(de[0]); } else { d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); } g.appendChild(d); } this.renderArchiveList(e.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); },
-            renderArchiveList: function(e) { const c = document.getElementById('month-entries'), em = document.getElementById('month-empty-state'); c.innerHTML = ''; if(e.length === 0) { c.classList.add('hidden'); em.classList.remove('hidden'); } else { c.classList.remove('hidden'); em.classList.add('hidden'); e.forEach(i => { const el = document.createElement('div'); el.className = 'flex items-center gap-4 p-3 bg-[var(--bg)]/30 rounded-lg border border-[var(--line)]/50 cursor-pointer hover:bg-[var(--line)]/20'; el.innerHTML = `<div class="text-lg font-bold font-num opacity-70 w-8 text-center">${new Date(i.ts).getDate()}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${i.title}</div></div><i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>`; el.onclick = () => this.openDetail(i); c.appendChild(el); }); } lucide.createIcons(); },
-            openEditor: function(dStr, exist) { const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); if(exist) { const d=new Date(exist.ts); document.getElementById('editor-id').value=exist.id; document.getElementById('editor-title').value=exist.title; document.getElementById('editor-content').innerHTML=exist.content; document.getElementById('editor-date').value=d.toISOString().split('T')[0]; document.getElementById('editor-time').value=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; this.selectMood(exist.mood); this.selectWeather(exist.weather); if(exist.img){this.state.tempImage=exist.img; document.getElementById('preview-img').src=exist.img; document.getElementById('image-preview-area').classList.remove('hidden');} } else { const n=new Date(); document.getElementById('editor-id').value=''; document.getElementById('editor-title').value=''; document.getElementById('editor-content').innerHTML=''; document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; document.getElementById('editor-time').value=n.toTimeString().slice(0,5); this.selectMood('smile'); this.selectWeather('sun'); } m.classList.remove('hidden'); setTimeout(()=>p.classList.remove('translate-y-full'),10); },
+            renderCalendar: function() { 
+                const g = document.getElementById('calendar-grid'); g.innerHTML = ''; const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); 
+                document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); document.getElementById('cal-year-display').innerText = y; 
+                const fd = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(); const e = DataManager.getAll(); 
+                for(let i=0; i<fd; i++) g.appendChild(document.createElement('div')); 
+                for(let i=1; i<=dim; i++) { 
+                    const d = document.createElement('div'); d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; 
+                    let lunarText = '';
+                    if (window.Lunar) { try { const solar = Solar.fromYmd(y, m+1, i); const lunar = solar.getLunar(); lunarText = lunar.getDayInChinese(); } catch(e){} }
+                    d.innerHTML = `<span>${i}</span><span class="calendar-lunar">${lunarText}</span>`;
+                    const today = new Date(); if(y===today.getFullYear() && m===today.getMonth() && i===today.getDate()) d.classList.add('current-day'); 
+                    const de = e.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); 
+                    if(de.length>0) { d.classList.add('has-entry', 'font-bold'); d.onclick=()=>this.openDetail(de[0]); } else { d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); } g.appendChild(d); 
+                } 
+                this.renderArchiveList(e.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); 
+            },
+            openEditor: function(dStr, exist) { 
+                const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); 
+                this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); 
+                this.showPromptBubble();
+
+                if(exist) { 
+                    const d=new Date(exist.ts); 
+                    document.getElementById('editor-id').value=exist.id; 
+                    document.getElementById('editor-title').value=exist.title; 
+                    document.getElementById('editor-content').value=exist.content; // Use .value for textarea
+                    document.getElementById('editor-date').value=d.toISOString().split('T')[0]; 
+                    document.getElementById('editor-time').value=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; 
+                    this.selectMood(exist.mood); 
+                    this.selectWeather(exist.weather); 
+                    document.getElementById('editor-anni').checked = !!exist.anni; 
+                    document.getElementById('editor-anni-type').value = exist.anniType || 'once'; 
+                    if(document.getElementById('editor-anni').checked) document.getElementById('anni-type-wrapper').style.display='block'; 
+                    if(exist.img){
+                        this.state.tempImage=exist.img; document.getElementById('preview-img').src=exist.img; document.getElementById('image-preview-area').classList.remove('hidden');
+                    } 
+                } else { 
+                    const n=new Date(); 
+                    document.getElementById('editor-id').value=''; 
+                    document.getElementById('editor-title').value=''; 
+                    document.getElementById('editor-content').value=''; 
+                    document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; 
+                    document.getElementById('editor-time').value=n.toTimeString().slice(0,5); 
+                    this.selectMood('smile'); 
+                    this.selectWeather('sun'); 
+                    document.getElementById('editor-anni').checked = false; 
+                    document.getElementById('anni-type-wrapper').style.display='none'; 
+                } 
+                m.classList.remove('hidden'); setTimeout(()=>p.classList.remove('translate-y-full'),10); 
+            },
             closeEditor: function() { document.getElementById('editor-panel').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('editor-modal').classList.add('hidden'),300); },
             selectMood: function(m) { this.state.mood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`mood-${m}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
             selectWeather: function(w) { this.state.weather = w; document.querySelectorAll('.weather-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`weather-${w}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
@@ -891,20 +949,51 @@
             handleImageUpload: function(i) { if(i.files[0]) { const r = new FileReader(); r.onload=(e)=>{this.state.tempImage=e.target.result; document.getElementById('preview-img').src=e.target.result; document.getElementById('image-preview-area').classList.remove('hidden');}; r.readAsDataURL(i.files[0]); } i.value=''; },
             clearImage: function() { this.state.tempImage = null; document.getElementById('image-preview-area').classList.add('hidden'); },
             openDetailById: function(id) { this.openDetail(DataManager.getById(id)); },
-            openDetail: function(i) { if(!i)return; this.state.currentDetailId=i.id; const d=new Date(i.ts); document.getElementById('detail-title').innerText=i.title; document.getElementById('detail-date').innerText=d.toLocaleDateString(undefined,{weekday:'short',month:'long',day:'numeric'}); document.getElementById('detail-time').innerText=this.formatTime(d); document.getElementById('detail-content').innerHTML=i.content; document.getElementById('detail-icons').innerHTML=`<i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i><i data-lucide="${this.getWeatherIcon(i.weather)}" class="w-4 h-4"></i>`; const ic=document.getElementById('detail-image-container'); if(i.img){document.getElementById('detail-image').src=i.img; ic.classList.remove('hidden');}else{ic.classList.add('hidden');} document.getElementById('detail-modal').classList.remove('hidden'); lucide.createIcons(); },
+            openDetail: function(i) { 
+                if(!i) return; 
+                this.state.currentDetailId = i.id; 
+                const d = new Date(i.ts);
+                const elTitle = document.getElementById('detail-title');
+                if (elTitle) {
+                    elTitle.innerText = i.title || 'Untitled';
+                    document.getElementById('detail-date').innerText = d.toLocaleDateString(undefined,{weekday:'short',month:'long',day:'numeric'});
+                    document.getElementById('detail-time').innerText = this.formatTime(d);
+                    document.getElementById('detail-content').innerHTML = marked.parse(i.content || ''); // Parse MD
+                    document.getElementById('detail-icons').innerHTML = `<i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i><i data-lucide="${this.getWeatherIcon(i.weather)}" class="w-4 h-4"></i>`;
+                    const ic=document.getElementById('detail-image-container'); 
+                    if(i.img){
+                        document.getElementById('detail-image').src=i.img; ic.classList.remove('hidden');
+                        // Add image to markdown content flow as well if user prefers
+                    }else{ic.classList.add('hidden');} 
+                    document.getElementById('detail-modal').classList.remove('hidden'); lucide.createIcons(); 
+                }
+            },
             closeDetail: function() { document.getElementById('detail-modal').classList.add('hidden'); },
             confirmDeleteEntry: function() { document.getElementById('confirm-modal').classList.remove('hidden'); },
             executeDelete: function() { if(this.state.currentDetailId) { DataManager.delete(this.state.currentDetailId); document.getElementById('confirm-modal').classList.add('hidden'); this.closeDetail(); } },
             editCurrentEntry: function() { const id = this.state.currentDetailId; this.closeDetail(); this.openEditor(null, DataManager.getById(id)); },
             openWeeklySummary: function() { document.getElementById('summary-modal').classList.remove('hidden'); },
             closeWeeklySummary: function() { document.getElementById('summary-modal').classList.add('hidden'); },
+            setPersona: function(p) {
+                this.state.persona = p;
+                document.getElementById('persona-western').className = p==='western' ? "px-3 py-1 text-xs font-bold rounded-full bg-[var(--primary)] text-white" : "px-3 py-1 text-xs font-bold rounded-full bg-[var(--line)] text-[var(--text)]";
+                document.getElementById('persona-eastern').className = p==='eastern' ? "px-3 py-1 text-xs font-bold rounded-full bg-[var(--primary)] text-white" : "px-3 py-1 text-xs font-bold rounded-full bg-[var(--line)] text-[var(--text)]";
+            },
             generateReport: async function() {
-                const div = document.getElementById('summary-ai-content'); const k = document.getElementById('user-api-key').value || "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
+                const div = document.getElementById('summary-ai-content'); const k = document.getElementById('user-api-key').value || DEFAULT_KEY;
                 localStorage.setItem('user_zodiac', document.getElementById('user-zodiac').value); localStorage.setItem('user_bazi', document.getElementById('user-bazi').value);
                 div.innerHTML = `<div class="flex justify-center py-8"><i data-lucide="loader-2" class="animate-spin w-6 h-6 text-[var(--primary)]"></i></div>`; lucide.createIcons();
                 const history = DataManager.getAll().slice(0, 10).map(e => ({d: new Date(e.ts).toLocaleDateString(), t: e.title, c: e.content.substring(0,100)}));
-                const prompt = `Role: Mystical Fortune Teller. Data: User Zodiac: ${document.getElementById('user-zodiac').value}, BaZi/Birth: ${document.getElementById('user-bazi').value}. Diary entries (last 7 days): ${JSON.stringify(history)}. Task: 1. Summarize "Story of the last 7 days". 2. List "Clear Goals/Items". 3. Provide "Fortune & Direction" based on Zodiac/Birth + Diary Context. Format: Use HTML classes for styling: <div class='ai-card'><div class='ai-h3'><i class='...'></i> Title</div><p class='ai-p'>text...</p></div>. Language: ${UI.state.lang === 'zh' ? 'Chinese' : 'English'}.`;
-                try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }); const json = await res.json(); div.innerHTML = json.candidates[0].content.parts[0].text.replace(/```html/g,'').replace(/```/g,''); } catch(e) { div.innerHTML = "<p class='text-center text-red-400'>Stars clouded.</p>"; }
+                
+                let promptRole = "";
+                if (this.state.persona === 'eastern') {
+                    promptRole = "Role: A Daoist Master/Red Chamber Narrator. Tone: Classical Chinese poetry/prose, mystical, wise. Reference: I Ching (周易), Dream of the Red Chamber.";
+                } else {
+                    promptRole = "Role: Mystical Western Fortune Teller. Tone: Magical, mysterious, insightful.";
+                }
+
+                const prompt = `${promptRole} Data: User Zodiac: ${document.getElementById('user-zodiac').value}, BaZi/Birth: ${document.getElementById('user-bazi').value}. Diary entries (last 7 days): ${JSON.stringify(history)}. Task: 1. Summarize "Story of the last 7 days". 2. List "Clear Goals/Items". 3. Provide "Fortune & Direction" based on Zodiac/Birth + Diary Context. Format: Markdown. Language: ${UI.state.lang === 'zh' ? 'Chinese' : 'English'}.`;
+                try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }); const json = await res.json(); div.innerHTML = marked.parse(json.candidates[0].content.parts[0].text); } catch(e) { div.innerHTML = "<p class='text-center text-red-400'>Stars clouded.</p>"; }
             },
             formatTime: (d) => d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             getMoodIcon: (m) => ({smile:'smile',meh:'meh',frown:'frown',heart:'heart'}[m]||'smile'),
