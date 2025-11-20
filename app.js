@@ -39,15 +39,14 @@ const TIME_THEMES = {
         particleConfig: { type: 'mist', count: 60, behavior: 'breathing' }
     },
     dusk: {
-        // Serene: Indigo -> Violet -> Peach
         bgGradient: ['#24243e', '#7F5A83', '#FFC3A0'], 
         celestialGradient: ['#FFD700', '#FF8C00'],
         particleConfig: { type: 'ember', count: 100, behavior: 'fading' }
     },
     day: {
-        bgGradient: ['#89CFF0', '#B0E0E6', '#E0FFFF'],
+        bgGradient: ['#5CA0D3', '#9AC6F5', '#E0F7FA'],
         celestialGradient: ['#FFFFFF', '#FFFACD'],
-        particleConfig: { type: 'tyndall_cloud', count: 45, behavior: 'floating' } 
+        particleConfig: { type: 'beam_only', count: 7, behavior: 'breathing' } 
     },
     night: {
         bgGradient: ['#0B1026', '#16213E', '#1F2F4F'],
@@ -82,7 +81,7 @@ const ParticleSystem = {
         if (weather === 'rain') {
             currentThemeConfig = WEATHER_OVERRIDES.rain;
             this.resetParticles();
-        } else if (weather === 'cloud' && currentThemeConfig.type !== 'tyndall_cloud') {
+        } else if (weather === 'cloud' && currentThemeConfig.type !== 'beam_only') {
              currentThemeConfig = WEATHER_OVERRIDES.cloud;
              this.resetParticles();
         }
@@ -139,19 +138,17 @@ class Particle {
             this.len = Math.random() * 15 + 5; 
             this.opacity = Math.random() * 0.4 + 0.2; 
         } 
-        else if (cfg.type === 'tyndall_cloud') {
-            this.subType = Math.random() > 0.4 ? 'cloud' : 'beam';
-            if (this.subType === 'cloud') {
-                this.size = Math.random() * 80 + 30; 
-                this.speedX = Math.random() * 0.15 + 0.05;
-                this.opacity = Math.random() * 0.2 + 0.1; 
-            } else {
-                this.width = Math.random() * 60 + 20; 
-                this.len = Math.random() * 600 + 300; 
-                this.angle = 0.35; 
-                this.speedX = 0.02; 
-                this.opacity = Math.random() * 0.2 + 0.1; 
-            }
+        else if (cfg.type === 'beam_only') {
+            this.width = Math.random() * 60 + 20; 
+            this.len = Math.random() * 600 + 300; 
+            this.angle = 0.35; 
+            this.speedX = 0.02; 
+            this.opacity = Math.random() * 0.1 + 0.05; 
+        }
+        else if (cfg.type === 'tyndall_cloud') { 
+            this.size = Math.random() * 80 + 30; 
+            this.speedX = Math.random() * 0.15 + 0.05;
+            this.opacity = Math.random() * 0.2 + 0.1; 
         }
         else if (cfg.type === 'ember') {
             this.y = this.ch + Math.random() * 20;
@@ -180,6 +177,12 @@ class Particle {
             this.x += this.speedX;
             if (this.y > this.ch) { this.y = -20; this.x = Math.random() * this.cw; }
         } 
+        else if (cfg.type === 'beam_only') {
+            this.x += this.speedX;
+            if (this.x > this.cw + 200) this.x = -200;
+            this.breathOffset += 0.01;
+            this.opacity = this.baseOpacity + Math.sin(this.breathOffset) * 0.05;
+        }
         else if (cfg.type === 'tyndall_cloud') {
             this.x += this.speedX;
             if (this.x > this.cw + 200) this.x = -200;
@@ -214,22 +217,21 @@ class Particle {
             ctx.lineTo(this.x + this.speedX * 2, this.y + this.len);
             ctx.stroke();
         }
-        else if (cfg.type === 'tyndall_cloud') {
-            if (this.subType === 'cloud') {
-                 ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                 ctx.filter = 'blur(30px)'; 
-                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
-                 ctx.filter = 'none';
-            } else {
-                ctx.translate(this.x, this.y);
-                ctx.rotate(this.angle);
-                const grad = ctx.createLinearGradient(0, 0, 0, this.len);
-                grad.addColorStop(0, `rgba(255,250,240,0)`); 
-                grad.addColorStop(0.2, `rgba(255,250,240,${this.opacity})`); 
-                grad.addColorStop(1, `rgba(255,250,240,0)`); 
-                ctx.fillStyle = grad;
-                ctx.fillRect(-this.width/2, 0, this.width, this.len);
-            }
+        else if (cfg.type === 'beam_only') {
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.angle);
+            const grad = ctx.createLinearGradient(0, 0, 0, this.len);
+            grad.addColorStop(0, `rgba(255,250,240,0)`); 
+            grad.addColorStop(0.2, `rgba(255,250,240,${this.opacity})`); 
+            grad.addColorStop(1, `rgba(255,250,240,0)`); 
+            ctx.fillStyle = grad;
+            ctx.fillRect(-this.width/2, 0, this.width, this.len);
+        }
+        else if (cfg.type === 'tyndall_cloud' || cfg.type === 'cloud_only') {
+             ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+             ctx.filter = 'blur(30px)'; 
+             ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+             ctx.filter = 'none';
         }
         else if (cfg.type === 'ember') {
             ctx.fillStyle = `rgba(255, 100, 50, ${this.opacity})`;
@@ -251,7 +253,7 @@ class Particle {
 const UI = {
     DEFAULT_KEY: "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE",
     state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true} },
-    cachedEntryItems: [], // 性能优化：缓存列表项
+    cachedEntryItems: [],
 
     init: async function() {
         await DataManager.init(); 
@@ -348,10 +350,7 @@ const UI = {
             c.appendChild(div);
         });
         lucide.createIcons(); 
-        
-        // 性能优化：缓存生成的 DOM 元素，供滚动时快速访问
         this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item'));
-        
         setTimeout(() => this.handleScroll(), 50);
     },
 
@@ -381,12 +380,10 @@ const UI = {
 
     initScrollObserver: function() {
         const main = document.getElementById('main-container'); let ticking = false;
-        // 性能优化：使用 passive: true
         main.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { this.handleScroll(); ticking = false; }); ticking = true; } }, { passive: true });
     },
 
     handleScroll: function() {
-        // 性能优化：使用缓存的列表，不再每次查询 DOM
         const entries = this.cachedEntryItems; 
         if(!entries || entries.length === 0) return;
 
@@ -397,26 +394,25 @@ const UI = {
         
         const viewCenter = window.innerHeight / 2; let closest = null; let minDiff = Infinity;
         
-        // 优化循环
         for (let i = 0; i < entries.length; i++) {
             const el = entries[i];
             const rect = el.getBoundingClientRect();
             const diff = Math.abs(rect.top + rect.height / 2 - viewCenter);
             
-            // 简单的视口检查，远离中心的元素不进行重绘
             if (rect.bottom < 0 || rect.top > window.innerHeight) continue;
 
             const card = el.querySelector('.entry-card-wrapper'); 
             const node = el.querySelector('.timeline-node');
             el.classList.remove('active-focus');
             
-            if (card) { card.style.transform = `translate3d(0,0,0) scale(1)`; card.style.opacity = 1; } 
+            if (card) { card.style.transform = `translate3d(0,0,0) scale(0.95)`; card.style.opacity = 0.6; } 
             if (node) { node.style.transform = `scale(1)`; node.style.boxShadow = ''; }
             
-            const distRatio = Math.min(diff / (window.innerHeight * 0.5), 1);
-            const scale = 1 - (distRatio * 0.3); const op = 1 - (distRatio * 0.5); 
+            const distRatio = Math.min(diff / (window.innerHeight * 0.4), 1);
+            const scale = 1 - (distRatio * 0.05); // 0.95 to 1.0
+            const op = 0.6 + (1 - distRatio) * 0.4; // 0.6 to 1.0
             
-            if (card) { card.style.transform = `translate3d(0,0,0) scale(${scale})`; card.style.opacity = Math.max(0.3, op); }
+            if (card) { card.style.transform = `translate3d(0,0,0) scale(${scale})`; card.style.opacity = op; }
             if(diff < minDiff) { minDiff = diff; closest = el; }
         }
         

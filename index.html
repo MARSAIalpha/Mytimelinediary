@@ -180,7 +180,7 @@
                     </div>
                 </div>
 
-                <textarea id="editor-content" class="flex-1 w-full outline-none bg-transparent resize-none p-2 min-h-[30vh]" placeholder="Write your story..."></textarea>
+                <textarea id="editor-content" class="flex-1 w-full outline-none bg-transparent resize-none p-2 h-[50vh]" placeholder="Write your story..."></textarea>
                 
                 <div id="image-preview-area" class="mt-4 hidden">
                     <img id="preview-img" class="max-h-32 rounded-lg shadow-md border border-[var(--line)]">
@@ -232,23 +232,11 @@
                         <button onclick="DataManager.nukeData()" class="w-full py-2 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors border border-red-200" data-i18n="btn_reset">Reset All Data</button>
                     </div>
                 </div>
-
-                <div id="feature-guide" class="hidden space-y-4 text-sm leading-relaxed opacity-90">
-                    <h3 class="font-bold text-[var(--primary)]">Feature Guide</h3>
-                    <ul class="list-disc pl-4 space-y-2">
-                        <li><strong>Epic Particles:</strong> Day/Night & Weather react to your diary entries.</li>
-                        <li><strong>Halo Celestial:</strong> Sun/Moon stay above the HUD for best visibility.</li>
-                        <li><strong>Filter Bar:</strong> Use the colored dots under the date to toggle Anniversaries (Yellow), Holidays (Green), or Diaries (White).</li>
-                        <li><strong>Markdown:</strong> The editor supports MD. Try # H1, > Quote.</li>
-                        <li><strong>AI Vision:</strong> Upload an image in the editor and click "Analyze & Write".</li>
-                    </ul>
-                </div>
-
                 <div class="simon-sig pt-4 border-t border-[var(--line)]">developed by simon</div>
             </div>
         </div>
     </div>
-    
+
     <div id="summary-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[60]">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeWeeklySummary()"></div>
         <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)]">
