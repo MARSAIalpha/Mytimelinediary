@@ -11,255 +11,345 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@400;700&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
 
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <style>
         /* --- Core Config --- */
-        :root { --transition-speed: 3s; }
-        body { font-family: 'Cormorant Garamond', serif; -webkit-font-smoothing: antialiased; width: 100%; overflow-x: hidden; margin: 0; }
+        :root { --transition-speed: 2.5s; }
+        body { 
+            font-family: 'Cormorant Garamond', serif; 
+            -webkit-font-smoothing: antialiased; 
+            width: 100%; 
+            overflow-x: hidden; 
+            margin: 0; 
+            overscroll-behavior-y: auto;
+            background-color: #0f2027;
+        }
         .font-display { font-family: 'Cinzel', serif; }
         .font-num { font-family: 'Lato', sans-serif; letter-spacing: 0.02em; }
-        .font-cn { font-family: 'Ma Shan Zheng', cursive; } /* Chinese Art Font */
+        .font-cn { font-family: 'Ma Shan Zheng', cursive; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
         /* --- Themes --- */
-        
-        /* ☀️ Day */
-        body[data-theme="day"] {
-            --bg-grad: linear-gradient(180deg, #87CEEB 0%, #E0F7FA 100%);
-            --text: #2C3E50; --text-sec: #607D8B; --primary: #F39C12; --line: #BDC3C7;
-            --card-bg: rgba(255, 255, 255, 0.85);
-            --sun-pos: 10%; --moon-pos: 150%; 
-            --sun-opacity: 1; --moon-opacity: 0;
-        }
-
-        /* 🌅 Dawn */
-        body[data-theme="dawn"] {
-            --bg-grad: linear-gradient(180deg, #FF9A9E 0%, #FECFEF 50%, #E0C3FC 100%);
-            --text: #4A4E69; --text-sec: #9A8C98; --primary: #FF6B6B; --line: #C9ADA7;
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --sun-pos: 60%; --moon-pos: 150%;
-            --sun-opacity: 0.8; --moon-opacity: 0;
-        }
-
-        /* 🌇 Dusk */
-        body[data-theme="dusk"] {
-            --bg-grad: linear-gradient(180deg, #355C7D 0%, #6C5B7B 50%, #C06C84 100%);
-            --text: #2D3436; --text-sec: #636E72; --primary: #F8B195; --line: #A8A8A8;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --sun-pos: 80%; --moon-pos: 150%;
-            --sun-opacity: 0.8; --moon-opacity: 0;
-        }
-
-        /* 🌙 Night */
-        body[data-theme="night"] {
-            --bg-grad: linear-gradient(180deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
-            --text: #ECF0F1; --text-sec: #BDC3C7; --primary: #54A0FF; --line: #34495E;
-            --card-bg: rgba(30, 40, 50, 0.6);
-            --sun-pos: -50%; --moon-pos: 10%;
-            --sun-opacity: 0; --moon-opacity: 1;
-        }
-
         body {
-            background-image: var(--bg-grad); color: var(--text);
-            transition: background-image var(--transition-speed) ease-in-out, color 1s ease;
-            background-attachment: fixed;
-            min-height: 100vh;
+            transition: background-image 3s ease-in-out, color 1.5s ease;
+            background-attachment: fixed; min-height: 100vh;
+            background-image: var(--bg-grad);
+            color: var(--text);
         }
 
-        /* --- Canvas & Celestial --- */
-        #world-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 0; pointer-events: none;
+        /* Day: Light Blue / Sky */
+        body[data-theme="day"] {
+            --bg-grad: linear-gradient(180deg, #89f7fe 0%, #66a6ff 100%);
+            --text: #1a2a3a; --text-sec: #455a64; --primary: #F39C12; --line: rgba(255,255,255,0.6);
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --rail-color: rgba(255, 255, 255, 0.7);
         }
-        .celestial-container { 
-            position: fixed; width: 200px; height: 200px; 
-            z-index: 1; pointer-events: none; 
-            transition: top var(--transition-speed) cubic-bezier(0.34, 1.56, 0.64, 1), opacity var(--transition-speed) ease;
-            right: 5%;
+        /* Dawn: Soft Pink/Purple */
+        body[data-theme="dawn"] {
+            --bg-grad: linear-gradient(180deg, #fbc2eb 0%, #a6c1ee 100%);
+            --text: #4A4E69; --text-sec: #727586; --primary: #FF6B6B; --line: rgba(255,255,255,0.5);
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --rail-color: rgba(255, 255, 255, 0.6);
         }
+        /* Dusk: Deep Purple/Orange */
+        body[data-theme="dusk"] {
+            --bg-grad: linear-gradient(180deg, #3f51b1 0%, #5a55ae 47%, #7b5fac 87%, #8f6aae 100%);
+            --text: #E0E0E0; --text-sec: #B0BEC5; --primary: #FFB74D; --line: rgba(255,255,255,0.3);
+            --card-bg: rgba(20, 20, 40, 0.4);
+            --rail-color: rgba(255, 255, 255, 0.3);
+        }
+        /* Night: Deep Blue/Black */
+        body[data-theme="night"] {
+            --bg-grad: linear-gradient(180deg, #09203f 0%, #537895 100%);
+            --text: #E3F2FD; --text-sec: #90A4AE; --primary: #81D4FA; --line: rgba(255,255,255,0.2);
+            --card-bg: rgba(10, 25, 40, 0.6);
+            --rail-color: rgba(255, 255, 255, 0.2);
+        }
+
+        /* --- Dynamic Orbit System --- */
+        .orbit-wrapper {
+            position: fixed; 
+            /* Lowered further to ensure hidden bodies stay hidden */
+            bottom: -50vh; 
+            left: 0; 
+            width: 100vw; 
+            height: 100vw; 
+            pointer-events: none; 
+            z-index: 0;
+            display: flex; justify-content: center;
+        }
+        
+        .orbit-wheel {
+            width: 150vh; height: 150vh; /* Massive radius */
+            border-radius: 50%;
+            position: relative;
+            /* Slower, smoother transition */
+            transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1); 
+            will-change: transform;
+        }
+        
+        .celestial-body {
+            position: absolute; 
+            width: 22vh; height: 22vh;
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        #sun-container { top: 0; }
+        #moon-container { top: 100%; transform: translate(-50%, -50%) rotate(180deg); }
+
+        /* Hand-drawn Stroke Style */
+        .sketch-stroke {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .sketch-fill {
+            fill: currentColor;
+            stroke: none;
+        }
+
+        #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
         /* --- UI Components --- */
-        header { z-index: 50; background: transparent; border-bottom: 1px solid transparent; transition: all 1s; }
-        .fab-btn { z-index: 40; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .fab-btn:hover { transform: scale(1.1) rotate(15deg); }
-
-        .modal-overlay { z-index: 9999; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); }
-        .modal-content { 
-            background-color: var(--card-bg); backdrop-filter: blur(20px);
-            border: 1px solid var(--line); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            position: relative; z-index: 10000;
-            transition: background-color 3s ease;
+        header { 
+            z-index: 50; background: rgba(255,255,255,0.01); 
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
-
-        /* Editor Image Constraint Fix */
-        #editor-content img {
-            max-height: 100px; width: auto;
-            border-radius: 6px; display: inline-block; margin: 4px 8px 4px 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: default; vertical-align: middle;
-        }
-
-        /* Entry Card (Timeline Item) */
-        .entry-card {
-            background-color: var(--card-bg); border: 1px solid var(--line);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease; cursor: pointer; border-radius: 12px; z-index: 10; position: relative;
-            backdrop-filter: blur(5px);
-            display: flex; flex-direction: row; align-items: flex-start;
-        }
-        .entry-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        .entry-card:active { transform: scale(0.99); }
-
-        /* Fixed Thumbnail Box for Timeline */
-        .thumb-box {
-            width: 5rem; height: 5rem; flex-shrink: 0; 
-            margin-left: 1rem; /* Fixed spacing from text */
-            border-radius: 6px; overflow: hidden;
-            border: 1px solid var(--line); background: rgba(0,0,0,0.05);
-            box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
-        }
-        .thumb-img { width: 100%; height: 100%; object-fit: cover; }
-
-        /* Calendar */
-        .calendar-cell {
-            aspect-ratio: 1/1; border-radius: 6px;
-            display: flex; align-items: center; justify-content: center;
-            font-family: 'Lato', sans-serif; font-size: 0.9rem;
-            transition: all 0.2s; cursor: pointer; user-select: none;
-            position: relative; color: var(--text);
-        }
-        .calendar-cell:hover { background-color: var(--line); opacity: 0.8; }
-        .calendar-cell.has-entry::after {
-            content: ''; position: absolute; bottom: 4px; width: 4px; height: 4px;
-            background-color: var(--primary); border-radius: 50%;
-            box-shadow: 0 0 4px var(--primary);
-        }
-
-        /* Archive List */
-        .archive-row {
-            display: flex; align-items: center; gap: 1rem; padding: 1rem;
-            border-bottom: 1px solid var(--line);
-            background: rgba(255,255,255,0.1);
-            transition: background 0.2s;
-        }
-        .archive-row:hover { background: rgba(255,255,255,0.25); }
         
-        /* Utils */
+        /* HUD - Date Position */
+        #focus-hud {
+            position: fixed; top: 40%; left: 1.5rem; transform: translateY(-50%);
+            z-index: 40; pointer-events: none;
+            display: flex; flex-direction: column; align-items: flex-start;
+            text-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            transition: opacity 0.3s ease;
+        }
+        .hud-day { font-size: 4rem; font-weight: 900; line-height: 0.9; font-family: 'Lato', sans-serif; color: var(--text); transition: transform 0.3s, color 0.5s; }
+        .hud-meta { font-size: 0.9rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-sec); font-family: 'Lato', sans-serif; margin-top: 0.5rem; opacity: 0.9; }
+
+        /* Timeline Rail */
+        .timeline-rail-container { position: absolute; left: 7rem; top: 0; bottom: 0; width: 2px; z-index: 0; }
+        @media (min-width: 640px) { .timeline-rail-container { left: 9rem; } }
+        
+        .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: var(--rail-color); width: 2px; }
+        .timeline-rail-flow { 
+            position: absolute; top: 0; bottom: 0; left: 0; right: 0; 
+            background: linear-gradient(180deg, transparent, var(--primary), transparent); 
+            background-size: 100% 400px; background-repeat: repeat-y; opacity: 0.6; 
+            animation: flowLight 5s linear infinite; 
+        }
+        @keyframes flowLight { 0% { background-position: 0 -400px; } 100% { background-position: 0 0; } }
+        .micro-ticks { position: absolute; top: 0; bottom: 0; left: -1px; width: 4px; background-image: radial-gradient(circle, var(--line) 1px, transparent 1px); background-size: 4px 24px; opacity: 0.6; }
+
+        .entry-item { position: relative; width: 100%; }
+        .entry-card-wrapper { flex: 1; padding-left: 8rem; min-width: 0; transition: transform 0.2s linear, opacity 0.2s linear; will-change: transform, opacity; }
+        @media (min-width: 640px) { .entry-card-wrapper { padding-left: 10rem; } }
+        
+        .entry-card { 
+            background-color: var(--card-bg); border: 1px solid var(--line); 
+            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.05); 
+            transition: all 0.3s ease; cursor: pointer; border-radius: 16px; 
+            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+        }
+
+        .timeline-node-wrapper { position: absolute; left: 7rem; top: 50%; transform: translate(-50%, -50%); z-index: 20; display: flex; align-items: center; justify-content: center; }
+        @media (min-width: 640px) { .timeline-node-wrapper { left: 9rem; } }
+        .timeline-node { width: 14px; height: 14px; border-radius: 50%; background-color: var(--line); transition: all 0.1s linear; border: 3px solid var(--card-bg); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+
+        /* Calendar & Modals */
+        .calendar-cell { aspect-ratio: 1/1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 0.95rem; position: relative; color: var(--text); }
+        .calendar-cell.current-day { border: 2px solid var(--primary); }
+        .calendar-cell.has-entry::after { content: ''; position: absolute; bottom: 6px; width: 5px; height: 5px; background-color: var(--primary); border-radius: 50%; }
+        .modal-content { background-color: var(--card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid var(--line); z-index: 10000; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
+        
+        .ai-card { background: var(--bg-grad); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--line); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .ai-h3 { font-family: 'Cinzel', serif; font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
+        .ai-p { font-size: 0.95em; line-height: 1.6; opacity: 0.9; margin-bottom: 8px; }
+        .ai-list { list-style-type: none; padding-left: 0; }
+        .ai-list li { margin-bottom: 6px; position: relative; padding-left: 16px; }
+        .ai-list li::before { content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
+        
+        @media (max-width: 640px) {
+            #editor-panel { height: 100vh; max-height: 100vh; border-radius: 0; bottom: 0; }
+            .celestial-body { width: 100px; height: 100px; }
+            .orbit-wrapper { bottom: -55vh; } /* Push orbit lower on mobile */
+            #diary-list { padding-left: 0; }
+            #focus-hud { left: 1.5rem; top: 35%; }
+            .hud-day { font-size: 3.5rem; }
+            .timeline-rail-container { left: 6rem; } .timeline-node-wrapper { left: 6rem; } .entry-card-wrapper { padding-left: 7.5rem; }
+        }
+
         .hidden-view { display: none !important; }
-        .active-view { display: block !important; animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
+        .active-view { display: block !important; animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .nav-btn-active { color: var(--text); border-bottom: 2px solid var(--primary); opacity: 1; }
+        .nav-btn-inactive { color: var(--text); border-bottom: 2px solid transparent; opacity: 0.5; }
         
-        /* Tabs */
-        .nav-btn {
-            font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.1em;
-            padding-bottom: 0.5rem; transition: all 0.3s ease; position: relative;
+        #main-container { 
+            scroll-behavior: auto; 
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
         }
-        .nav-btn-active { opacity: 1 !important; color: var(--text); border-bottom: 2px solid var(--text) !important; }
-        .nav-btn-inactive { opacity: 0.5; color: var(--text); border-bottom: 2px solid transparent; }
-        .nav-btn-inactive:hover { opacity: 0.8; }
 
-        /* AI Report */
-        .ai-section { margin-bottom: 1.5rem; border-bottom: 1px dashed var(--line); padding-bottom: 1rem; }
-        .ai-title { font-family: 'Ma Shan Zheng', cursive; font-weight: bold; color: var(--primary); margin-bottom: 0.5rem; font-size: 1.4em; }
-
-        .sketch-stroke { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-        @media print { .no-print { display: none !important; } }
+        .list-placeholder {
+            height: 20vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; color: var(--text);
+            transition: opacity 0.5s ease; pointer-events: none;
+        }
+        .simon-sig { font-family: 'Oswald', sans-serif; font-weight: 300; letter-spacing: 0.1em; opacity: 0.5; font-size: 0.7rem; text-align: center; margin-top: 2rem; color: var(--text-sec); }
     </style>
 </head>
-<body data-theme="day" class="antialiased h-screen overflow-hidden flex flex-col selection:bg-[var(--primary)] selection:text-white">
+<body data-theme="day" class="antialiased h-screen overflow-hidden flex flex-col select-none">
 
     <!-- Particle Canvas -->
     <canvas id="world-canvas"></canvas>
 
-    <!-- Celestial Bodies -->
-    <div id="sun-container" class="celestial-container text-yellow-400 mix-blend-screen" style="top: var(--sun-pos); opacity: var(--sun-opacity);">
-        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_0_30px_rgba(253,224,71,0.6)]">
-             <circle cx="100" cy="100" r="40" fill="currentColor" class="opacity-90" />
-             <g class="sketch-stroke opacity-60">
-                 <line x1="100" y1="40" x2="100" y2="20" />
-                 <line x1="100" y1="160" x2="100" y2="180" />
-                 <line x1="40" y1="100" x2="20" y2="100" />
-                 <line x1="160" y1="100" x2="180" y2="100" />
-                 <line x1="58" y1="58" x2="44" y2="44" />
-                 <line x1="142" y1="142" x2="156" y2="156" />
-                 <line x1="58" y1="142" x2="44" y2="156" />
-                 <line x1="142" y1="58" x2="156" y2="44" />
-             </g>
-        </svg>
-    </div>
-    <div id="moon-container" class="celestial-container text-gray-200 mix-blend-screen" style="top: var(--moon-pos); opacity: var(--moon-opacity);">
-        <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">
-            <path d="M140 40 C 100 40, 60 80, 60 120 C 60 150, 80 175, 110 185 C 80 170, 75 130, 75 100 C 75 70, 100 50, 140 40" fill="currentColor" />
-            <circle cx="120" cy="100" r="2" fill="#94a3b8" class="opacity-50" />
-            <circle cx="100" cy="140" r="3" fill="#94a3b8" class="opacity-30" />
-            <circle cx="90" cy="90" r="1.5" fill="#94a3b8" class="opacity-40" />
-        </svg>
+    <!-- Celestial Orbit System -->
+    <div class="orbit-wrapper">
+        <div class="orbit-wheel" id="orbit-wheel" style="transform: rotate(0deg);">
+            <!-- Sun: Hand-drawn Classical Style with Cute Face -->
+            <div id="sun-container" class="celestial-body text-yellow-400 mix-blend-screen">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_0_50px_rgba(253,224,71,0.8)]">
+                    <!-- Rays: Wavy classical style -->
+                    <g class="sketch-stroke opacity-80" stroke-width="3">
+                        <path d="M100 20 Q110 35 100 50" />
+                        <path d="M100 180 Q90 165 100 150" />
+                        <path d="M20 100 Q35 90 50 100" />
+                        <path d="M180 100 Q165 110 150 100" />
+                        <path d="M40 40 Q55 55 65 65" />
+                        <path d="M160 160 Q145 145 135 135" />
+                        <path d="M40 160 Q55 145 65 135" />
+                        <path d="M160 40 Q145 55 135 65" />
+                    </g>
+                    <!-- Core -->
+                    <circle cx="100" cy="100" r="38" fill="none" stroke="currentColor" stroke-width="3" />
+                    <circle cx="100" cy="100" r="32" fill="currentColor" class="opacity-20" />
+                    <!-- Cute Face -->
+                    <g class="text-yellow-600">
+                        <!-- Eyes -->
+                        <circle cx="88" cy="95" r="3" fill="currentColor" />
+                        <circle cx="112" cy="95" r="3" fill="currentColor" />
+                        <!-- Smile -->
+                        <path d="M90 110 Q100 118 110 110" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <!-- Blush -->
+                        <circle cx="82" cy="105" r="2" fill="currentColor" class="opacity-30" />
+                        <circle cx="118" cy="105" r="2" fill="currentColor" class="opacity-30" />
+                    </g>
+                </svg>
+            </div>
+            <!-- Moon: Sleeping Classical Style -->
+            <div id="moon-container" class="celestial-body text-gray-100 mix-blend-screen" style="filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));">
+                <svg viewBox="0 0 200 200" class="w-full h-full">
+                    <!-- Crescent -->
+                    <path d="M140 40 C 90 40, 50 80, 50 130 C 50 170, 70 190, 90 200 C 50 180, 70 110, 70 90 C 70 60, 100 50, 140 40" 
+                          fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
+                    <!-- Texture -->
+                    <circle cx="85" cy="140" r="4" class="sketch-stroke opacity-20" />
+                    <circle cx="80" cy="80" r="3" class="sketch-stroke opacity-20" />
+                    
+                    <!-- Face: Sleeping -->
+                    <g class="text-gray-400" transform="translate(-10, 10)">
+                        <!-- Closed Eye with lashes -->
+                        <path d="M85 100 Q95 105 105 100" fill="none" stroke="currentColor" stroke-width="2" />
+                        <line x1="95" y1="103" x2="95" y2="108" stroke="currentColor" stroke-width="1" />
+                        <!-- Mouth -->
+                        <path d="M92 120 Q96 122 100 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                        <!-- Zzz (Optional) -->
+                        <path d="M120 80 L130 80 L120 90 L130 90" stroke="currentColor" stroke-width="1.5" fill="none" class="opacity-50" />
+                    </g>
+                </svg>
+            </div>
+        </div>
     </div>
 
     <!-- Header -->
-    <header class="fixed top-0 w-full">
-        <div class="max-w-4xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3 group cursor-default">
-                <div class="w-10 h-10 rounded-full border-2 border-[var(--text)] flex items-center justify-center text-[var(--text)] group-hover:rotate-180 transition-transform duration-700">
-                    <i data-lucide="hourglass" class="w-5 h-5"></i>
+    <header class="fixed top-0 w-full h-16 sm:h-20 flex flex-col justify-center">
+        <div class="max-w-4xl w-full mx-auto px-4 flex items-center justify-between">
+            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer active:scale-95 transition-transform" onclick="UI.openSettings()">
+                <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[var(--text)] flex items-center justify-center text-[var(--text)] relative">
+                    <i data-lucide="settings-2" class="w-4 h-4 sm:w-5 sm:h-5"></i>
                 </div>
-                <h1 class="text-2xl font-bold tracking-[0.2em] font-display uppercase text-[var(--text)] drop-shadow-sm">Timeline</h1>
+                <h1 class="text-xl sm:text-2xl font-bold tracking-[0.15em] font-display uppercase text-[var(--text)] drop-shadow-sm hidden sm:block">Timeline</h1>
             </div>
-            <div class="flex gap-12">
-                <button onclick="UI.switchView('timeline')" id="btn-timeline" class="nav-btn nav-btn-active">TIMELINE</button>
-                <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn nav-btn-inactive">CALENDAR</button>
+            <div class="flex gap-6 sm:gap-12">
+                <button onclick="UI.switchView('timeline')" id="btn-timeline" class="nav-btn nav-btn-active text-sm sm:text-base font-bold pb-1" data-i18n="nav_timeline">TIMELINE</button>
+                <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn nav-btn-inactive text-sm sm:text-base font-bold pb-1" data-i18n="nav_calendar">CALENDAR</button>
             </div>
-            <div class="flex gap-3">
-                 <button onclick="UI.openWeeklySummary()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors" title="The Oracle"><i data-lucide="sparkles" class="w-5 h-5"></i></button>
+            <div class="flex gap-2 items-center">
+                 <button onclick="UI.openInfo()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="info" class="w-5 h-5"></i></button>
+                 <button onclick="UI.openWeeklySummary()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="sparkles" class="w-5 h-5 text-[var(--primary)]"></i></button>
             </div>
         </div>
     </header>
 
+    <!-- Focus HUD -->
+    <div id="focus-hud" class="hidden sm:flex">
+        <div class="hud-day" id="hud-day">--</div>
+        <div class="hud-meta">
+            <span id="hud-month-year">--- ----</span>
+            <span id="hud-time" class="text-[var(--primary)]">--:--</span>
+        </div>
+    </div>
+
     <!-- Main Content -->
-    <main class="flex-1 overflow-y-auto no-scrollbar pt-28 pb-32 scroll-smooth relative z-10" id="main-container">
-        <div class="max-w-4xl mx-auto px-4 relative min-h-screen">
+    <main class="flex-1 overflow-y-auto no-scrollbar pt-20 pb-0 scroll-smooth relative z-10" id="main-container">
+        <div class="max-w-3xl mx-auto px-3 sm:px-4 relative min-h-screen">
             
             <!-- TIMELINE VIEW -->
             <div id="view-timeline" class="active-view relative">
-                <div class="timeline-line border-l-2 border-[var(--line)] opacity-40 border-dashed"></div>
-                <div id="diary-list" class="space-y-12 pb-24 relative z-10"></div>
-                <div class="text-center py-12 opacity-60 font-display tracking-[0.3em] text-xs text-[var(--text)] italic">~ END OF CHRONICLE ~</div>
+                <div class="timeline-rail-container">
+                    <div class="timeline-rail-line"></div>
+                    <div class="timeline-rail-flow"></div>
+                    <div class="micro-ticks"></div>
+                </div>
+                
+                <div id="future-placeholder" class="list-placeholder mt-10">
+                    <i data-lucide="arrow-up" class="w-4 h-4 mb-2"></i>
+                    <span data-i18n="future">Future Unwritten</span>
+                </div>
+
+                <div id="diary-list" class="space-y-24 relative z-10"></div>
+                
+                <div id="origin-placeholder" class="list-placeholder mb-20">
+                    <span data-i18n="origin">The Beginning</span>
+                    <i data-lucide="arrow-down" class="w-4 h-4 mt-2"></i>
+                </div>
             </div>
 
             <!-- CALENDAR VIEW -->
-            <div id="view-calendar" class="hidden-view pb-24">
-                <!-- Calendar Card -->
-                <div class="bg-[var(--card-bg)] rounded-2xl p-8 shadow-xl border border-[var(--line)]/50 backdrop-blur-lg">
-                    <div class="flex justify-between items-center mb-8 border-b border-[var(--line)] pb-6">
-                        <button onclick="UI.changeMonth(-1)" class="p-3 hover:bg-[var(--line)] rounded-full transition-colors"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
-                        <div class="text-center">
-                            <h2 class="text-5xl font-display font-bold text-[var(--primary)] mb-1 drop-shadow-sm" id="cal-month-display">Nov</h2>
-                            <div class="text-xl font-num text-[var(--text-sec)] tracking-widest" id="cal-year-display">2025</div>
+            <div id="view-calendar" class="hidden-view pb-24 pt-4">
+                <div class="bg-[var(--card-bg)] rounded-2xl p-4 sm:p-8 shadow-xl border border-[var(--line)]/50">
+                    <div class="flex justify-between items-center mb-6 border-b border-[var(--line)] pb-4">
+                        <button onclick="UI.changeMonth(-1)" class="p-2 hover:bg-[var(--line)] rounded-full active:scale-90 transition-all"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
+                        <div class="text-center cursor-pointer" onclick="UI.resetCalendarToday()">
+                            <h2 class="text-3xl sm:text-4xl font-display font-bold text-[var(--primary)] mb-1" id="cal-month-display">Nov</h2>
+                            <div class="text-sm sm:text-lg font-num text-[var(--text-sec)] tracking-widest" id="cal-year-display">2025</div>
                         </div>
-                        <button onclick="UI.changeMonth(1)" class="p-3 hover:bg-[var(--line)] rounded-full transition-colors"><i data-lucide="chevron-right" class="w-6 h-6 text-[var(--text)]"></i></button>
+                        <button onclick="UI.changeMonth(1)" class="p-2 hover:bg-[var(--line)] rounded-full active:scale-90 transition-all"><i data-lucide="chevron-right" class="w-6 h-6 text-[var(--text)]"></i></button>
                     </div>
-                    <div class="grid grid-cols-7 gap-4 text-center mb-4 text-xs font-bold font-num text-[var(--text-sec)] uppercase tracking-widest">
-                        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+                    <div class="grid grid-cols-7 gap-2 sm:gap-4 text-center mb-2 text-[10px] sm:text-xs font-bold font-num text-[var(--text-sec)] uppercase tracking-widest">
+                        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
                     </div>
-                    <div class="grid grid-cols-7 gap-4" id="calendar-grid"></div>
+                    <div class="grid grid-cols-7 gap-2 sm:gap-4" id="calendar-grid"></div>
                 </div>
-
-                <!-- Archive List -->
-                <div class="mt-10">
-                    <div class="flex justify-between items-end mb-4 border-b border-[var(--line)] pb-2 px-2">
-                        <h3 class="font-display text-xl font-bold text-[var(--text)] flex items-center gap-2">
-                            <i data-lucide="folder-open" class="w-5 h-5 text-[var(--primary)]"></i> Monthly Archive
+                <div class="mt-8">
+                    <div class="flex justify-between items-center mb-4 px-2">
+                        <h3 class="font-display text-lg font-bold text-[var(--text)] flex items-center gap-2">
+                            <i data-lucide="folder-open" class="w-4 h-4 text-[var(--primary)]"></i> <span data-i18n="archive_title">Archive</span>
                         </h3>
-                        <button onclick="EntryManager.exportMonthMarkdown()" class="text-[10px] font-bold font-num bg-[var(--primary)] text-white px-4 py-1.5 rounded-full shadow hover:shadow-md transition-all uppercase tracking-wide">
-                            Export MD
-                        </button>
+                        <button onclick="DataManager.exportMonthMarkdown()" class="text-[10px] font-bold font-num bg-[var(--primary)] text-white px-3 py-1.5 rounded-full shadow active:scale-95" data-i18n="btn_export">EXPORT MD</button>
                     </div>
                     <div id="month-entries" class="space-y-3"></div>
-                    <div id="month-empty-state" class="hidden text-center py-16 text-[var(--text-sec)]">
-                        <i data-lucide="wind" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
-                        <p class="italic opacity-70">The winds of time have left no trace here.</p>
+                    <div id="month-empty-state" class="hidden text-center py-12 text-[var(--text-sec)]">
+                        <p class="italic opacity-70 text-sm" data-i18n="empty_month">No entries for this period.</p>
                     </div>
                 </div>
             </div>
@@ -267,142 +357,249 @@
     </main>
 
     <!-- FAB -->
-    <button onclick="UI.openEditor()" class="fab-btn fixed bottom-10 right-8 w-16 h-16 bg-[var(--primary)] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[rgba(255,255,255,0.2)] backdrop-blur-sm">
-        <i data-lucide="pen-tool" class="w-7 h-7"></i>
+    <button onclick="UI.openEditor()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 sm:w-16 sm:h-16 bg-[var(--primary)] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[rgba(255,255,255,0.2)] backdrop-blur-sm z-40 active:scale-90 transition-transform">
+        <i data-lucide="pen-tool" class="w-6 h-6 sm:w-7 sm:h-7"></i>
     </button>
 
-    <!-- Dialog Modal -->
-    <div id="dialog-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[10001]">
-        <div class="bg-[var(--card-bg)] w-full max-w-sm rounded-2xl shadow-2xl border border-[var(--line)] p-8 text-center relative">
-            <div id="dialog-icon" class="mb-4 flex justify-center text-[var(--primary)]"></div>
-            <h3 id="dialog-title" class="font-display font-bold text-2xl mb-2 text-[var(--text)]"></h3>
-            <p id="dialog-msg" class="text-[var(--text-sec)] text-sm mb-8 font-serif leading-relaxed"></p>
-            <div class="flex justify-center gap-4" id="dialog-actions"></div>
-        </div>
-    </div>
-
     <!-- Editor Modal -->
-    <div id="editor-modal" class="modal-overlay fixed inset-0 hidden">
-        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm transition-opacity" onclick="UI.closeEditor()"></div>
-        <div class="modal-content absolute bottom-0 left-0 w-full sm:max-w-2xl sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 rounded-t-3xl sm:rounded-2xl p-8 shadow-2xl transform translate-y-full transition-transform duration-500 border border-[var(--line)] flex flex-col max-h-[85vh]" id="editor-panel">
-            <div class="flex justify-between items-center mb-6 border-b border-[var(--line)]/50 pb-4">
-                <div class="flex items-center gap-3">
-                    <input type="date" id="editor-date" class="bg-transparent font-num text-sm outline-none text-[var(--text)] border border-[var(--line)] rounded-md px-3 py-1.5 hover:border-[var(--primary)] transition-colors">
-                    <input type="time" id="editor-time" class="bg-transparent font-num text-sm outline-none text-[var(--text)] border border-[var(--line)] rounded-md px-3 py-1.5 hover:border-[var(--primary)] transition-colors">
+    <div id="editor-modal" class="modal-overlay fixed inset-0 hidden z-50">
+        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="UI.closeEditor()"></div>
+        <div class="modal-content absolute bottom-0 w-full sm:max-w-2xl sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:rounded-2xl shadow-2xl transform translate-y-full flex flex-col" id="editor-panel">
+            <div class="flex justify-between items-center p-4 sm:p-6 border-b border-[var(--line)]/50 bg-[var(--bg)]/50">
+                <div class="flex items-center gap-2">
+                    <button onclick="UI.closeEditor()" class="p-2 -ml-2 sm:hidden text-[var(--text-sec)]"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                    <input type="date" id="editor-date" class="bg-transparent font-num text-sm font-bold outline-none text-[var(--text)] border-none p-0">
+                    <input type="time" id="editor-time" class="bg-transparent font-num text-sm outline-none text-[var(--text-sec)] border-none">
                 </div>
-                <button onclick="EntryManager.saveFromEditor()" class="bg-[var(--primary)] text-white px-6 py-2 rounded-full font-bold font-num text-xs shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all tracking-wide">SAVE MEMORY</button>
+                <button onclick="DataManager.saveFromEditor()" class="text-[var(--primary)] font-bold font-num text-sm uppercase tracking-wider px-2 py-1" data-i18n="btn_save">Save</button>
             </div>
-            
-            <input type="hidden" id="editor-id">
-
-            <div class="flex gap-6 mb-6 overflow-x-auto pb-2 no-scrollbar items-center">
-                <div class="flex gap-2 p-1.5 bg-[var(--line)]/20 rounded-lg border border-[var(--line)]/30 shrink-0">
-                    <button onclick="UI.selectMood('smile')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button>
-                    <button onclick="UI.selectMood('meh')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button>
-                    <button onclick="UI.selectMood('frown')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button>
-                    <button onclick="UI.selectMood('heart')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="mood-heart"><i data-lucide="heart" class="w-5 h-5"></i></button>
+            <div class="p-4 sm:p-8 flex-1 overflow-y-auto flex flex-col">
+                <input type="hidden" id="editor-id">
+                <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl sm:text-3xl font-bold mb-6 outline-none placeholder-[var(--text-sec)]/40 text-[var(--text)] font-display">
+                <div class="flex gap-4 mb-6 overflow-x-auto no-scrollbar">
+                    <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
+                        <button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button>
+                        <button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button>
+                        <button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button>
+                    </div>
+                    <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
+                        <button onclick="UI.selectWeather('sun')" class="weather-btn p-2 rounded" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button>
+                        <button onclick="UI.selectWeather('cloud')" class="weather-btn p-2 rounded" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button>
+                        <button onclick="UI.selectWeather('rain')" class="weather-btn p-2 rounded" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
+                    </div>
                 </div>
-                <div class="flex gap-2 p-1.5 bg-[var(--line)]/20 rounded-lg border border-[var(--line)]/30 shrink-0">
-                    <button onclick="UI.selectWeather('sun')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button>
-                    <button onclick="UI.selectWeather('cloud')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button>
-                    <button onclick="UI.selectWeather('rain')" class="selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
+                <div id="editor-content" contenteditable="true" class="flex-1 w-full outline-none text-lg leading-relaxed text-[var(--text)] font-serif min-h-[150px] empty:before:content-[attr(placeholder)] empty:before:text-[var(--text-sec)]/40" placeholder="Write your story here..."></div>
+                <div id="image-preview-area" class="mt-4 hidden">
+                    <img id="preview-img" class="max-h-32 rounded-lg shadow-md border border-[var(--line)]">
+                    <button onclick="UI.clearImage()" class="text-xs text-red-500 mt-1 font-bold uppercase">Remove Image</button>
                 </div>
             </div>
-            <input id="editor-title" type="text" placeholder="Title of your story..." class="w-full bg-transparent text-3xl font-bold mb-4 outline-none placeholder-[var(--text-sec)]/30 text-[var(--text)] font-display border-b border-transparent focus:border-[var(--line)] pb-2 transition-colors">
-            
-            <div id="editor-content" contenteditable="true" class="flex-1 w-full outline-none text-lg leading-loose text-[var(--text)] font-serif overflow-y-auto min-h-[200px] p-4 border border-[var(--line)]/30 focus:border-[var(--line)] rounded-xl transition-colors bg-[var(--bg)]/10" placeholder="What happened today?"></div>
-            
-            <div class="flex gap-2 mt-4 pt-2 border-t border-[var(--line)]/30">
-                 <button class="toolbar-btn hover:bg-[var(--line)]/20 p-2 rounded" onmousedown="event.preventDefault(); UI.execCmd('bold')"><i data-lucide="bold" class="w-4 h-4"></i></button>
-                <button class="toolbar-btn hover:bg-[var(--line)]/20 p-2 rounded" onmousedown="event.preventDefault(); UI.execCmd('italic')"><i data-lucide="italic" class="w-4 h-4"></i></button>
-                <button class="toolbar-btn hover:bg-[var(--line)]/20 p-2 rounded" onmousedown="event.preventDefault(); UI.execCmd('insertUnorderedList')"><i data-lucide="list" class="w-4 h-4"></i></button>
-                <div class="w-px bg-[var(--line)] mx-2 h-6 self-center"></div>
-                <button class="toolbar-btn text-[var(--primary)] hover:bg-[var(--primary)]/10 p-2 rounded" onmousedown="event.preventDefault(); UI.triggerImageUpload()"><i data-lucide="image" class="w-4 h-4"></i></button>
+            <div class="p-3 border-t border-[var(--line)]/30 bg-[var(--bg)]/50 flex gap-4 items-center justify-between sm:justify-start">
+                 <div class="flex gap-2">
+                     <button class="p-2 rounded hover:bg-[var(--line)]/20 text-[var(--text-sec)]" onmousedown="event.preventDefault(); UI.execCmd('bold')"><i data-lucide="bold" class="w-5 h-5"></i></button>
+                     <button class="p-2 rounded hover:bg-[var(--line)]/20 text-[var(--text-sec)]" onmousedown="event.preventDefault(); UI.execCmd('italic')"><i data-lucide="italic" class="w-5 h-5"></i></button>
+                 </div>
+                 <button class="p-2 rounded text-[var(--primary)] bg-[var(--primary)]/10" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-5 h-5"></i></button>
             </div>
             <input type="file" id="image-input" accept="image/*" class="hidden" onchange="UI.handleImageUpload(this)">
         </div>
     </div>
 
     <!-- Detail Modal -->
-    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm" onclick="UI.closeDetail()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[90vh] border border-[var(--line)]">
-            <div class="p-10 overflow-y-auto no-scrollbar flex-1">
-                <div class="flex justify-between items-start mb-8 border-b border-[var(--line)]/50 pb-6">
-                    <div>
-                        <h2 class="text-4xl font-bold font-display text-[var(--text)] leading-tight drop-shadow-sm" id="detail-title"></h2>
-                        <div class="flex gap-4 mt-3 font-num text-sm text-[var(--text-sec)] tracking-widest items-center uppercase">
-                            <span id="detail-date"></span> <span class="text-[var(--line)]">|</span> <span id="detail-time" class="text-[var(--primary)] font-bold"></span>
-                            <div id="detail-meta" class="flex gap-3 ml-2 opacity-80 bg-[var(--line)]/20 px-3 py-1 rounded-full"></div>
-                        </div>
-                    </div>
-                    <button onclick="UI.closeDetail()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text-sec)] transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--line)] transition-all animate-in zoom-in-95 duration-300">
+            <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl sm:text-3xl font-bold font-display text-[var(--text)] leading-tight" id="detail-title"></h2>
+                    <button onclick="UI.closeDetail()" class="p-1 bg-[var(--line)]/20 rounded-full"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button>
                 </div>
-                <div id="detail-content" class="text-xl leading-loose text-[var(--text)] font-serif prose prose-lg max-w-none"></div>
+                <div class="flex gap-3 mb-6 text-xs font-num text-[var(--text-sec)] uppercase tracking-widest items-center">
+                    <span id="detail-date"></span> <span class="text-[var(--primary)]" id="detail-time"></span>
+                    <div id="detail-icons" class="flex gap-2 ml-auto text-[var(--text)]"></div>
+                </div>
+                <div id="detail-image-container" class="mb-6 hidden">
+                    <img id="detail-image" class="w-full rounded-xl shadow-md object-cover max-h-64">
+                </div>
+                <div id="detail-content" class="text-lg leading-loose text-[var(--text)] font-serif opacity-90"></div>
             </div>
-            
-            <div class="p-6 border-t border-[var(--line)] bg-[var(--bg)]/30 flex justify-end gap-4 backdrop-blur-sm">
-                <button onclick="UI.editCurrentEntry()" class="flex items-center gap-2 px-6 py-2.5 bg-white/50 border border-[var(--line)] rounded-full text-xs font-bold text-[var(--text)] hover:text-[var(--primary)] hover:border-[var(--primary)] uppercase tracking-widest transition-all shadow-sm">
-                    <i data-lucide="edit" class="w-3 h-3"></i> Edit
-                </button>
-                <button onclick="UI.deleteCurrentEntry()" class="flex items-center gap-2 px-6 py-2.5 bg-red-50/50 border border-red-200 rounded-full text-xs font-bold text-red-500 hover:bg-red-500 hover:text-white uppercase tracking-widest transition-all shadow-sm">
-                    <i data-lucide="trash" class="w-3 h-3"></i> Delete
-                </button>
+            <div class="p-4 border-t border-[var(--line)]/30 flex justify-between bg-[var(--card-bg)]/50">
+                <button onclick="UI.confirmDeleteEntry()" class="text-red-500 p-2 flex gap-2 items-center"><i data-lucide="trash-2" class="w-5 h-5"></i> <span class="text-xs font-bold uppercase" data-i18n="btn_delete">Delete</span></button>
+                <button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] p-2 flex gap-2 items-center"><span class="text-xs font-bold uppercase" data-i18n="btn_edit">Edit</span> <i data-lucide="edit-3" class="w-5 h-5"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- AI Summary Modal (Fortune Teller) -->
-    <div id="summary-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center px-4">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeWeeklySummary()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)]" id="summary-card">
-            <div class="h-48 bg-[var(--primary)] relative overflow-hidden flex items-center px-10">
-                 <div class="absolute inset-0 opacity-30 mix-blend-multiply bg-[url('https://www.transparenttextures.com/patterns/aged-paper.png')]"></div>
-                 <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/30"></div>
-                <div class="text-white z-10 relative w-full">
-                    <div class="text-xs font-num opacity-80 uppercase tracking-[0.3em] mb-2">Oracle Insights</div>
-                    <h2 class="text-4xl font-display font-bold drop-shadow-md">命运指引</h2>
-                    <button onclick="UI.closeWeeklySummary()" class="absolute top-0 right-0 text-white/70 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center animate-in zoom-in-95 duration-200">
+            <div class="mx-auto w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
+                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[var(--text)] mb-2" data-i18n="delete_title">Delete Memory?</h3>
+            <p class="text-sm text-[var(--text-sec)] mb-6" data-i18n="delete_desc">This action cannot be undone.</p>
+            <div class="flex gap-3 justify-center">
+                <button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold" data-i18n="btn_cancel">Cancel</button>
+                <button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold shadow-md hover:bg-red-600" data-i18n="btn_delete">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info / Settings Modal -->
+    <div id="info-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[65]">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeInfo()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)] animate-in slide-in-from-bottom-10 duration-300">
+            <div class="bg-[var(--text)] p-4 text-[var(--card-bg)] flex justify-between items-center">
+                <h2 class="font-display font-bold text-lg" data-i18n="info_title">About Timeline</h2>
+                <button onclick="UI.closeInfo()"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-6 text-[var(--text)]">
+                <div class="flex justify-center gap-4 border-b border-[var(--line)] pb-4">
+                    <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-en">English</button>
+                    <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-zh">中文</button>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="hourglass" class="w-4 h-4"></i> <span data-i18n="timeline_title">Timeline Flow</span></h3>
+                        <p class="text-sm opacity-80 leading-relaxed" data-i18n="timeline_desc">Fluid perspective journal.</p>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-[var(--primary)] mb-1 flex items-center gap-2"><i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="ai_title">AI Oracle</span></h3>
+                        <p class="text-sm opacity-80 leading-relaxed" data-i18n="ai_desc">Fortune teller.</p>
+                    </div>
+                </div>
+                <div class="simon-sig pt-4 border-t border-[var(--line)]">developed by simon</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Settings Modal -->
+    <div id="settings-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[60]">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeSettings()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)] animate-in slide-in-from-bottom-10 duration-300">
+            <div class="bg-[var(--text)] p-4 text-[var(--card-bg)] flex justify-between items-center">
+                <h2 class="font-display font-bold text-lg" data-i18n="data_title">Data Management</h2>
+                <button onclick="UI.closeSettings()"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-6">
+                <div class="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--line)]">
+                    <h4 class="text-xs font-bold uppercase text-[var(--text-sec)] mb-2" data-i18n="storage_title">Storage Usage</h4>
+                    <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden">
+                        <div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-num text-[var(--text)]">
+                        <span id="entry-count">0 Entries</span>
+                        <span id="storage-size">0 KB / 5 MB</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-4 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors">
+                        <i data-lucide="download" class="w-6 h-6 text-[var(--primary)]"></i><span class="text-xs font-bold" data-i18n="btn_backup">Backup Data</span>
+                    </button>
+                    <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-4 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors">
+                        <i data-lucide="upload" class="w-6 h-6 text-[var(--primary)]"></i><span class="text-xs font-bold" data-i18n="btn_restore">Restore Data</span>
+                    </button>
+                </div>
+                <input type="file" id="import-input" accept=".json" class="hidden" onchange="DataManager.importBackup(this)">
+                <div class="pt-4 border-t border-[var(--line)]">
+                    <button onclick="DataManager.nukeData()" class="w-full py-3 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors" data-i18n="btn_reset">Reset All Data</button>
                 </div>
             </div>
-            <div class="p-8 text-[var(--text)] max-h-[60vh] overflow-y-auto space-y-6 scroll-smooth">
-                
-                <!-- Config Section -->
-                <div id="fortune-config" class="mb-4">
-                    <div class="p-4 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl space-y-3">
-                        <div>
-                             <label class="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider mb-1">你的星座 (Zodiac)</label>
-                             <input type="text" id="user-zodiac" class="w-full bg-white/80 p-2 px-3 border border-[var(--line)] text-sm rounded-lg focus:ring-1 focus:ring-[var(--primary)] outline-none" placeholder="例如: 天蝎座 / Scorpio">
-                        </div>
-                        <div>
-                             <label class="block text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider mb-1">八字/生日 (BaZi/DOB)</label>
-                             <input type="text" id="user-bazi" class="w-full bg-white/80 p-2 px-3 border border-[var(--line)] text-sm rounded-lg focus:ring-1 focus:ring-[var(--primary)] outline-none" placeholder="例如: 1995年5月20日 早上8点">
-                        </div>
-                        <div class="pt-2 flex gap-2">
-                             <button onclick="UI.saveProfileAndAnalyze()" class="flex-1 bg-[var(--primary)] text-white px-4 py-2 text-sm font-bold rounded-lg shadow hover:bg-opacity-90 transition-all flex items-center justify-center gap-2">
-                                 <i data-lucide="sparkles" class="w-4 h-4"></i> 开始解读
-                             </button>
-                        </div>
-                    </div>
-                    <!-- API Key (Hidden by default unless empty) -->
-                     <div class="mt-4 text-center">
-                         <input type="password" id="user-api-key" class="text-xs text-center bg-transparent border-b border-[var(--line)] outline-none w-1/2 opacity-50 hover:opacity-100 transition-opacity" placeholder="API Key (Optional)">
-                     </div>
-                </div>
+        </div>
+    </div>
 
-                <div id="summary-ai-content" class="space-y-6 text-sm leading-relaxed font-serif opacity-90">
-                    <div class="text-center text-[var(--text-sec)] italic py-4">
-                        请输入您的星座或生日，让 AI 结合日记为您揭示运势。
+    <!-- Oracle Modal -->
+    <div id="summary-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[60]">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeWeeklySummary()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)]">
+            <div class="bg-[var(--primary)] p-6 text-white relative overflow-hidden">
+                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
+                <h2 class="text-2xl font-display font-bold relative z-10" data-i18n="ai_title">AI Oracle</h2>
+                <p class="text-xs opacity-80 relative z-10">AI Summary & Fortune</p>
+                <button onclick="UI.closeWeeklySummary()" class="absolute top-4 right-4 text-white/80"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_zodiac">Zodiac</label>
+                        <input type="text" id="user-zodiac" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="e.g. Scorpio">
+                    </div>
+                    <div>
+                        <label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_birth">Birth Date</label>
+                        <input type="text" id="user-bazi" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="YYYY-MM-DD">
                     </div>
                 </div>
+                <button onclick="UI.generateReport()" class="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-transform" data-i18n="btn_consult">Consult the Stars</button>
+                <div id="summary-ai-content" class="text-sm leading-relaxed font-serif border-t border-[var(--line)] pt-4 mt-4 empty:hidden"></div>
+                <div class="mt-2 border-t border-[var(--line)] pt-2">
+                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key (Optional override)">
+                </div>
+                <div class="simon-sig pt-4 border-t border-[var(--line)]">developed by simon</div>
             </div>
         </div>
     </div>
 
     <script>
-        const DEFAULT_API_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
+        const I18N = {
+            en: {
+                timeline_title: "Timeline Flow",
+                timeline_desc: "A fluid, perspective-based journal that mimics the flow of time. Scroll through your memories with a 3D depth effect, where the central moment comes into focus.",
+                ai_title: "AI Oracle",
+                ai_desc: "Click the sparkles to summon the Oracle. It analyzes your last 7 days, extracts clear goals, and uses your birth data to provide astrological guidance.",
+                future: "Future Unwritten",
+                origin: "The Beginning",
+                nav_timeline: "TIMELINE",
+                nav_calendar: "CALENDAR",
+                info_title: "About Timeline",
+                data_title: "Data Management",
+                storage_title: "Storage Usage",
+                btn_backup: "Backup Data",
+                btn_restore: "Restore Data",
+                btn_reset: "Reset All Data",
+                btn_save: "Save",
+                btn_delete: "Delete",
+                btn_cancel: "Cancel",
+                btn_edit: "Edit",
+                btn_export: "EXPORT MD",
+                btn_consult: "Consult the Stars",
+                label_zodiac: "Zodiac",
+                label_birth: "Birth Date",
+                archive_title: "Archive",
+                empty_month: "No entries for this period.",
+                delete_title: "Delete Memory?",
+                delete_desc: "This action cannot be undone."
+            },
+            zh: {
+                timeline_title: "时光流",
+                timeline_desc: "一个模仿时间流动的透视日记本。通过3D景深效果滚动记忆，让每一个当下的瞬间成为焦点。",
+                ai_title: "AI 预言家",
+                ai_desc: "点击星光按钮召唤先知。AI 将总结你过去7天的故事，提取清晰的目标清单，并结合你的生辰给出星象指引。",
+                future: "未来篇章",
+                origin: "起源之时",
+                nav_timeline: "时间轴",
+                nav_calendar: "日历",
+                info_title: "关于时光流",
+                data_title: "数据管理",
+                storage_title: "存储空间",
+                btn_backup: "备份数据",
+                btn_restore: "恢复数据",
+                btn_reset: "重置所有数据",
+                btn_save: "保存回忆",
+                btn_delete: "删除",
+                btn_cancel: "取消",
+                btn_edit: "编辑",
+                btn_export: "导出 MD",
+                btn_consult: "开启命理推演",
+                label_zodiac: "你的星座",
+                label_birth: "出生日期/八字",
+                archive_title: "归档",
+                empty_month: "这段时间没有记录。",
+                delete_title: "删除这段回忆？",
+                delete_desc: "此操作无法撤销。"
+            }
+        };
 
-        // --- Particle System ---
         const ParticleSystem = {
             canvas: null, ctx: null, particles: [], width: 0, height: 0, theme: 'day', running: false,
             init: function() {
@@ -415,13 +612,20 @@
                 this.canvas.width = this.width; this.canvas.height = this.height;
             },
             createParticles: function() {
-                this.particles = []; const count = this.width < 600 ? 20 : 40;
+                this.particles = []; const count = this.width < 600 ? 25 : 45;
                 for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height));
             },
             setTheme: function(theme) { this.theme = theme; },
             animate: function() {
                 if(!this.running) return;
                 this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                if (this.theme === 'day') {
+                     this.ctx.globalCompositeOperation = 'overlay'; // Tyndall effect logic
+                } else {
+                     this.ctx.globalCompositeOperation = 'source-over';
+                }
+                
                 this.particles.forEach(p => { p.update(this.width, this.height, this.theme); p.draw(this.ctx, this.theme); });
                 requestAnimationFrame(() => this.animate());
             }
@@ -431,302 +635,205 @@
             constructor(w, h) { this.init(w, h); }
             init(w, h) {
                 this.x = Math.random() * w; this.y = Math.random() * h;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2;
-                this.opacity = Math.random() * 0.5 + 0.1; this.blinkPhase = Math.random() * Math.PI * 2;
-                this.twinkleSpeed = Math.random() * 0.03 + 0.005;
-                this.angle = -30 * (Math.PI / 180); this.rayLength = Math.random() * 400 + 200; this.rayWidth = Math.random() * 40 + 10;
+                this.size = Math.random() * 2 + 0.5; 
+                this.speedX = (Math.random() - 0.5) * 0.15; // Slowed down
+                this.speedY = (Math.random() - 0.5) * 0.15;
+                this.opacity = Math.random() * 0.4 + 0.1; 
+                
+                // Tyndall Ray Properties
+                this.beamWidth = Math.random() * 80 + 40;
+                this.beamHeight = Math.random() * 400 + 200;
+                this.beamAngle = 20 * (Math.PI / 180); // Fixed angle for rays
             }
             update(w, h, theme) {
-                if (theme === 'night') { this.blinkPhase += this.twinkleSpeed; } 
-                else {
-                    this.x += this.speedX; this.y += this.speedY;
-                    if(this.x < -200) this.x = w + 200; if(this.x > w + 200) this.x = -200;
-                    if(this.y < -200) this.y = h + 200; if(this.y > h + 200) this.y = -200;
+                if (theme === 'day') {
+                    // Day: Rays drift slowly across
+                    this.x += 0.2;
+                    this.y += 0.1;
+                } else {
+                    // Night: Stars twinkle
+                    this.opacity += (Math.random() - 0.5) * 0.02;
+                    if(this.opacity < 0.1) this.opacity = 0.1;
+                    if(this.opacity > 0.8) this.opacity = 0.8;
+                    this.x += this.speedX * 0.5; 
                 }
+
+                if(this.x < -200) this.x = w + 200; if(this.x > w + 200) this.x = -200;
+                if(this.y < -200) this.y = h + 200; if(this.y > h + 200) this.y = -200;
             }
             draw(ctx, theme) {
-                if (theme === 'night') {
-                    let opacity = (Math.sin(this.blinkPhase) + 1) / 2 * 0.8; 
-                    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
-                    ctx.beginPath(); ctx.arc(this.x, this.y, this.size * 0.8, 0, Math.PI * 2); ctx.fill();
-                } else if (theme === 'day') {
-                    ctx.save(); ctx.translate(this.x, this.y); ctx.rotate(this.angle);
-                    let grad = ctx.createLinearGradient(0, 0, this.rayLength, 0);
+                ctx.beginPath();
+                if (theme === 'day') {
+                    // Draw Tyndall Beam (Trapezoid-ish via Gradient)
+                    ctx.save();
+                    ctx.translate(this.x, this.y);
+                    ctx.rotate(this.beamAngle);
+                    let grad = ctx.createLinearGradient(0, 0, 0, this.beamHeight);
                     grad.addColorStop(0, `rgba(255, 255, 255, 0)`);
-                    grad.addColorStop(0.2, `rgba(255, 255, 255, 0.08)`);
-                    grad.addColorStop(0.8, `rgba(255, 255, 255, 0.08)`);
+                    grad.addColorStop(0.5, `rgba(255, 255, 255, ${this.opacity * 0.15})`); // Very subtle
                     grad.addColorStop(1, `rgba(255, 255, 255, 0)`);
-                    ctx.fillStyle = grad; ctx.fillRect(0, -this.rayWidth/2, this.rayLength, this.rayWidth); ctx.restore();
+                    ctx.fillStyle = grad;
+                    ctx.fillRect(-this.beamWidth/2, 0, this.beamWidth, this.beamHeight);
+                    ctx.restore();
                 } else {
-                    ctx.beginPath(); ctx.fillStyle = `rgba(255, 220, 150, 0.3)`;
-                    ctx.arc(this.x, this.y, this.size * 1.5, 0, Math.PI * 2); ctx.fill();
+                    // Draw Star
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    ctx.arc(this.x, this.y, this.size * 1.2, 0, Math.PI * 2);
+                    ctx.fill();
                 }
             }
         }
 
-        // --- Database Layer ---
-        const EntryManager = {
-            data: [],
-            init: function() {
-                try {
-                    const stored = localStorage.getItem('timeline_entries');
-                    this.data = stored ? JSON.parse(stored) : [];
-                    if (this.data.length === 0) {
-                        this.add({
-                            title: "A New Beginning",
-                            content: "Welcome to your timeline. The journey starts here.",
-                            mood: "smile", weather: "sun",
-                            ts: Date.now(), h: 12, m: 0
-                        });
-                    }
-                } catch(e) { console.error("DB Init failed", e); this.data = []; }
-            },
-            saveToDisk: function() { localStorage.setItem('timeline_entries', JSON.stringify(this.data)); UI.refreshAll(); },
+        // ... DataManager (No changes needed) ...
+        const DataManager = {
+            key: 'timeline_entries', data: [],
+            init: function() { try { const s = localStorage.getItem(this.key); this.data = s ? JSON.parse(s) : []; if(!this.data.length) this.seedData(); } catch(e){ this.data = []; } this.updateStats(); },
+            seedData: function() { this.add({ title: "The Beginning", content: "My chronicle starts here.", mood: "smile", weather: "sun", ts: Date.now(), h: 9 }); },
             getAll: function() { return this.data; },
             getById: function(id) { return this.data.find(e => String(e.id) === String(id)); },
-            add: function(entry) { entry.id = Date.now(); this.data.unshift(entry); this.saveToDisk(); return entry; },
-            update: function(id, updates) { const idx = this.data.findIndex(e => String(e.id) === String(id)); if (idx !== -1) { this.data[idx] = { ...this.data[idx], ...updates }; this.saveToDisk(); } },
-            delete: function(id) {
-                const beforeCount = this.data.length; this.data = this.data.filter(e => String(e.id) !== String(id));
-                if(this.data.length !== beforeCount) { this.saveToDisk(); return true; } return false;
-            },
+            add: function(entry) { entry.id = Date.now(); this.data.unshift(entry); this.persist(); return entry; },
+            update: function(id, updates) { const idx = this.data.findIndex(e => String(e.id) === String(id)); if (idx !== -1) { this.data[idx] = { ...this.data[idx], ...updates }; this.persist(); } },
+            delete: function(id) { const initialLen = this.data.length; this.data = this.data.filter(e => String(e.id) !== String(id)); if(this.data.length !== initialLen) { this.persist(); return true; } return false; },
+            persist: function() { try { localStorage.setItem(this.key, JSON.stringify(this.data)); this.updateStats(); UI.refreshAll(); } catch (e) { alert("Storage Full!"); } },
             saveFromEditor: function() {
-                const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value;
-                const c = document.getElementById('editor-content').innerHTML; const d = document.getElementById('editor-date').value;
-                const tm = document.getElementById('editor-time').value; let thumb = null;
-                const wrapper = document.createElement('div'); wrapper.innerHTML = c; const imgEl = wrapper.querySelector('img'); if(imgEl) thumb = imgEl.src;
-                if(t && d && tm) {
-                    const [y,m,day] = d.split('-').map(Number); const [hr,min] = tm.split(':').map(Number); const ts = new Date(y,m-1,day,hr,min).getTime();
-                    const payload = { ts, h: hr, m: min, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: thumb };
-                    if (id) { this.update(id, payload); } else { this.add(payload); } UI.closeEditor();
-                } else { UI.showDialog('alert', 'Incomplete', 'Please fill in a Title and Date.', null); }
+                const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value; const c = document.getElementById('editor-content').innerHTML; const d = document.getElementById('editor-date').value; const tm = document.getElementById('editor-time').value; const img = UI.state.tempImage;
+                if(t && d) { const [y,m,day] = d.split('-').map(Number); const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; const ts = new Date(y,m-1,day,hr,min).getTime(); const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: img };
+                if (id) this.update(id, payload); else this.add(payload); UI.closeEditor(); } else { alert('Title and Date required'); }
             },
-            exportMonthMarkdown: function() {
-                const y = UI.state.calendarDate.getFullYear(); const m = UI.state.calendarDate.getMonth();
-                const entries = this.data.filter(e => { const d = new Date(e.ts); return d.getFullYear() === y && d.getMonth() === m; }).sort((a,b) => a.ts - b.ts);
-                if(entries.length === 0) { UI.showDialog('alert', 'Empty', "No entries to export for this month.", null); return; }
-                let md = `# Journal Archive - ${y}/${m+1}\n\n`;
-                entries.forEach(e => {
-                    const dt = new Date(e.ts); let content = e.content.replace(/<img[^>]*src="([^"]*)"[^>]*>/g, '![Image]($1)\n').replace(/<[^>]+>/g, ''); 
-                    md += `## ${e.title}\n> ${dt.toLocaleString()} | Mood: ${e.mood}\n\n${content}\n\n---\n\n`;
-                });
-                const dataStr = "data:text/markdown;charset=utf-8," + encodeURIComponent(md); const dlNode = document.createElement('a');
-                dlNode.setAttribute("href", dataStr); dlNode.setAttribute("download", `Journal_${y}_${m+1}.md`); document.body.appendChild(dlNode); dlNode.click(); dlNode.remove();
-            }
+            exportBackup: function() { const b = new Blob([JSON.stringify(this.data, null, 2)], {type: 'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `timeline_backup.json`; a.click(); URL.revokeObjectURL(u); },
+            importBackup: function(input) { if(input.files[0]) { const r = new FileReader(); r.onload = (e) => { try { const i = JSON.parse(e.target.result); if(Array.isArray(i) && confirm(`Import ${i.length} entries?`)) { this.data = i; this.persist(); alert("Restored!"); UI.closeSettings(); } } catch(err) { alert("Invalid JSON"); } }; r.readAsText(input.files[0]); } input.value = ''; },
+            exportMonthMarkdown: function() { const y = UI.state.calendarDate.getFullYear(), m = UI.state.calendarDate.getMonth(); const e = this.data.filter(i => { const d = new Date(i.ts); return d.getFullYear() === y && d.getMonth() === m; }); if(!e.length) return alert("No entries."); let md = `# Archive ${y}-${m+1}\n\n` + e.map(i => `## ${i.title}\n${new Date(i.ts).toLocaleString()}\n\n${i.content.replace(/<[^>]*>/g, '')}\n---`).join('\n\n'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], {type: 'text/markdown'})); a.download = `Journal_${y}_${m+1}.md`; a.click(); },
+            nukeData: function() { if(confirm("Delete ALL data?")) { this.data = []; this.persist(); UI.closeSettings(); } },
+            updateStats: function() { const u = JSON.stringify(this.data).length; const m = 5 * 1024 * 1024; document.getElementById('storage-bar').style.width = `${Math.min((u / m) * 100, 100)}%`; document.getElementById('storage-size').innerText = `${(u/1024).toFixed(1)} KB / 5 MB`; document.getElementById('entry-count').innerText = `${this.data.length} Entries`; }
         };
 
-        // --- UI Layer ---
         const UI = {
-            state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null },
+            state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0 },
             init: function() {
-                lucide.createIcons(); ParticleSystem.init(); this.refreshAll(); this.initThemeObserver();
-                let k = localStorage.getItem('gemini_api_key');
-                if(!k) { k = DEFAULT_API_KEY; localStorage.setItem('gemini_api_key', k); }
-                document.getElementById('user-api-key').value = k;
-                
-                // Load User Profile
-                const z = localStorage.getItem('user_zodiac'); if(z) document.getElementById('user-zodiac').value = z;
-                const b = localStorage.getItem('user_bazi'); if(b) document.getElementById('user-bazi').value = b;
+                DataManager.init(); ParticleSystem.init(); lucide.createIcons(); this.initScrollObserver(); this.refreshAll();
+                if(localStorage.getItem('user_zodiac')) document.getElementById('user-zodiac').value = localStorage.getItem('user_zodiac');
+                if(localStorage.getItem('user_bazi')) document.getElementById('user-bazi').value = localStorage.getItem('user_bazi');
+                if(localStorage.getItem('app_lang')) this.setLanguage(localStorage.getItem('app_lang'));
+                this.updateCelestialPosition(12);
             },
             refreshAll: function() { this.renderTimeline(); this.renderCalendar(); },
-            
-            showDialog: function(type, title, msg, onConfirm) {
-                const el = document.getElementById('dialog-modal');
-                document.getElementById('dialog-title').innerText = title; document.getElementById('dialog-msg').innerText = msg;
-                const actions = document.getElementById('dialog-actions'); actions.innerHTML = '';
-                const icon = document.getElementById('dialog-icon');
-                icon.innerHTML = type === 'confirm' ? '<i data-lucide="alert-triangle" class="w-10 h-10"></i>' : '<i data-lucide="info" class="w-10 h-10"></i>';
-                const btnCancel = document.createElement('button');
-                btnCancel.className = "px-5 py-2 rounded-full border border-[var(--line)] text-[var(--text)] text-xs font-bold hover:bg-[var(--line)] transition-colors";
-                btnCancel.innerText = type === 'confirm' ? "CANCEL" : "CLOSE"; btnCancel.onclick = () => el.classList.add('hidden'); actions.appendChild(btnCancel);
-                if(type === 'confirm') {
-                    const btnOk = document.createElement('button');
-                    btnOk.className = "px-5 py-2 rounded-full bg-red-500 text-white text-xs font-bold hover:bg-red-600 transition-colors shadow-lg";
-                    btnOk.innerText = "DELETE";
-                    btnOk.onclick = () => { if(onConfirm) onConfirm(); el.classList.add('hidden'); }; actions.appendChild(btnOk);
-                }
-                lucide.createIcons(); el.classList.remove('hidden');
-            },
             switchView: function(v) {
-                const tl = document.getElementById('view-timeline'); const cal = document.getElementById('view-calendar');
-                const bt = document.getElementById('btn-timeline'); const bc = document.getElementById('btn-calendar');
+                const tl = document.getElementById('view-timeline'), cal = document.getElementById('view-calendar'), bt = document.getElementById('btn-timeline'), bc = document.getElementById('btn-calendar'), hud = document.getElementById('focus-hud');
                 if(v === 'timeline') {
-                    tl.classList.remove('hidden-view'); tl.classList.add('active-view'); cal.classList.remove('active-view'); cal.classList.add('hidden-view');
-                    bt.classList.replace('nav-btn-inactive', 'nav-btn-active'); bc.classList.replace('nav-btn-active', 'nav-btn-inactive');
+                    tl.classList.replace('hidden-view','active-view'); cal.classList.replace('active-view','hidden-view');
+                    bt.className = 'nav-btn nav-btn-active text-base font-bold pb-1'; bc.className = 'nav-btn nav-btn-inactive text-base font-bold pb-1';
+                    hud.classList.remove('opacity-0'); setTimeout(() => this.handleScroll(), 100);
                 } else {
-                    tl.classList.remove('active-view'); tl.classList.add('hidden-view'); cal.classList.remove('hidden-view'); cal.classList.add('active-view');
-                    bt.classList.replace('nav-btn-active', 'nav-btn-inactive'); bc.classList.replace('nav-btn-inactive', 'nav-btn-active'); this.renderCalendar(); 
+                    tl.classList.replace('active-view','hidden-view'); cal.classList.replace('hidden-view','active-view');
+                    bt.className = 'nav-btn nav-btn-inactive text-base font-bold pb-1'; bc.className = 'nav-btn nav-btn-active text-base font-bold pb-1';
+                    hud.classList.add('opacity-0'); this.renderCalendar();
                 }
             },
             renderTimeline: function() {
-                const container = document.getElementById('diary-list'); container.innerHTML = '';
-                const entries = EntryManager.getAll().sort((a, b) => b.ts - a.ts);
-                entries.forEach(item => {
-                    const date = new Date(item.ts); const div = document.createElement('div');
-                    div.className = `entry-item flex relative group`; div.dataset.hour = date.getHours();
-                    const node = `<div class="absolute left-[5.3rem] sm:left-[8.85rem] top-6 w-3 h-3 rounded-full bg-[var(--primary)] border-4 border-[var(--bg)] z-20 shadow-sm"></div>`;
-                    let thumb = item.img ? `<div class="thumb-box"><img src="${item.img}" class="thumb-img"></div>` : '';
-                    const card = document.createElement('div'); card.className = `entry-card p-6 flex flex-row items-start flex-1`;
-                    card.innerHTML = `<div class="flex-1 min-w-0"><h3 class="text-xl font-bold text-[var(--text)] font-display mb-2">${item.title}</h3><div class="text-base text-[var(--text)]/80 leading-relaxed font-serif line-clamp-3">${item.content.replace(/<[^>]*>/g, '')}</div></div>${thumb}`;
-                    card.onclick = () => this.openDetail(item);
-                    div.innerHTML = `<div class="date-col w-[5.5rem] sm:w-36 flex flex-col items-end pr-6 pt-2 shrink-0 z-10 text-right"><span class="text-4xl font-bold font-num text-[var(--text)]">${String(date.getDate()).padStart(2, '0')}</span><span class="text-[10px] font-num font-bold text-[var(--text-sec)] uppercase tracking-widest">${date.toLocaleString('default', {month:'short'})} ${date.getFullYear()}</span><div class="mt-2 text-xs font-bold text-[var(--primary)] font-num">${this.formatTime(date)}</div></div>${node}`;
-                    const right = document.createElement('div'); right.className = 'flex-1 pl-8 pb-12'; right.appendChild(card); div.appendChild(right); container.appendChild(div);
-                    if(this.themeObserver) this.themeObserver.observe(div);
+                const c = document.getElementById('diary-list'); c.innerHTML = ''; const entries = DataManager.getAll().sort((a, b) => b.ts - a.ts);
+                if(entries.length === 0) { c.innerHTML = `<div class="text-center opacity-50 py-20 flex flex-col items-center gap-2"><i data-lucide="feather" class="w-8 h-8 opacity-50"></i><span>Tap the Pen to start.</span></div>`; lucide.createIcons(); return; }
+                entries.forEach(i => {
+                    const d = new Date(i.ts); const div = document.createElement('div'); div.className = `entry-item`;
+                    div.dataset.ts = i.ts; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate();
+                    div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear();
+                    div.dataset.time = this.formatTime(d);
+                    let thumb = i.img ? `<img src="${i.img}" class="w-full h-32 object-cover rounded-lg mb-3 opacity-90">` : '';
+                    const sum = i.content.replace(/<[^>]*>/g, '').substring(0, 120) + (i.content.length > 120 ? '...' : '');
+                    div.innerHTML = `<div class="timeline-node-wrapper"><div class="timeline-node"></div></div><div class="entry-card-wrapper"><div class="entry-card p-4 sm:p-6" onclick="UI.openDetailById(${i.id})">${thumb}<div class="flex justify-between items-start mb-1"><h3 class="text-lg sm:text-xl font-bold text-[var(--text)] font-display leading-tight">${i.title}</h3><div class="flex gap-1 opacity-50 scale-75 origin-right"><i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i></div></div><p class="text-sm sm:text-base text-[var(--text)]/80 font-serif line-clamp-3 leading-relaxed">${sum}</p></div></div>`;
+                    c.appendChild(div);
                 });
+                lucide.createIcons(); setTimeout(() => this.handleScroll(), 50);
             },
-            renderCalendar: function() {
-                const grid = document.getElementById('calendar-grid'); grid.innerHTML = '';
-                const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth();
-                document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString('default', { month: 'short' });
-                document.getElementById('cal-year-display').innerText = y;
-                const fd = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate();
-                const entries = EntryManager.getAll(); const monthEntries = [];
-                for(let i=0; i<fd; i++) grid.appendChild(document.createElement('div'));
-                for(let i=1; i<=dim; i++) {
-                    const d = document.createElement('div'); d.className = 'calendar-cell'; d.textContent = i;
-                    const dayEntries = entries.filter(e => { const t=new Date(e.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; });
-                    if(dayEntries.length > 0) { d.classList.add('has-entry', 'font-bold', 'text-[var(--primary)]'); monthEntries.push(...dayEntries); }
-                    d.onclick = (e) => { e.stopPropagation(); if (dayEntries.length > 0) this.openDetail(dayEntries[0]); else this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); };
-                    grid.appendChild(d);
+            initScrollObserver: function() {
+                const main = document.getElementById('main-container'); let ticking = false;
+                main.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { this.handleScroll(); ticking = false; }); ticking = true; } });
+            },
+            handleScroll: function() {
+                const main = document.getElementById('main-container'); const entries = document.querySelectorAll('.entry-item');
+                const topPh = document.getElementById('future-placeholder'); const botPh = document.getElementById('origin-placeholder');
+                if(topPh) topPh.style.opacity = main.scrollTop < 60 ? 1 - (main.scrollTop / 60) : 0;
+                if(botPh) { const d = main.scrollHeight - main.scrollTop - main.clientHeight; botPh.style.opacity = d < 60 ? 1 - (d / 60) : 0; }
+                if(entries.length === 0) return;
+                const viewCenter = window.innerHeight / 2; let closest = null; let minDiff = Infinity;
+                entries.forEach(el => {
+                    const rect = el.getBoundingClientRect(); const diff = Math.abs(rect.top + rect.height / 2 - viewCenter);
+                    const card = el.querySelector('.entry-card-wrapper'); const node = el.querySelector('.timeline-node');
+                    const distRatio = Math.min(diff / (window.innerHeight * 0.5), 1);
+                    const scale = 1 - (distRatio * 0.4); const op = 1 - (distRatio * 0.6); const tx = distRatio * 20;
+                    if (card) { card.style.transform = `scale(${scale}) translateX(${tx}px)`; card.style.opacity = Math.max(0.3, op); }
+                    if (node) { const ns = 1 - (distRatio * 0.5); node.style.transform = `scale(${ns})`; node.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)'; node.style.borderColor = 'var(--card-bg)'; node.style.background = 'var(--line)'; }
+                    if(diff < minDiff) { minDiff = diff; closest = el; }
+                });
+                if(closest) {
+                    const node = closest.querySelector('.timeline-node');
+                    if(node) { node.style.transform = 'scale(1.4)'; node.style.boxShadow = '0 0 0 4px var(--bg-grad), 0 0 15px 2px var(--primary)'; node.style.borderColor = 'white'; node.style.background = 'var(--primary)'; }
+                    const day = String(closest.dataset.day).padStart(2, '0'); const elDay = document.getElementById('hud-day');
+                    if (elDay.innerText !== day) { elDay.innerText = day; elDay.style.transform = "scale(1.2)"; elDay.style.color = "var(--primary)"; setTimeout(() => { elDay.style.transform = "scale(1)"; elDay.style.color = "var(--text)"; }, 200); }
+                    document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; document.getElementById('hud-time').innerText = closest.dataset.time;
+                    this.updateCelestialPosition(parseInt(closest.dataset.hour));
                 }
-                this.renderMonthList(monthEntries.sort((a, b) => b.ts - a.ts));
             },
-            renderMonthList: function(entries) {
-                const container = document.getElementById('month-entries'); const empty = document.getElementById('month-empty-state'); container.innerHTML = '';
-                if(entries.length === 0) { container.style.display = 'none'; empty.style.display = 'block'; } 
-                else {
-                    container.style.display = 'block'; empty.style.display = 'none';
-                    entries.forEach(e => {
-                        const d = new Date(e.ts); const el = document.createElement('div'); el.className = 'archive-row rounded-lg cursor-pointer';
-                        const summary = e.content.replace(/<[^>]*>/g, '').substring(0, 50) + '...';
-                        el.innerHTML = `<div class="archive-date text-xl">${String(d.getDate()).padStart(2,'0')}</div><div class="archive-content"><div class="archive-title">${e.title}</div><div class="archive-preview">${summary}</div></div><button class="p-2 text-[var(--text-sec)] hover:text-red-500 transition-colors" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>`;
-                        el.onclick = () => this.openDetail(e); el.querySelector('button').onclick = (evt) => { evt.stopPropagation(); this.deleteEntryById(e.id); };
-                        container.appendChild(el);
-                    });
+            updateCelestialPosition: function(hour) {
+                // 0-24h -> 360 degrees
+                const targetDeg = (hour - 12) * 15; 
+                
+                let delta = targetDeg - this.state.currentRotation;
+                while (delta > 180) delta -= 360;
+                while (delta < -180) delta += 360;
+                
+                this.state.currentRotation += delta;
+                document.getElementById('orbit-wheel').style.transform = `rotate(${-this.state.currentRotation}deg)`;
+                
+                let theme = 'day';
+                if(hour >= 6 && hour < 17) theme = 'day';
+                else if(hour >= 17 && hour < 20) theme = 'dusk';
+                else if(hour >= 20 || hour < 5) theme = 'night';
+                else theme = 'dawn';
+
+                if(document.body.getAttribute('data-theme') !== theme) {
+                    document.body.setAttribute('data-theme', theme);
+                    ParticleSystem.setTheme(theme);
                 }
-                lucide.createIcons();
             },
-            openDetailById: function(id) { const entry = EntryManager.getById(id); if(entry) this.openDetail(entry); },
-            deleteEntryById: function(id) { this.showDialog('confirm', 'Delete Memory?', 'This will permanently erase this moment from time.', () => { const success = EntryManager.delete(id); if(!success) this.showDialog('alert', 'Error', 'Failed to delete item.', null); }); },
-            deleteCurrentEntry: function() { if(this.state.currentDetailId) { const id = this.state.currentDetailId; this.closeDetail(); this.deleteEntryById(id); } },
-            editCurrentEntry: function() { if (!this.state.currentDetailId) return; const entry = EntryManager.getById(this.state.currentDetailId); if(entry) { this.closeDetail(); const dt = new Date(entry.ts); this.openEditor(`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`, entry); } },
-            openEditor: function(dStr=null, exist=null) {
-                document.getElementById('editor-modal').classList.remove('hidden'); const now = new Date(); document.getElementById('editor-id').value = ""; 
-                if(exist) {
-                    document.getElementById('editor-id').value = exist.id; document.getElementById('editor-title').value = exist.title;
-                    document.getElementById('editor-content').innerHTML = exist.content; const dt = new Date(exist.ts);
-                    document.getElementById('editor-date').value = dStr; document.getElementById('editor-time').value = `${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
-                    this.selectMood(exist.mood || 'smile'); this.selectWeather(exist.weather || 'sun');
-                } else {
-                    document.getElementById('editor-title').value = ''; document.getElementById('editor-content').innerHTML = '';
-                    document.getElementById('editor-date').value = dStr || now.toISOString().split('T')[0]; document.getElementById('editor-time').value = now.toTimeString().slice(0,5);
-                    this.selectMood('smile'); this.selectWeather('sun');
-                }
-                void document.getElementById('editor-modal').offsetWidth; setTimeout(() => document.getElementById('editor-panel').classList.remove('translate-y-full'), 10);
-            },
-            closeEditor: function() { document.getElementById('editor-panel').classList.add('translate-y-full'); setTimeout(() => document.getElementById('editor-modal').classList.add('hidden'), 300); },
-            openDetail: function(item) {
-                this.state.currentDetailId = String(item.id); const m = document.getElementById('detail-modal'); const d = new Date(item.ts);
-                document.getElementById('detail-title').innerText = item.title;
-                document.getElementById('detail-date').innerText = d.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric'});
-                document.getElementById('detail-time').innerText = this.formatTime(d);
-                let html = item.content; if(item.img && html.indexOf(item.img) === -1) html = `<img src="${item.img}" class="w-full rounded-xl shadow-lg mb-8 sepia-[0.1]">` + html;
-                document.getElementById('detail-content').innerHTML = html;
-                document.getElementById('detail-meta').innerHTML = `<i data-lucide="${this.getMoodIcon(item.mood)}" class="w-4 h-4"></i> <span class="mx-2 text-[var(--line)]">|</span> <i data-lucide="${this.getWeatherIcon(item.weather)}" class="w-4 h-4"></i>`;
-                lucide.createIcons(); m.classList.remove('hidden');
-            },
-            closeDetail: function() { document.getElementById('detail-modal').classList.add('hidden'); this.state.currentDetailId = null; },
-            selectMood: function(m) { this.state.mood=m; this.updateSelectionUI(); },
-            selectWeather: function(w) { this.state.weather=w; this.updateSelectionUI(); },
-            updateSelectionUI: function() {
-                 document.querySelectorAll('.selection-btn').forEach(b => { b.className = 'selection-btn p-2 rounded-md text-[var(--text-sec)] hover:bg-[var(--line)]/20 transition-colors'; });
-                 const activeClass = 'selection-btn p-2 rounded-md bg-[var(--primary)] text-white shadow-md transform scale-105 transition-all';
-                 const mBtn = document.getElementById(`mood-${this.state.mood}`); if(mBtn) mBtn.className = activeClass;
-                 const wBtn = document.getElementById(`weather-${this.state.weather}`); if(wBtn) wBtn.className = activeClass;
-            },
+            // ... UI methods (openInfo, setLanguage, etc - No changes) ...
+            openInfo: function() { document.getElementById('info-modal').classList.remove('hidden'); },
+            closeInfo: function() { document.getElementById('info-modal').classList.add('hidden'); },
+            setLanguage: function(lang) { this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) el.innerText = t[key]; }); document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; this.renderCalendar(); this.renderTimeline(); },
+            changeMonth: function(o) { const d = new Date(this.state.calendarDate); d.setMonth(d.getMonth() + o); this.state.calendarDate = d; this.renderCalendar(); },
+            resetCalendarToday: function() { this.state.calendarDate = new Date(); this.renderCalendar(); },
+            renderCalendar: function() { const g = document.getElementById('calendar-grid'); g.innerHTML = ''; const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); document.getElementById('cal-year-display').innerText = y; const fd = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(); const e = DataManager.getAll(); for(let i=0; i<fd; i++) g.appendChild(document.createElement('div')); for(let i=1; i<=dim; i++) { const d = document.createElement('div'); d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; d.textContent = i; const today = new Date(); if(y===today.getFullYear() && m===today.getMonth() && i===today.getDate()) d.classList.add('current-day'); const de = e.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); if(de.length>0) { d.classList.add('has-entry', 'font-bold'); d.onclick=()=>this.openDetail(de[0]); } else { d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); } g.appendChild(d); } this.renderArchiveList(e.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); },
+            renderArchiveList: function(e) { const c = document.getElementById('month-entries'), em = document.getElementById('month-empty-state'); c.innerHTML = ''; if(e.length === 0) { c.classList.add('hidden'); em.classList.remove('hidden'); } else { c.classList.remove('hidden'); em.classList.add('hidden'); e.forEach(i => { const el = document.createElement('div'); el.className = 'flex items-center gap-4 p-3 bg-[var(--bg)]/30 rounded-lg border border-[var(--line)]/50 cursor-pointer hover:bg-[var(--line)]/20'; el.innerHTML = `<div class="text-lg font-bold font-num opacity-70 w-8 text-center">${new Date(i.ts).getDate()}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate">${i.title}</div></div><i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>`; el.onclick = () => this.openDetail(i); c.appendChild(el); }); } lucide.createIcons(); },
+            openEditor: function(dStr, exist) { const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); if(exist) { const d=new Date(exist.ts); document.getElementById('editor-id').value=exist.id; document.getElementById('editor-title').value=exist.title; document.getElementById('editor-content').innerHTML=exist.content; document.getElementById('editor-date').value=d.toISOString().split('T')[0]; document.getElementById('editor-time').value=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; this.selectMood(exist.mood); this.selectWeather(exist.weather); if(exist.img){this.state.tempImage=exist.img; document.getElementById('preview-img').src=exist.img; document.getElementById('image-preview-area').classList.remove('hidden');} } else { const n=new Date(); document.getElementById('editor-id').value=''; document.getElementById('editor-title').value=''; document.getElementById('editor-content').innerHTML=''; document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; document.getElementById('editor-time').value=n.toTimeString().slice(0,5); this.selectMood('smile'); this.selectWeather('sun'); } m.classList.remove('hidden'); setTimeout(()=>p.classList.remove('translate-y-full'),10); },
+            closeEditor: function() { document.getElementById('editor-panel').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('editor-modal').classList.add('hidden'),300); },
+            selectMood: function(m) { this.state.mood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`mood-${m}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
+            selectWeather: function(w) { this.state.weather = w; document.querySelectorAll('.weather-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`weather-${w}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
             execCmd: function(c) { document.execCommand(c, false, null); },
-            triggerImageUpload: function() { document.getElementById('image-input').click(); },
-            handleImageUpload: function(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = (e) => { const editor = document.getElementById('editor-content'); editor.focus(); const imgHtml = `<br><img src="${e.target.result}" class="max-w-full rounded-lg shadow-md my-4 block"><br>`; document.execCommand('insertHTML', false, imgHtml) || (editor.innerHTML += imgHtml); }; reader.readAsDataURL(input.files[0]); input.value = ''; } },
-            saveApiKey: function() { 
-                const k = document.getElementById('user-api-key').value; localStorage.setItem('gemini_api_key', k); 
-                this.showDialog('alert', 'Secure', 'API Key saved locally.', null);
-            },
-            
-            // NEW: Save Profile & Analyze
-            saveProfileAndAnalyze: function() {
-                const z = document.getElementById('user-zodiac').value;
-                const b = document.getElementById('user-bazi').value;
-                const k = document.getElementById('user-api-key').value;
-                
-                if(z) localStorage.setItem('user_zodiac', z);
-                if(b) localStorage.setItem('user_bazi', b);
-                if(k) localStorage.setItem('gemini_api_key', k);
-                
-                this.generateReport();
-            },
-
-            openWeeklySummary: function() {
-                document.getElementById('summary-modal').classList.remove('hidden');
-                // Don't auto analyze, wait for user
-            },
-
+            triggerImageUpload: () => document.getElementById('image-input').click(),
+            handleImageUpload: function(i) { if(i.files[0]) { const r = new FileReader(); r.onload=(e)=>{this.state.tempImage=e.target.result; document.getElementById('preview-img').src=e.target.result; document.getElementById('image-preview-area').classList.remove('hidden');}; r.readAsDataURL(i.files[0]); } i.value=''; },
+            clearImage: function() { this.state.tempImage = null; document.getElementById('image-preview-area').classList.add('hidden'); },
+            openDetailById: function(id) { this.openDetail(DataManager.getById(id)); },
+            openDetail: function(i) { if(!i)return; this.state.currentDetailId=i.id; const d=new Date(i.ts); document.getElementById('detail-title').innerText=i.title; document.getElementById('detail-date').innerText=d.toLocaleDateString(undefined,{weekday:'short',month:'long',day:'numeric'}); document.getElementById('detail-time').innerText=this.formatTime(d); document.getElementById('detail-content').innerHTML=i.content; document.getElementById('detail-icons').innerHTML=`<i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i><i data-lucide="${this.getWeatherIcon(i.weather)}" class="w-4 h-4"></i>`; const ic=document.getElementById('detail-image-container'); if(i.img){document.getElementById('detail-image').src=i.img; ic.classList.remove('hidden');}else{ic.classList.add('hidden');} document.getElementById('detail-modal').classList.remove('hidden'); lucide.createIcons(); },
+            closeDetail: function() { document.getElementById('detail-modal').classList.add('hidden'); },
+            confirmDeleteEntry: function() { document.getElementById('confirm-modal').classList.remove('hidden'); },
+            executeDelete: function() { if(this.state.currentDetailId) { DataManager.delete(this.state.currentDetailId); document.getElementById('confirm-modal').classList.add('hidden'); this.closeDetail(); } },
+            editCurrentEntry: function() { const id = this.state.currentDetailId; this.closeDetail(); this.openEditor(null, DataManager.getById(id)); },
+            openSettings: function() { DataManager.updateStats(); document.getElementById('settings-modal').classList.remove('hidden'); },
+            closeSettings: function() { document.getElementById('settings-modal').classList.add('hidden'); },
+            openWeeklySummary: function() { document.getElementById('summary-modal').classList.remove('hidden'); },
+            closeWeeklySummary: function() { document.getElementById('summary-modal').classList.add('hidden'); },
             generateReport: async function() {
-                const div = document.getElementById('summary-ai-content');
-                const k = localStorage.getItem('gemini_api_key') || document.getElementById('user-api-key').value;
-                const zodiac = localStorage.getItem('user_zodiac') || "未提供";
-                const bazi = localStorage.getItem('user_bazi') || "未提供";
-
-                if(!k) { div.innerHTML = `<div class="text-center text-red-500">Please enter API Key above.</div>`; return; }
-
-                div.innerHTML = `<div class="flex flex-col items-center py-10 space-y-3"><i data-lucide="loader-2" class="w-8 h-8 animate-spin text-[var(--primary)]"></i><span class="text-xs opacity-60">观星象，测命理...</span></div>`; lucide.createIcons();
-
-                const recent = EntryManager.getAll().slice(0,7).map(e=>({ d:new Date(e.ts).toLocaleDateString(), t:e.title, c:e.content.replace(/<[^>]*>/g,'').substring(0,100) }));
-                
-                // CHINESE PROMPT WITH FORTUNE TELLING
-                const prompt = `角色：你是一位专业的日记分析师和精通周易八字的命理大师。
-任务：分析以下日记内容，并结合用户的星座和八字（如果有）进行运势预测。
-输出格式：HTML (divs with classes: ai-section, ai-title, ai-text)。不要包含 markdown 代码块标记。
-内容板块：
-1. 📜 时光回溯 (Narrative): 用优美的中文总结这段时间的经历和故事。
-2. 📊 心情气象 (Mood Analysis): 分析情绪变化趋势。
-3. 🔮 运势指引 (Guidance & Fortune):
-   - 基于日记内容给出建议。
-   - 用户星座: ${zodiac}，用户八字: ${bazi}。请结合这些命理信息进行具体的运势占卜（结合周易/星盘）。
-   - 如果没有提供星座/八字，请给出通用的哲学指引。
-
-用户日记数据: ${JSON.stringify(recent)}`;
-
-                try {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) });
-                    const json = await res.json();
-                    if (json.candidates?.[0]?.content) div.innerHTML = json.candidates[0].content.parts[0].text.replace(/```html/g,'').replace(/```/g,'');
-                    else div.innerText = "The Oracle is silent.";
-                } catch(e) { div.innerHTML = "Connection Error. Check API Key."; }
+                const div = document.getElementById('summary-ai-content'); const k = document.getElementById('user-api-key').value || "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
+                localStorage.setItem('user_zodiac', document.getElementById('user-zodiac').value); localStorage.setItem('user_bazi', document.getElementById('user-bazi').value);
+                div.innerHTML = `<div class="flex justify-center py-8"><i data-lucide="loader-2" class="animate-spin w-6 h-6 text-[var(--primary)]"></i></div>`; lucide.createIcons();
+                const history = DataManager.getAll().slice(0, 10).map(e => ({d: new Date(e.ts).toLocaleDateString(), t: e.title, c: e.content.substring(0,100)}));
+                const prompt = `Role: Mystical Fortune Teller. Data: User Zodiac: ${document.getElementById('user-zodiac').value}, BaZi/Birth: ${document.getElementById('user-bazi').value}. Diary entries (last 7 days): ${JSON.stringify(history)}. Task: 1. Summarize "Story of the last 7 days". 2. List "Clear Goals/Items". 3. Provide "Fortune & Direction" based on Zodiac/Birth + Diary Context. Format: Use HTML classes for styling: <div class='ai-card'><div class='ai-h3'><i class='...'></i> Title</div><p class='ai-p'>text...</p></div>. Language: ${UI.state.lang === 'zh' ? 'Chinese' : 'English'}.`;
+                try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text:prompt}]}]}) }); const json = await res.json(); div.innerHTML = json.candidates[0].content.parts[0].text.replace(/```html/g,'').replace(/```/g,''); } catch(e) { div.innerHTML = "<p class='text-center text-red-400'>Stars clouded.</p>"; }
             },
-
-            closeWeeklySummary: () => document.getElementById('summary-modal').classList.add('hidden'),
-            formatTime: (date) => { let h=date.getHours(), m=date.getMinutes(), ampm=h>=12?'PM':'AM'; h=h%12; h=h?h:12; m=m<10?'0'+m:m; return h+':'+m+' '+ampm; },
+            formatTime: (d) => d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
             getMoodIcon: (m) => ({smile:'smile',meh:'meh',frown:'frown',heart:'heart'}[m]||'smile'),
-            getWeatherIcon: (w) => ({sun:'sun',cloud:'cloud',rain:'cloud-rain'}[w]||'sun'),
-            
-            initThemeObserver: function() {
-                const scrollContainer = document.getElementById('main-container');
-                this.themeObserver = new IntersectionObserver((entries) => {
-                    entries.forEach(e => { if(e.isIntersecting) this.updateTheme(parseInt(e.target.dataset.hour)); });
-                }, { root: scrollContainer, rootMargin: '-45% 0px -45% 0px', threshold: 0 });
-            },
-            updateTheme: (h) => {
-                let theme = 'night';
-                if (h >= 5 && h < 8) theme = 'dawn';
-                else if (h >= 8 && h < 17) theme = 'day';
-                else if (h >= 17 && h < 20) theme = 'dusk';
-                document.body.setAttribute('data-theme', theme);
-                ParticleSystem.setTheme(theme);
-            }
+            getWeatherIcon: (w) => ({sun:'sun',cloud:'cloud',rain:'cloud-rain'}[w]||'sun')
         };
-
-        window.onload = () => { EntryManager.init(); UI.init(); };
+        window.onload = () => UI.init();
     </script>
 </body>
 </html>
