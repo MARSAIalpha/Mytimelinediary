@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="theme-color" content="#E0F7FA">
+    
+    <!-- PWA & Mobile Capability -->
+    <meta name="theme-color" content="#0f2027">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Timeline">
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVGltZWxpbmUgT3JhY2xlIiwic2hvcnRfbmFtZSI6IlRpbWVsaW5lIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjIwMjciLCJ0aGVtZV9jb2xvciI6IiMwZjIwMjciLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnstcG5nLmZsYXRpY29uLmNvbS81MTIvMzY1Mi8zNjUyMTkxLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3652/3652191.png">
+
     <title>Timeline: Fortune Teller</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -24,12 +31,12 @@
             width: 100%; 
             overflow-x: hidden; 
             margin: 0; 
-            overscroll-behavior-y: auto;
+            overscroll-behavior-y: auto; 
             background-color: #0f2027;
+            -webkit-user-select: none; user-select: none;
         }
         .font-display { font-family: 'Cinzel', serif; }
         .font-num { font-family: 'Lato', sans-serif; letter-spacing: 0.02em; }
-        .font-cn { font-family: 'Ma Shan Zheng', cursive; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
 
         /* --- Themes --- */
@@ -40,177 +47,187 @@
             color: var(--text);
         }
 
-        /* Day: Light Blue / Sky */
+        /* Day: Lighter, Airier Blue (Less saturated) */
         body[data-theme="day"] {
-            --bg-grad: linear-gradient(180deg, #89f7fe 0%, #66a6ff 100%);
-            --text: #1a2a3a; --text-sec: #455a64; --primary: #F39C12; --line: rgba(255,255,255,0.6);
-            --card-bg: rgba(255, 255, 255, 0.75);
-            --rail-color: rgba(255, 255, 255, 0.7);
+            --bg-grad: linear-gradient(180deg, #e0f7fa 0%, #b3e5fc 100%);
+            --text: #263238; --text-sec: #546e7a; --primary: #d4af37; --line: rgba(0,0,0,0.1);
+            --card-bg: rgba(255, 255, 255, 0.65);
+            --rail-color: rgba(0, 0, 0, 0.1);
+            --glow-color: rgba(255, 223, 0, 0.4);
         }
-        /* Dawn: Soft Pink/Purple */
+        /* Dawn: Subtle Pastel */
         body[data-theme="dawn"] {
-            --bg-grad: linear-gradient(180deg, #fbc2eb 0%, #a6c1ee 100%);
-            --text: #4A4E69; --text-sec: #727586; --primary: #FF6B6B; --line: rgba(255,255,255,0.5);
+            --bg-grad: linear-gradient(180deg, #fff1eb 0%, #ace0f9 100%);
+            --text: #455a64; --text-sec: #78909c; --primary: #ff8a65; --line: rgba(0,0,0,0.1);
             --card-bg: rgba(255, 255, 255, 0.7);
-            --rail-color: rgba(255, 255, 255, 0.6);
+            --rail-color: rgba(0, 0, 0, 0.1);
+            --glow-color: rgba(255, 150, 150, 0.4);
         }
-        /* Dusk: Deep Purple/Orange */
+        /* Dusk: Elegant Violet */
         body[data-theme="dusk"] {
-            --bg-grad: linear-gradient(180deg, #3f51b1 0%, #5a55ae 47%, #7b5fac 87%, #8f6aae 100%);
-            --text: #E0E0E0; --text-sec: #B0BEC5; --primary: #FFB74D; --line: rgba(255,255,255,0.3);
-            --card-bg: rgba(20, 20, 40, 0.4);
-            --rail-color: rgba(255, 255, 255, 0.3);
+            --bg-grad: linear-gradient(180deg, #a18cd1 0%, #fbc2eb 100%);
+            --text: #2d3436; --text-sec: #636e72; --primary: #6c5ce7; --line: rgba(255,255,255,0.3);
+            --card-bg: rgba(255, 255, 255, 0.4);
+            --rail-color: rgba(255, 255, 255, 0.4);
+            --glow-color: rgba(160, 100, 255, 0.4);
         }
-        /* Night: Deep Blue/Black */
+        /* Night: Deep Cosmic */
         body[data-theme="night"] {
-            --bg-grad: linear-gradient(180deg, #09203f 0%, #537895 100%);
-            --text: #E3F2FD; --text-sec: #90A4AE; --primary: #81D4FA; --line: rgba(255,255,255,0.2);
-            --card-bg: rgba(10, 25, 40, 0.6);
-            --rail-color: rgba(255, 255, 255, 0.2);
+            --bg-grad: linear-gradient(180deg, #0f2027 0%, #203a43 60%, #2c5364 100%);
+            --text: #eceff1; --text-sec: #b0bec5; --primary: #81d4fa; --line: rgba(255,255,255,0.15);
+            --card-bg: rgba(20, 30, 40, 0.5);
+            --rail-color: rgba(255, 255, 255, 0.15);
+            --glow-color: rgba(100, 200, 255, 0.5);
         }
 
-        /* --- Dynamic Orbit System (Aligned to HUD) --- */
+        /* --- Orbit System --- */
         .orbit-wrapper {
             position: fixed; 
-            /* Center horizontally relative to the HUD area (approx left 15-20vw on mobile) */
-            left: -65vh; /* Shift left so the center of rotation aligns closer to the left edge */
-            bottom: -65vh; 
-            width: 160vh; 
-            height: 160vh; 
-            pointer-events: none; 
-            z-index: 0;
+            left: -65vh; bottom: -65vh; 
+            width: 160vh; height: 160vh; 
+            pointer-events: none; z-index: 0;
             display: flex; justify-content: center;
         }
-
-        /* On Desktop, shift it back a bit */
-        @media (min-width: 640px) {
-            .orbit-wrapper { left: -60vh; bottom: -60vh; }
-        }
+        @media (min-width: 640px) { .orbit-wrapper { left: -60vh; bottom: -60vh; } }
         
         .orbit-wheel {
             width: 100%; height: 100%;
-            border-radius: 50%;
-            position: relative;
-            transition: transform 3s cubic-bezier(0.25, 1, 0.5, 1); 
+            border-radius: 50%; position: relative;
+            transition: transform 3s cubic-bezier(0.2, 0.8, 0.2, 1); 
             will-change: transform;
         }
         
         .celestial-body {
-            position: absolute; 
-            width: 20vh; height: 20vh;
-            left: 50%; 
-            transform: translate(-50%, -50%);
+            position: absolute; width: 24vh; height: 24vh; /* Slightly larger for detail */
+            left: 50%; transform: translate(-50%, -50%);
             display: flex; justify-content: center; align-items: center;
         }
         
         #sun-container { top: 0; }
         #moon-container { top: 100%; transform: translate(-50%, -50%) rotate(180deg); }
 
-        /* Hand-drawn Stroke Style */
-        .sketch-stroke {
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
+        /* Abstract Geometric Strokes */
+        .geo-stroke {
+            fill: none; stroke: currentColor; stroke-width: 1.5;
+            stroke-linecap: square; vector-effect: non-scaling-stroke;
         }
-        .sketch-fill {
-            fill: currentColor;
-            stroke: none;
-        }
+        .geo-fill { fill: currentColor; opacity: 0.8; }
 
         #world-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
 
-        /* --- UI Components --- */
+        /* --- Header --- */
         header { 
-            z-index: 50; background: rgba(255,255,255,0.01); 
-            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            z-index: 50; background: rgba(255,255,255,0.00); /* More transparent */
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
             border-bottom: 1px solid rgba(255,255,255,0.05); 
         }
-        
-        /* HUD - Date Position - Aligned under the sun/moon arc */
+
+        /* --- HUD --- */
         #focus-hud {
-            position: fixed; top: 35%; left: 1.5rem; transform: translateY(-50%);
-            z-index: 40; pointer-events: none;
+            position: fixed; top: 38%; left: 1rem; width: 7rem;
+            transform: translateY(-50%); z-index: 40; pointer-events: none;
             display: flex; flex-direction: column; align-items: flex-start;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.1); 
             transition: opacity 0.3s ease;
         }
-        .hud-day { font-size: 3.5rem; font-weight: 900; line-height: 0.9; font-family: 'Lato', sans-serif; color: var(--text); transition: transform 0.3s, color 0.5s; }
-        .hud-meta { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-sec); font-family: 'Lato', sans-serif; margin-top: 0.5rem; opacity: 0.9; }
+        .hud-day { 
+            font-size: 3.8rem; font-weight: 900; line-height: 0.9; font-family: 'Lato', sans-serif; 
+            color: var(--text); transition: transform 0.3s, color 0.5s; 
+            /* Refined Glow */
+            text-shadow: 0 0 30px var(--glow-color); 
+            mix-blend-mode: overlay;
+        }
+        /* Normal blend mode fallback for text readability if needed */
+        body[data-theme="night"] .hud-day { mix-blend-mode: normal; text-shadow: 0 0 20px var(--glow-color); }
 
-        /* Timeline Rail */
-        .timeline-rail-container { position: absolute; left: 6.5rem; top: 0; bottom: 0; width: 2px; z-index: 0; }
-        @media (min-width: 640px) { .timeline-rail-container { left: 9rem; } }
-        
-        .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: var(--rail-color); width: 2px; }
+        .hud-time {
+            font-size: 1.8rem; font-weight: 700; color: var(--primary); 
+            font-family: 'Lato', sans-serif; display: block; line-height: 1; margin-top: 0.5rem;
+            text-shadow: 0 0 10px var(--glow-color);
+        }
+        .hud-meta { 
+            font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; 
+            text-transform: uppercase; color: var(--text-sec); 
+            font-family: 'Lato', sans-serif; opacity: 0.8; margin-top: 0.2rem;
+        }
+
+        /* --- Timeline Rail --- */
+        .timeline-rail-container { position: absolute; left: 8.5rem; top: 0; bottom: 0; width: 1px; z-index: 0; } /* Thinner rail */
+        .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: var(--rail-color); width: 1px; }
         .timeline-rail-flow { 
             position: absolute; top: 0; bottom: 0; left: 0; right: 0; 
             background: linear-gradient(180deg, transparent, var(--primary), transparent); 
-            background-size: 100% 400px; background-repeat: repeat-y; opacity: 0.6; 
-            animation: flowLight 5s linear infinite; 
+            background-size: 100% 500px; background-repeat: repeat-y; opacity: 0.4; 
+            animation: flowLight 6s linear infinite; 
         }
-        @keyframes flowLight { 0% { background-position: 0 -400px; } 100% { background-position: 0 0; } }
-        .micro-ticks { position: absolute; top: 0; bottom: 0; left: -1px; width: 4px; background-image: radial-gradient(circle, var(--line) 1px, transparent 1px); background-size: 4px 24px; opacity: 0.6; }
+        @keyframes flowLight { 0% { background-position: 0 -500px; } 100% { background-position: 0 0; } }
+        .micro-ticks { position: absolute; top: 0; bottom: 0; left: -1px; width: 3px; background-image: radial-gradient(circle, var(--line) 1px, transparent 1px); background-size: 3px 30px; opacity: 0.5; }
 
+        /* Entry Items */
         .entry-item { position: relative; width: 100%; }
-        .entry-card-wrapper { flex: 1; padding-left: 7.5rem; min-width: 0; transition: transform 0.2s linear, opacity 0.2s linear; will-change: transform, opacity; }
-        @media (min-width: 640px) { .entry-card-wrapper { padding-left: 10rem; } }
-        
+        .entry-card-wrapper { flex: 1; padding-left: 9.5rem; min-width: 0; transition: transform 0.2s linear, opacity 0.2s linear; will-change: transform, opacity; }
         .entry-card { 
             background-color: var(--card-bg); border: 1px solid var(--line); 
-            box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.05); 
-            transition: all 0.3s ease; cursor: pointer; border-radius: 16px; 
-            backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); /* Softer shadow */
+            transition: all 0.3s ease; cursor: pointer; border-radius: 12px; /* Sharper radius */
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); 
+        }
+        .timeline-node-wrapper { position: absolute; left: 8.5rem; top: 50%; transform: translate(-50%, -50%); z-index: 20; display: flex; align-items: center; justify-content: center; }
+        .timeline-node { 
+            width: 10px; height: 10px; border-radius: 50%; 
+            background-color: var(--card-bg); 
+            transition: all 0.2s ease; 
+            border: 2px solid var(--line); 
+        }
+        /* Active node style */
+        .entry-item.active-focus .timeline-node {
+            width: 16px; height: 16px; 
+            background-color: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--glow-color);
         }
 
-        .timeline-node-wrapper { position: absolute; left: 6.5rem; top: 50%; transform: translate(-50%, -50%); z-index: 20; display: flex; align-items: center; justify-content: center; }
-        @media (min-width: 640px) { .timeline-node-wrapper { left: 9rem; } }
-        .timeline-node { width: 14px; height: 14px; border-radius: 50%; background-color: var(--line); transition: all 0.1s linear; border: 3px solid var(--card-bg); box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
+        /* Mobile adjustments */
+        @media (max-width: 640px) {
+            .timeline-rail-container { left: 8.5rem; }
+            .timeline-node-wrapper { left: 8.5rem; }
+            .entry-card-wrapper { padding-left: 9.5rem; padding-right: 1rem; }
+            #diary-list { padding-top: 50vh; padding-bottom: 50vh; }
+            #focus-hud { left: 1rem; top: 40%; width: 7rem; }
+            .hud-day { font-size: 3.2rem; }
+            .hud-time { font-size: 1.5rem; }
+            
+            .list-placeholder {
+                position: absolute; left: 0; right: 0; height: 100px;
+                display: flex; flex-direction: column; justify-content: center; align-items: center;
+                opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.3em; 
+                font-size: 0.65rem; color: var(--text-sec);
+                transition: opacity 0.5s ease; pointer-events: none;
+            }
+            #future-placeholder { top: 25vh; }
+            #origin-placeholder { bottom: 25vh; }
+        }
 
-        /* Calendar & Modals */
+        @media (min-width: 641px) {
+            .timeline-rail-container { left: 12rem; }
+            .timeline-node-wrapper { left: 12rem; }
+            .entry-card-wrapper { padding-left: 14rem; }
+            #diary-list { padding-top: 50vh; padding-bottom: 50vh; }
+            #focus-hud { left: 3rem; }
+            #future-placeholder { top: 100px; position: absolute; width: 100%; text-align: center; opacity: 0; transition: opacity 0.5s; }
+            #origin-placeholder { bottom: 100px; position: absolute; width: 100%; text-align: center; opacity: 0; transition: opacity 0.5s; }
+        }
+
+        /* Other UI */
         .calendar-cell { aspect-ratio: 1/1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 0.95rem; position: relative; color: var(--text); }
         .calendar-cell.current-day { border: 2px solid var(--primary); }
         .calendar-cell.has-entry::after { content: ''; position: absolute; bottom: 6px; width: 5px; height: 5px; background-color: var(--primary); border-radius: 50%; }
-        .modal-content { background-color: var(--card-bg); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border: 1px solid var(--line); z-index: 10000; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
-        
-        .ai-card { background: var(--bg-grad); border-radius: 12px; padding: 16px; margin-bottom: 16px; border: 1px solid var(--line); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .ai-h3 { font-family: 'Cinzel', serif; font-weight: bold; color: var(--primary); margin-bottom: 8px; font-size: 1.1em; display: flex; align-items: center; gap: 8px; }
-        .ai-p { font-size: 0.95em; line-height: 1.6; opacity: 0.9; margin-bottom: 8px; }
-        .ai-list { list-style-type: none; padding-left: 0; }
-        .ai-list li { margin-bottom: 6px; position: relative; padding-left: 16px; }
-        .ai-list li::before { content: '•'; position: absolute; left: 0; color: var(--primary); font-weight: bold; }
-        
-        @media (max-width: 640px) {
-            #editor-panel { height: 100vh; max-height: 100vh; border-radius: 0; bottom: 0; }
-            .celestial-body { width: 100px; height: 100px; }
-            /* Adjusted HUD and Orbit for mobile alignment */
-            #focus-hud { left: 1.5rem; top: 35%; }
-            .hud-day { font-size: 3.5rem; }
-            .timeline-rail-container { left: 6rem; } 
-            .timeline-node-wrapper { left: 6rem; } 
-            .entry-card-wrapper { padding-left: 7.2rem; }
-            .entry-card { padding: 1rem; }
-            h1.font-display { font-size: 1.25rem; } /* Header font adjust */
-        }
-
+        .modal-content { background-color: var(--card-bg); backdrop-filter: blur(30px); border: 1px solid var(--line); z-index: 10000; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); }
         .hidden-view { display: none !important; }
         .active-view { display: block !important; animation: fadeIn 0.6s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .nav-btn-active { color: var(--text); border-bottom: 2px solid var(--primary); opacity: 1; }
         .nav-btn-inactive { color: var(--text); border-bottom: 2px solid transparent; opacity: 0.5; }
-        
-        #main-container { 
-            scroll-behavior: auto; 
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior-y: contain;
-        }
-
-        .list-placeholder {
-            height: 20vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
-            opacity: 0; font-family: 'Cinzel', serif; text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; color: var(--text);
-            transition: opacity 0.5s ease; pointer-events: none;
-        }
+        #main-container { scroll-behavior: auto; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; position: relative; }
         .simon-sig { font-family: 'Oswald', sans-serif; font-weight: 300; letter-spacing: 0.1em; opacity: 0.5; font-size: 0.7rem; text-align: center; margin-top: 2rem; color: var(--text-sec); }
     </style>
 </head>
@@ -222,56 +239,50 @@
     <!-- Celestial Orbit System -->
     <div class="orbit-wrapper">
         <div class="orbit-wheel" id="orbit-wheel" style="transform: rotate(0deg);">
-            <!-- Sun: Hand-drawn Classical Style with Cute Face -->
-            <div id="sun-container" class="celestial-body text-yellow-400 mix-blend-screen">
-                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-[0_0_50px_rgba(253,224,71,0.8)]">
-                    <!-- Rays: Wavy classical style -->
-                    <g class="sketch-stroke opacity-80" stroke-width="3">
-                        <path d="M100 20 Q110 35 100 50" />
-                        <path d="M100 180 Q90 165 100 150" />
-                        <path d="M20 100 Q35 90 50 100" />
-                        <path d="M180 100 Q165 110 150 100" />
-                        <path d="M40 40 Q55 55 65 65" />
-                        <path d="M160 160 Q145 145 135 135" />
-                        <path d="M40 160 Q55 145 65 135" />
-                        <path d="M160 40 Q145 55 135 65" />
+            
+            <!-- Sun: Abstract Geometric -->
+            <div id="sun-container" class="celestial-body text-yellow-500 mix-blend-overlay">
+                <svg viewBox="0 0 200 200" class="w-full h-full" style="filter: drop-shadow(0 0 30px rgba(253,224,71,0.6));">
+                    <defs>
+                         <linearGradient id="sunGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#fcd34d" stop-opacity="0.8"/>
+                            <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.4"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Outer Rings -->
+                    <circle cx="100" cy="100" r="80" class="geo-stroke opacity-20" stroke-dasharray="1 4"/>
+                    <circle cx="100" cy="100" r="65" class="geo-stroke opacity-40" stroke-width="0.5"/>
+                    <!-- Rotating Rays (Abstract) -->
+                    <g class="animate-[spin_20s_linear_infinite]">
+                         <rect x="98" y="10" width="4" height="20" class="geo-fill" rx="2"/>
+                         <rect x="98" y="170" width="4" height="20" class="geo-fill" rx="2"/>
+                         <rect x="10" y="98" width="20" height="4" class="geo-fill" rx="2"/>
+                         <rect x="170" y="98" width="20" height="4" class="geo-fill" rx="2"/>
                     </g>
                     <!-- Core -->
-                    <circle cx="100" cy="100" r="38" fill="none" stroke="currentColor" stroke-width="3" />
-                    <circle cx="100" cy="100" r="32" fill="currentColor" class="opacity-20" />
-                    <!-- Cute Face -->
-                    <g class="text-yellow-600">
-                        <!-- Eyes -->
-                        <circle cx="88" cy="95" r="3" fill="currentColor" />
-                        <circle cx="112" cy="95" r="3" fill="currentColor" />
-                        <!-- Smile -->
-                        <path d="M90 110 Q100 118 110 110" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <!-- Blush -->
-                        <circle cx="82" cy="105" r="2" fill="currentColor" class="opacity-30" />
-                        <circle cx="118" cy="105" r="2" fill="currentColor" class="opacity-30" />
-                    </g>
+                    <circle cx="100" cy="100" r="35" fill="url(#sunGrad)"/>
+                    <circle cx="100" cy="100" r="45" class="geo-stroke" stroke-opacity="0.6"/>
                 </svg>
             </div>
-            <!-- Moon: Sleeping Classical Style -->
-            <div id="moon-container" class="celestial-body text-gray-100 mix-blend-screen" style="filter: drop-shadow(0 0 20px rgba(255,255,255,0.4));">
+
+            <!-- Moon: Abstract Minimalist -->
+            <div id="moon-container" class="celestial-body text-gray-200 mix-blend-screen" style="filter: drop-shadow(0 0 25px rgba(255,255,255,0.3));">
                 <svg viewBox="0 0 200 200" class="w-full h-full">
-                    <!-- Crescent -->
-                    <path d="M140 40 C 90 40, 50 80, 50 130 C 50 170, 70 190, 90 200 C 50 180, 70 110, 70 90 C 70 60, 100 50, 140 40" 
-                          fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" />
-                    <!-- Texture -->
-                    <circle cx="85" cy="140" r="4" class="sketch-stroke opacity-20" />
-                    <circle cx="80" cy="80" r="3" class="sketch-stroke opacity-20" />
-                    
-                    <!-- Face: Sleeping -->
-                    <g class="text-gray-400" transform="translate(-10, 10)">
-                        <!-- Closed Eye with lashes -->
-                        <path d="M85 100 Q95 105 105 100" fill="none" stroke="currentColor" stroke-width="2" />
-                        <line x1="95" y1="103" x2="95" y2="108" stroke="currentColor" stroke-width="1" />
-                        <!-- Mouth -->
-                        <path d="M92 120 Q96 122 100 120" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                        <!-- Zzz (Optional) -->
-                        <path d="M120 80 L130 80 L120 90 L130 90" stroke="currentColor" stroke-width="1.5" fill="none" class="opacity-50" />
-                    </g>
+                    <defs>
+                        <linearGradient id="moonGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#e5e7eb" />
+                            <stop offset="100%" stop-color="#9ca3af" stop-opacity="0.5"/>
+                        </linearGradient>
+                    </defs>
+                    <!-- Main Body -->
+                    <circle cx="100" cy="100" r="40" fill="url(#moonGrad)" />
+                    <!-- Abstract Craters / Geometry -->
+                    <circle cx="80" cy="80" r="8" fill="rgba(0,0,0,0.1)" />
+                    <circle cx="115" cy="110" r="12" fill="rgba(0,0,0,0.05)" />
+                    <circle cx="90" cy="130" r="5" fill="rgba(0,0,0,0.08)" />
+                    <!-- Halo Ring -->
+                    <circle cx="100" cy="100" r="55" class="geo-stroke opacity-30" stroke-width="1"/>
+                    <path d="M145 100 A 45 45 0 0 1 100 145" class="geo-stroke opacity-50" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -280,7 +291,6 @@
     <!-- Header -->
     <header class="fixed top-0 w-full h-16 sm:h-20 flex flex-col justify-center">
         <div class="max-w-4xl w-full mx-auto px-4 flex items-center justify-between">
-            <!-- Reverted to full logo visible -->
             <div class="flex items-center gap-2 sm:gap-3 cursor-pointer active:scale-95 transition-transform" onclick="UI.openInfo()">
                 <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[var(--text)] flex items-center justify-center text-[var(--text)] relative">
                     <i data-lucide="hourglass" class="w-4 h-4 sm:w-5 sm:h-5"></i>
@@ -292,7 +302,6 @@
                 <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn nav-btn-inactive text-sm sm:text-base font-bold pb-1" data-i18n="nav_calendar">CALENDAR</button>
             </div>
             <div class="flex gap-2 items-center">
-                 <!-- Info Button now handles Settings too -->
                  <button onclick="UI.openInfo()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="info" class="w-5 h-5"></i></button>
                  <button onclick="UI.openWeeklySummary()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="sparkles" class="w-5 h-5 text-[var(--primary)]"></i></button>
             </div>
@@ -302,10 +311,10 @@
     <!-- Focus HUD -->
     <div id="focus-hud" class="hidden sm:flex">
         <div class="hud-day" id="hud-day">--</div>
-        <div class="hud-meta">
-            <span id="hud-month-year">--- ----</span>
-            <span id="hud-time" class="text-[var(--primary)]">--:--</span>
+        <div class="hud-time-wrapper">
+            <div class="hud-time" id="hud-time">--:--</div>
         </div>
+        <div class="hud-meta" id="hud-month-year">--- ----</div>
     </div>
 
     <!-- Main Content -->
@@ -320,16 +329,15 @@
                     <div class="micro-ticks"></div>
                 </div>
                 
-                <div id="future-placeholder" class="list-placeholder mt-10">
-                    <i data-lucide="arrow-up" class="w-4 h-4 mb-2"></i>
+                <!-- Placeholders -->
+                <div id="future-placeholder" class="list-placeholder">
                     <span data-i18n="future">Future Unwritten</span>
                 </div>
 
-                <div id="diary-list" class="space-y-24 relative z-10"></div>
+                <div id="diary-list" class="relative z-10"></div>
                 
-                <div id="origin-placeholder" class="list-placeholder mb-20">
+                <div id="origin-placeholder" class="list-placeholder">
                     <span data-i18n="origin">The Beginning</span>
-                    <i data-lucide="arrow-down" class="w-4 h-4 mt-2"></i>
                 </div>
             </div>
 
@@ -646,6 +654,10 @@
                 this.beamWidth = Math.random() * 80 + 40;
                 this.beamHeight = Math.random() * 400 + 200;
                 this.beamAngle = 20 * (Math.PI / 180); // Fixed angle for rays
+                
+                // Star twinkling properties
+                this.phase = Math.random() * Math.PI * 2;
+                this.twinkleSpeed = Math.random() * 0.05 + 0.01;
             }
             update(w, h, theme) {
                 if (theme === 'day') {
@@ -653,11 +665,12 @@
                     this.x += 0.2;
                     this.y += 0.1;
                 } else {
-                    // Night: Stars twinkle
-                    this.opacity += (Math.random() - 0.5) * 0.02;
-                    if(this.opacity < 0.1) this.opacity = 0.1;
-                    if(this.opacity > 0.8) this.opacity = 0.8;
-                    this.x += this.speedX * 0.5; 
+                    // Night: Stars twinkle (Sinusoidal breathing)
+                    this.phase += this.twinkleSpeed;
+                    // Map sine wave [-1, 1] to opacity range [0.1, 0.8]
+                    this.opacity = 0.45 + Math.sin(this.phase) * 0.35; 
+                    
+                    this.x += this.speedX * 0.2; // Very slow drift
                 }
 
                 if(this.x < -200) this.x = w + 200; if(this.x > w + 200) this.x = -200;
@@ -703,9 +716,9 @@
                 if (id) this.update(id, payload); else this.add(payload); UI.closeEditor(); } else { alert('Title and Date required'); }
             },
             exportBackup: function() { const b = new Blob([JSON.stringify(this.data, null, 2)], {type: 'application/json'}); const u = URL.createObjectURL(b); const a = document.createElement('a'); a.href = u; a.download = `timeline_backup.json`; a.click(); URL.revokeObjectURL(u); },
-            importBackup: function(input) { if(input.files[0]) { const r = new FileReader(); r.onload = (e) => { try { const i = JSON.parse(e.target.result); if(Array.isArray(i) && confirm(`Import ${i.length} entries?`)) { this.data = i; this.persist(); alert("Restored!"); UI.closeSettings(); } } catch(err) { alert("Invalid JSON"); } }; r.readAsText(input.files[0]); } input.value = ''; },
+            importBackup: function(input) { if(input.files[0]) { const r = new FileReader(); r.onload = (e) => { try { const i = JSON.parse(e.target.result); if(Array.isArray(i) && confirm(`Import ${i.length} entries?`)) { this.data = i; this.persist(); alert("Restored!"); UI.closeInfo(); } } catch(err) { alert("Invalid JSON"); } }; r.readAsText(input.files[0]); } input.value = ''; },
             exportMonthMarkdown: function() { const y = UI.state.calendarDate.getFullYear(), m = UI.state.calendarDate.getMonth(); const e = this.data.filter(i => { const d = new Date(i.ts); return d.getFullYear() === y && d.getMonth() === m; }); if(!e.length) return alert("No entries."); let md = `# Archive ${y}-${m+1}\n\n` + e.map(i => `## ${i.title}\n${new Date(i.ts).toLocaleString()}\n\n${i.content.replace(/<[^>]*>/g, '')}\n---`).join('\n\n'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], {type: 'text/markdown'})); a.download = `Journal_${y}_${m+1}.md`; a.click(); },
-            nukeData: function() { if(confirm("Delete ALL data?")) { this.data = []; this.persist(); UI.closeSettings(); } },
+            nukeData: function() { if(confirm("Delete ALL data?")) { this.data = []; this.persist(); UI.closeInfo(); } },
             updateStats: function() { const u = JSON.stringify(this.data).length; const m = 5 * 1024 * 1024; document.getElementById('storage-bar').style.width = `${Math.min((u / m) * 100, 100)}%`; document.getElementById('storage-size').innerText = `${(u/1024).toFixed(1)} KB / 5 MB`; document.getElementById('entry-count').innerText = `${this.data.length} Entries`; }
         };
 
