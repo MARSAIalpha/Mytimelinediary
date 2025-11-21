@@ -3,305 +3,290 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <meta name="theme-color" content="#0f2027">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Timeline">
-    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiVGltZWxpbmUgT3JhY2xlIiwic2hvcnRfbmFtZSI6IlRpbWVsaW5lIiwic3RhcnRfdXJsIjoiLiIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwZjIwMjciLCJ0aGVtZV9jb2xvciI6IiMwZjIwMjciLCJpY29ucyI6W3sic3JjIjoiaHR0cHM6Ly9jZG4taWNvbnstcG5nLmZsYXRpY29uLmNvbS81MTIvMzY1Mi8zNjUyMTkxLnBuZyIsInNpemVzIjoiMTkyeDE5MiIsInR5cGUiOiJpbWFnZS9wbmcifV19">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3652/3652191.png">
-
-    <title>Timeline: Fortune Teller</title>
-    
+    <meta name="theme-color" content="#0077be">
+    <title>Timeline Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
-
+    
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
+    
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="antialiased h-screen flex flex-col select-none">
+<body class="antialiased h-screen flex flex-col select-none" data-theme="day" data-font="medium">
 
     <canvas id="world-canvas"></canvas>
+    <div class="orbit-wrapper"><div id="orbit-wheel" class="orbit-wheel"><div class="celestial-body sun-body"></div><div class="celestial-body moon-body"><div class="crescent-shape"></div></div></div></div>
 
-    <div class="orbit-wrapper">
-        <div class="orbit-wheel" id="orbit-wheel" style="transform: rotate(0deg);">
-            <div id="sun-container" class="celestial-body sun-body"></div>
-
-            <div id="moon-container" class="celestial-body moon-body">
-                <div class="crescent-shape"></div>
-            </div>
-        </div>
-    </div>
-
-    <header class="fixed top-0 w-full h-16 sm:h-20 flex flex-col justify-center">
-        <div class="max-w-4xl w-full mx-auto px-4 flex items-center justify-between">
-            <div class="flex items-center gap-2 sm:gap-3 cursor-pointer active:scale-95 transition-transform" onclick="UI.openInfo()">
-                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-[var(--text)] flex items-center justify-center text-[var(--text)] relative">
-                    <i data-lucide="hourglass" class="w-3 h-3 sm:w-4 sm:h-4"></i>
-                </div>
-                <h1 class="text-base sm:text-xl font-bold tracking-[0.2em] font-display uppercase text-[var(--text)] drop-shadow-sm">Timeline</h1>
+    <header class="fixed top-0 w-full h-16 z-50 flex flex-col justify-center bg-gradient-to-b from-[rgba(255,255,255,0.1)] to-transparent backdrop-blur-[2px]">
+        <div class="w-full px-6 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="UI.openInfo()">
+                <i data-lucide="hourglass" class="w-5 h-5 text-[var(--text)]"></i>
+                <h1 class="text-lg font-bold tracking-[0.2em] font-display uppercase text-[var(--text)]">Timeline</h1>
             </div>
             <div class="nav-capsule">
-                <button onclick="UI.switchView('timeline')" id="btn-timeline" class="nav-btn active" data-i18n="nav_timeline">TIMELINE</button>
-                <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn" data-i18n="nav_calendar">CALENDAR</button>
+                <button onclick="UI.switchView('timeline')" id="btn-timeline" class="nav-btn active">TIMELINE</button>
+                <button onclick="UI.switchView('dashboard')" id="btn-dashboard" class="nav-btn">DASHBOARD</button>
+                <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn">CALENDAR</button>
             </div>
-            <div class="flex gap-2 items-center">
-                 <button onclick="UI.openInfo()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="info" class="w-5 h-5"></i></button>
-                 <button onclick="UI.openWeeklySummary()" class="p-2 hover:bg-[var(--line)] rounded-full text-[var(--text)] transition-colors active:scale-90"><i data-lucide="sparkles" class="w-5 h-5 text-[var(--primary)]"></i></button>
+            <div class="flex gap-3 items-center">
+                 <button onclick="UI.openInfo()" class="p-2 rounded-full text-[var(--text)] hover:bg-[var(--line)] transition-colors"><i data-lucide="info" class="w-5 h-5"></i></button>
+                 <button onclick="UI.openWeeklySummary()" class="p-2 rounded-full text-[var(--text)] active:scale-90 transition-transform hover:bg-[var(--line)]"><i data-lucide="sparkles" class="w-5 h-5 text-[var(--primary)]"></i></button>
             </div>
         </div>
     </header>
 
-    <div id="focus-hud" class="hidden sm:flex">
+    <div id="focus-hud">
         <div class="hud-day" id="hud-day">--</div>
         <div class="hud-time-wrapper"><div class="hud-time" id="hud-time">--:--</div></div>
-        <div class="hud-meta" id="hud-month-year">--- ----</div>
-        <div class="filter-bar">
-            <div class="filter-dot f-anni active" onclick="UI.toggleFilter('anni')" title="Anniversary"></div>
-            <div class="filter-dot f-holiday active" onclick="UI.toggleFilter('holiday')" title="Holiday"></div>
-            <div class="filter-dot f-normal active" onclick="UI.toggleFilter('normal')" title="Diary"></div>
+        <div class="hud-meta" id="hud-month-year">---</div>
+    </div>
+
+    <div id="filter-fab-group">
+        <div class="filter-row" onclick="UI.toggleFilter('anni')"><span class="filter-label label-anni">ANN</span><div class="filter-dot f-anni active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('holiday')"><span class="filter-label label-holiday">HOL</span><div class="filter-dot f-holiday active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('normal')"><span class="filter-label label-normal">DIARY</span><div class="filter-dot f-normal active"></div></div>
+    </div>
+
+    <div id="center-guide-layer"><div class="guide-beam"></div><div class="guide-cursor" id="beam-cursor"></div></div>
+
+    <div id="export-bar" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] hidden animate-in slide-in-from-bottom-4">
+        <div class="flex gap-1 bg-[var(--text)] p-1.5 rounded-full shadow-2xl">
+            <button onclick="UI.exportSelectedPDF()" class="text-[var(--card-bg)] px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors text-xs uppercase tracking-wider">
+                <i data-lucide="file-text" class="w-4 h-4"></i> PDF <span id="selected-count" class="bg-[var(--primary)] text-white text-[9px] px-1.5 py-0.5 rounded-full ml-1">0</span>
+            </button>
+            <div class="w-[1px] bg-white/20 my-1"></div>
+            <button onclick="UI.exportSelectedMarkdown()" class="text-[var(--card-bg)] px-4 py-2 rounded-full font-bold flex items-center gap-2 hover:bg-white/20 transition-colors text-xs uppercase tracking-wider">
+                <i data-lucide="file-code" class="w-4 h-4"></i> MD
+            </button>
         </div>
     </div>
 
     <main id="main-container" class="flex-1 relative z-10">
-        <div class="max-w-3xl mx-auto px-3 sm:px-4 relative min-h-full">
+        <div class="w-full px-0 relative min-h-full">
+            
             <div id="view-timeline" class="active-view relative">
-                <div id="future-placeholder" class="list-placeholder"><span data-i18n="future">Future Unwritten</span></div>
-                <div id="origin-placeholder" class="list-placeholder"><span data-i18n="origin">The Beginning</span></div>
-                <div class="timeline-rail-outer"><div class="timeline-rail-container"><div class="timeline-rail-line"></div><div class="timeline-rail-flow"></div><div class="micro-ticks"></div></div></div>
-                <div id="diary-list"></div>
+                <div id="future-placeholder" class="list-placeholder"><span>Future Unwritten</span></div>
+                <div class="timeline-rail-outer"><div class="timeline-rail-container"><div class="rail-center-glow"></div><div class="timeline-rail-line"></div><div class="timeline-rail-flow"></div></div></div>
+                <div id="diary-list" class="relative"><div id="task-lines-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></div></div>
+                <div id="origin-placeholder" class="list-placeholder"><span>The Beginning</span></div>
             </div>
 
-            <div id="view-calendar" class="hidden-view pb-24 pt-24">
-                <div class="bg-[var(--card-bg)] rounded-2xl p-4 sm:p-8 shadow-xl border border-[var(--line)]/50 min-h-[50vh]">
+            <div id="view-dashboard" class="hidden-view pt-24 pb-24">
+                <div class="max-w-2xl mx-auto px-4">
+                    <h2 class="text-2xl font-display font-bold mb-4 text-[var(--text)]">Life Rhythm</h2>
+                    <div class="dashboard-grid mb-8">
+                        <div class="stat-card" style="--stat-accent: #ef4444;">
+                            <div class="stat-label text-[#ef4444]"><i data-lucide="flame" class="inline w-3 h-3 mr-1"></i> Exercise</div>
+                            <div class="stat-value" id="stat-exercise">--</div>
+                            <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#ef4444]" id="bar-exercise"></div></div>
+                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-exercise-disp">1</span>h</div>
+                        </div>
+                        <div class="stat-card" style="--stat-accent: #3b82f6;">
+                            <div class="stat-label text-[#3b82f6]"><i data-lucide="moon" class="inline w-3 h-3 mr-1"></i> Sleep</div>
+                            <div class="stat-value" id="stat-sleep">--</div>
+                            <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#3b82f6]" id="bar-sleep"></div></div>
+                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-sleep-disp">8</span>h</div>
+                        </div>
+                        <div class="stat-card" style="--stat-accent: #10b981;">
+                            <div class="stat-label text-[#10b981]"><i data-lucide="zap" class="inline w-3 h-3 mr-1"></i> Focus</div>
+                            <div class="stat-value" id="stat-focus">--</div>
+                            <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#10b981]" id="bar-focus"></div></div>
+                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-focus-disp">4</span>h</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-[var(--card-bg)] rounded-xl p-6 border border-[var(--line)] shadow-lg backdrop-blur-xl mb-8">
+                        <div class="flex justify-between items-center mb-6 border-b border-[var(--line)] pb-2">
+                            <h3 class="text-lg font-bold text-[var(--text)] flex items-center gap-2"><i data-lucide="utensils" class="w-5 h-5 text-orange-500"></i> Nutrition</h3>
+                            <div class="text-right"><div class="text-[10px] text-[var(--text-sec)] uppercase font-bold">Target / Actual</div><div class="text-xs font-bold font-num"><span class="opacity-50" id="target-calories-disp">2000</span> / <span class="text-orange-500" id="stat-calories-total">0</span> kcal</div></div>
+                        </div>
+                        <div class="h-40 flex items-end gap-2 relative" id="calorie-chart">
+                             <div class="absolute left-0 w-full border-t border-dashed border-red-400 opacity-50 z-0" style="bottom: 0; height: 1px; pointer-events: none;" id="cal-target-line"></div>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-display font-bold mb-4 text-[var(--text)]">Pending Tasks</h2>
+                    <div id="dashboard-todo-list" class="bg-[var(--card-bg)] rounded-xl p-4 border border-[var(--line)] shadow-lg backdrop-blur-xl min-h-[100px]"></div>
+                </div>
+            </div>
+
+            <div id="view-calendar" class="hidden-view pb-24 pt-24 px-4">
+                <div class="bg-[var(--card-bg)] max-w-3xl mx-auto rounded-2xl p-4 shadow-xl border border-[var(--card-border)] min-h-[50vh] flex flex-col">
                     <div class="flex justify-between items-center mb-6">
                         <div class="nav-capsule scale-90">
                              <button onclick="UI.switchSubView('grid')" id="btn-sub-grid" class="nav-btn active"><i data-lucide="calendar" class="w-4 h-4"></i></button>
                              <button onclick="UI.switchSubView('gallery')" id="btn-sub-gallery" class="nav-btn"><i data-lucide="image" class="w-4 h-4"></i></button>
+                             <button onclick="UI.switchSubView('data')" id="btn-sub-data" class="nav-btn"><i data-lucide="database" class="w-4 h-4"></i></button>
                          </div>
-                        <button onclick="DataManager.updateHolidays()" class="text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)] px-3 py-1.5 rounded-full hover:bg-[var(--primary)] hover:text-white transition-colors">Update Holidays</button>
+                        <button onclick="DataManager.updateHolidays()" class="text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)] px-3 py-1 rounded-full">Sync</button>
                     </div>
                     
                     <div id="calendar-container">
-                        <div class="flex justify-between items-center mb-6 border-b border-[var(--line)] pb-4">
-                            <button onclick="UI.changeMonth(-1)" class="p-2 hover:bg-[var(--line)] rounded-full active:scale-90 transition-all"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
-                            <div class="text-center cursor-pointer" onclick="UI.resetCalendarToday()">
-                                <h2 class="text-3xl sm:text-4xl font-display font-bold text-[var(--primary)] mb-1" id="cal-month-display">Nov</h2>
-                                <div class="text-sm sm:text-lg font-num text-[var(--text-sec)] tracking-widest" id="cal-year-display">2025</div>
+                        <div class="flex justify-between items-center mb-4 border-b border-[var(--line)] pb-4">
+                            <button onclick="UI.changeMonth(-1)"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
+                            <div class="text-center" onclick="UI.resetCalendarToday()">
+                                <h2 class="text-3xl font-display font-bold text-[var(--primary)]" id="cal-month-display">Nov</h2>
+                                <div class="text-xs font-num text-[var(--text-sec)] tracking-widest" id="cal-year-display">2025</div>
                             </div>
-                            <button onclick="UI.changeMonth(1)" class="p-2 hover:bg-[var(--line)] rounded-full active:scale-90 transition-all"><i data-lucide="chevron-right" class="w-6 h-6 text-[var(--text)]"></i></button>
+                            <button onclick="UI.changeMonth(1)"><i data-lucide="chevron-right" class="w-6 h-6 text-[var(--text)]"></i></button>
                         </div>
-                        <div class="grid grid-cols-7 gap-2 sm:gap-4 text-center mb-2 text-[10px] sm:text-xs font-bold font-num text-[var(--text-sec)] uppercase tracking-widest"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
-                        <div class="grid grid-cols-7 gap-2 sm:gap-4" id="calendar-grid"></div>
+                        <div class="grid grid-cols-7 gap-2 text-center mb-2 text-[10px] font-bold text-[var(--text-sec)] opacity-50"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+                        <div class="grid grid-cols-7 gap-2" id="calendar-grid"></div>
                     </div>
+
                     <div id="gallery-container" class="hidden">
-                        <div id="gallery-grid-view"></div>
-                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm" data-i18n="empty_gallery">No images found.</p></div>
+                        <div id="gallery-grid-view" class="grid grid-cols-3 gap-2"></div>
+                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm">No images.</p></div>
                     </div>
-                </div>
-                <div class="mt-8" id="archive-list-section">
-                    <div class="flex justify-between items-center mb-4 px-2">
-                        <h3 class="font-display text-lg font-bold text-[var(--text)] flex items-center gap-2"><i data-lucide="folder-open" class="w-4 h-4 text-[var(--primary)]"></i> <span data-i18n="archive_title">Archive</span></h3>
-                        <button onclick="DataManager.exportMonthMarkdown()" class="text-[10px] font-bold font-num bg-[var(--primary)] text-white px-3 py-1.5 rounded-full shadow active:scale-95" data-i18n="btn_export">EXPORT MD</button>
+
+                    <div id="data-container" class="hidden flex-1">
+                        <h3 class="font-display font-bold text-lg mb-4 text-[var(--text)]">Data Center</h3>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <button onclick="DataManager.exportBackup()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="download" class="w-6 h-6"></i><span class="text-xs font-bold uppercase">Backup JSON</span></button>
+                            <button onclick="document.getElementById('backup-input').click()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="upload" class="w-6 h-6"></i><span class="text-xs font-bold uppercase">Restore JSON</span></button>
+                            <input type="file" id="backup-input" class="hidden" onchange="DataManager.importBackup(this)">
+                        </div>
+                        <div class="flex justify-between items-center mb-2 border-b border-[var(--line)] pb-2">
+                            <span class="text-xs font-bold text-[var(--text-sec)] uppercase tracking-wider">All Entries</span>
+                            <button onclick="UI.toggleSelectionMode()" class="bg-[var(--text)] text-[var(--card-bg)] text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1" id="btn-select-mode-cal"><i data-lucide="check-square" class="w-3 h-3"></i> Select</button>
+                        </div>
+                        <div id="archive-list" class="space-y-2 max-h-[40vh] overflow-y-auto pr-2"></div>
                     </div>
-                    <div id="month-entries" class="space-y-3"></div>
-                    <div id="month-empty-state" class="hidden text-center py-12 text-[var(--text-sec)]"><p class="italic opacity-70 text-sm" data-i18n="empty_month">No entries for this period.</p></div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="prompt-bubble" class="hidden">Thinking of something?</div>
-    <button onclick="UI.openEditor()" onmouseenter="UI.showPromptBubble()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 sm:w-16 sm:h-16 bg-[var(--primary)] text-white rounded-full shadow-2xl flex items-center justify-center border-4 border-[rgba(255,255,255,0.2)] backdrop-blur-sm z-40 active:scale-90 transition-transform">
-        <i data-lucide="pen-tool" class="w-6 h-6 sm:w-7 sm:h-7"></i>
+    <div id="prompt-bubble" class="hidden">What's on your mind?</div>
+    <button onclick="UI.openEditor()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 bg-[var(--primary)] text-white rounded-full shadow-xl flex items-center justify-center z-40 active:scale-90 transition-transform">
+        <i data-lucide="pen-tool" class="w-6 h-6"></i>
     </button>
 
-    <div id="editor-modal" class="modal-overlay fixed inset-0 hidden z-50">
-        <div class="absolute inset-0 bg-black/30 backdrop-blur-sm transition-opacity" onclick="UI.closeEditor()"></div>
-        <div class="modal-content absolute bottom-0 w-full h-[92vh] sm:h-[85vh] sm:max-w-2xl sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:rounded-2xl shadow-2xl transform translate-y-full flex flex-col transition-transform duration-500" id="editor-panel">
-            <div class="flex justify-between items-center p-4 sm:p-6 border-b border-[var(--line)]/50 bg-[var(--bg)]/50">
-                <div class="flex items-center gap-2">
-                    <button onclick="UI.closeEditor()" class="p-2 -ml-2 sm:hidden text-[var(--text-sec)]"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
-                    <input type="date" id="editor-date" class="bg-transparent font-num text-sm font-bold outline-none text-[var(--text)] border-none p-0">
-                    <input type="time" id="editor-time" class="bg-transparent font-num text-sm outline-none text-[var(--text-sec)] border-none">
+    <div id="editor-modal" class="modal-overlay fixed inset-0 hidden z-50 flex items-end sm:items-center justify-center">
+        <div class="absolute inset-0 bg-black/20 backdrop-blur-sm" onclick="UI.closeEditor()"></div>
+        <div class="modal-content w-full h-[92vh] sm:h-[85vh] sm:max-w-2xl sm:rounded-2xl shadow-2xl flex flex-col relative z-10 transition-transform transform translate-y-full" id="editor-panel">
+            <div class="flex justify-between items-center p-4 border-b border-[var(--line)]">
+                <button onclick="UI.closeEditor()"><i data-lucide="x" class="w-6 h-6 text-[var(--text-sec)]"></i></button>
+                <div class="flex gap-2 font-num font-bold text-[var(--text)]">
+                    <input type="date" id="editor-date" class="bg-transparent border-none outline-none">
+                    <input type="time" id="editor-time" class="bg-transparent border-none outline-none text-[var(--primary)]">
                 </div>
-                <button onclick="DataManager.saveFromEditor()" class="text-[var(--primary)] font-bold font-num text-sm uppercase tracking-wider px-2 py-1" data-i18n="btn_save">Save</button>
+                <button onclick="DataManager.saveFromEditor()" class="text-[var(--primary)] font-bold text-sm uppercase">Save</button>
             </div>
-            <div class="p-4 sm:p-8 flex-1 overflow-y-auto flex flex-col">
+            <div class="p-4 flex-1 overflow-y-auto">
                 <input type="hidden" id="editor-id">
-                <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl sm:text-3xl font-bold mb-4 outline-none placeholder-[var(--text-sec)]/40 text-[var(--text)] font-display">
-                
-                <div class="flex flex-col gap-4 mb-4">
-                    <div class="flex flex-wrap gap-4 items-center">
-                         <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
-                            <button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button>
-                            <button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button>
-                            <button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button>
-                        </div>
-                        <div class="flex gap-1 p-1 bg-[var(--line)]/20 rounded-lg shrink-0">
-                            <button onclick="UI.selectWeather('sun')" class="weather-btn p-2 rounded" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button>
-                            <button onclick="UI.selectWeather('cloud')" class="weather-btn p-2 rounded" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button>
-                            <button onclick="UI.selectWeather('rain')" class="weather-btn p-2 rounded" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-4 p-2 bg-[var(--line)]/10 rounded-lg">
-                        <div class="flex items-center gap-2">
-                            <input type="checkbox" id="editor-anni" class="w-4 h-4 rounded border-[var(--line)] text-[var(--primary)] focus:ring-[var(--primary)]" onchange="document.getElementById('anni-type-wrapper').style.display = this.checked ? 'block' : 'none'">
-                            <label for="editor-anni" class="text-xs font-bold uppercase text-[var(--text-sec)] tracking-wider">Anniversary</label>
-                        </div>
-                        <div id="anni-type-wrapper" style="display:none;">
-                            <select id="editor-anni-type" class="bg-transparent text-xs font-bold text-[var(--text)] border border-[var(--line)] rounded px-2 py-1">
-                                <option value="once">Once</option>
-                                <option value="annual">Annual</option>
-                            </select>
-                        </div>
+                <input type="number" id="editor-calories" class="hidden">
+
+                <div class="flex gap-2 mb-4 p-1 bg-[var(--line)] rounded-lg">
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors bg-[var(--card-bg)] shadow-sm text-[var(--text)]" id="type-diary" onclick="UI.setEditorType('diary')">Diary</button>
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-task" onclick="UI.setEditorType('task')">Routine</button>
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-anni" onclick="UI.setEditorType('anni')">Anniversary</button>
+                </div>
+
+                <div id="task-settings" class="hidden mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg animate-in slide-in-from-top-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs font-bold text-yellow-800 uppercase"><i data-lucide="repeat" class="inline w-3 h-3 mr-1"></i> Recurrence</span>
+                        <select id="editor-recurrence" class="bg-white text-xs font-bold text-yellow-900 border border-yellow-300 rounded px-2 py-1 outline-none">
+                            <option value="none">One-off</option>
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="workday">Workdays</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="editor-tools-wrapper">
-                    <div class="editor-row no-scrollbar">
-                        <button class="block-btn" onclick="UI.editorInsertMD('# ')"><i data-lucide="heading-1"></i> H1</button>
-                        <button class="block-btn" onclick="UI.editorInsertMD('## ')"><i data-lucide="heading-2"></i> H2</button>
-                        <button class="block-btn" onclick="UI.editorInsertMD('> ')"><i data-lucide="quote"></i></button>
-                        <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')"><i data-lucide="check-square"></i></button>
-                    </div>
-                    <div class="editor-row no-scrollbar border-t border-[var(--line)]/20 pt-2">
-                        <button class="block-btn" onclick="UI.triggerImageUpload()"><i data-lucide="image"></i> Image</button>
-                        <button class="block-btn text-[var(--primary)]" onclick="DataManager.fetchInspiration()" id="btn-inspire">
-                            <i data-lucide="sparkles"></i> Inspire
-                        </button>
+                <div class="mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar">
+                    <span class="text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider mr-1">Track:</span>
+                    <button onclick="UI.quickSaveTask('Exercise')" class="quick-task-btn group border-red-200 text-red-600 hover:bg-red-50"><i data-lucide="flame" class="w-3 h-3"></i><span>Exercise</span></button>
+                    <button onclick="UI.quickSaveTask('Sleep')" class="quick-task-btn group border-blue-200 text-blue-600 hover:bg-blue-50"><i data-lucide="moon" class="w-3 h-3"></i><span>Sleep</span></button>
+                    <button onclick="UI.quickSaveTask('Focus')" class="quick-task-btn group border-emerald-200 text-emerald-600 hover:bg-emerald-50"><i data-lucide="zap" class="w-3 h-3"></i><span>Focus</span></button>
+                </div>
+
+                <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl font-bold mb-4 outline-none text-[var(--text)] font-display">
+                
+                <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
+                     <div class="flex gap-1 p-1 bg-[var(--line)] rounded-lg"><button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button><button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button><button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button></div>
+                     <div class="flex gap-1 p-1 bg-[var(--line)] rounded-lg"><button onclick="UI.selectWeather('sun')" class="weather-btn p-2 rounded" id="weather-sun"><i data-lucide="sun" class="w-5 h-5"></i></button><button onclick="UI.selectWeather('cloud')" class="weather-btn p-2 rounded" id="weather-cloud"><i data-lucide="cloud" class="w-5 h-5"></i></button><button onclick="UI.selectWeather('rain')" class="weather-btn p-2 rounded" id="weather-rain"><i data-lucide="cloud-rain" class="w-5 h-5"></i></button></div>
+                </div>
+
+                <div class="editor-tools-wrapper flex gap-2 mb-2 overflow-x-auto">
+                    <button class="block-btn" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-4 h-4"></i> Photo</button>
+                    <button class="block-btn" onclick="DataManager.fetchInspiration()"><i data-lucide="sparkles" class="w-4 h-4"></i> Inspire</button>
+                    <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')"><i data-lucide="check-square" class="w-4 h-4"></i> Todo</button>
+                </div>
+                
+                <textarea id="editor-content" class="w-full h-[20vh] bg-[var(--card-bg)]/50 p-3 rounded-lg border border-[var(--line)] outline-none resize-none text-[var(--text)] leading-relaxed" placeholder="Start writing..."></textarea>
+                
+                <div id="image-preview-area" class="mt-4 hidden p-2 border border-[var(--line)] rounded-lg bg-[var(--bg)]/50">
+                    <img id="preview-img" class="max-h-40 rounded-lg mb-2">
+                    <div class="flex gap-2 justify-between">
+                        <button onclick="UI.analyzeFoodImage()" class="bg-orange-500 text-white text-xs font-bold px-3 py-2 rounded flex items-center gap-2"><i data-lucide="utensils" class="w-3 h-3"></i> Analyze Calories</button>
+                        <button onclick="UI.clearImage()" class="text-red-500 text-xs font-bold">Remove</button>
                     </div>
                 </div>
 
-                <textarea id="editor-content" class="flex-1 w-full outline-none bg-transparent resize-none p-2 h-[50vh]" placeholder="Write your story..."></textarea>
-                
-                <div id="image-preview-area" class="mt-4 hidden">
-                    <img id="preview-img" class="max-h-32 rounded-lg shadow-md border border-[var(--line)]">
-                    <div class="flex gap-2 mt-2">
-                         <button onclick="DataManager.generateStoryFromImage()" class="bg-[var(--primary)] text-white px-3 py-1 rounded text-xs font-bold shadow flex items-center gap-1" id="btn-vision">
-                             <i data-lucide="wand-2" class="w-3 h-3"></i> Analyze & Write
-                         </button>
-                         <button onclick="UI.clearImage()" class="text-xs text-red-500 font-bold uppercase px-2 py-1">Remove</button>
-                    </div>
+                <div class="hidden">
+                    <input type="checkbox" id="editor-is-task">
+                    <input id="editor-task-type">
+                    <input id="editor-task-cat">
+                    <input id="editor-entry-type" value="diary">
+                    <input type="checkbox" id="editor-anni">
+                    <input id="editor-anni-type">
                 </div>
             </div>
             <input type="file" id="image-input" accept="image/*" class="hidden" onchange="UI.handleImageUpload(this)">
         </div>
     </div>
 
-    <div id="info-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[65]">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeInfo()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)] animate-in slide-in-from-bottom-10 duration-300">
-            <div class="bg-[var(--text)] p-4 text-[var(--card-bg)] flex justify-between items-center">
-                <h2 class="font-display font-bold text-lg" data-i18n="info_title">About Timeline</h2>
-                <button onclick="UI.closeInfo()"><i data-lucide="x" class="w-5 h-5"></i></button>
+    <div id="info-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="UI.closeInfo()"></div>
+        <div class="bg-[var(--card-bg)] w-full max-w-md p-6 rounded-2xl relative z-10 border border-[var(--card-border)] shadow-2xl flex flex-col h-[85vh]">
+            <div class="p-4 border-b border-[var(--line)] flex justify-between items-center">
+                <h2 class="text-xl font-bold font-display text-[var(--text)]">Settings</h2>
+                <button onclick="UI.closeInfo()"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="p-6 space-y-6 text-[var(--text)] max-h-[80vh] overflow-y-auto">
-                <div class="flex border-b border-[var(--line)] mb-4">
-                    <button class="flex-1 py-2 font-bold text-sm border-b-2 border-[var(--primary)] text-[var(--primary)]">Settings</button>
-                    <button class="flex-1 py-2 font-bold text-sm border-b-2 border-transparent opacity-50 hover:opacity-100" onclick="document.getElementById('feature-guide').classList.remove('hidden'); this.classList.add('border-[var(--primary)]', 'text-[var(--primary)]', 'opacity-100'); this.previousElementSibling.classList.remove('border-[var(--primary)]', 'text-[var(--primary)]'); this.previousElementSibling.classList.add('opacity-50')">Features</button>
+            <div class="p-6 flex-1 overflow-y-auto text-[var(--text)]">
+                <div class="flex justify-center gap-4 mb-6 border-b border-[var(--line)] pb-4">
+                    <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white text-xs font-bold" id="lang-en">English</button>
+                    <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white text-xs font-bold" id="lang-zh">中文</button>
                 </div>
-
-                <div id="settings-content">
-                    <div class="flex justify-center gap-4 border-b border-[var(--line)] pb-4">
-                        <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-en">English</button>
-                        <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold" id="lang-zh">中文</button>
-                    </div>
-                    <div class="pt-4 border-t border-[var(--line)]">
-                        <h3 class="font-bold text-[var(--text)] mb-3 text-sm flex items-center gap-2" data-i18n="data_title">Data Management</h3>
-                        <div class="bg-[var(--bg)]/50 p-4 rounded-lg border border-[var(--line)] mb-4">
-                            <h4 class="text-xs font-bold uppercase text-[var(--text-sec)] mb-2" data-i18n="storage_title">Storage Usage</h4>
-                            <div class="w-full bg-[var(--line)]/30 rounded-full h-2 mb-2 overflow-hidden"><div id="storage-bar" class="bg-[var(--primary)] h-full w-0 transition-all duration-1000"></div></div>
-                            <div class="flex justify-between text-[10px] font-num text-[var(--text)]"><span id="entry-count">0 Entries</span><span id="storage-size">Checking...</span></div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-4 mb-4">
-                            <button onclick="DataManager.exportBackup()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="download" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_backup">Backup</span></button>
-                            <button onclick="document.getElementById('import-input').click()" class="flex flex-col items-center gap-2 p-3 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors"><i data-lucide="upload" class="w-5 h-5 text-[var(--primary)]"></i><span class="text-[10px] font-bold uppercase" data-i18n="btn_restore">Restore</span></button>
-                        </div>
-                        <button onclick="DataManager.exportPDF()" class="w-full mb-4 py-3 flex items-center justify-center gap-2 bg-[var(--bg)]/50 border border-[var(--line)] rounded-xl hover:bg-[var(--primary)]/10 transition-colors font-bold uppercase text-xs">
-                            <i data-lucide="file-text" class="w-4 h-4 text-[var(--primary)]"></i> Download PDF Book
-                        </button>
-                        <input type="file" id="import-input" accept=".json" class="hidden" onchange="DataManager.importBackup(this)">
-                        <button onclick="DataManager.nukeData()" class="w-full py-2 text-red-500 text-xs font-bold uppercase hover:bg-red-50 rounded-lg transition-colors border border-red-200" data-i18n="btn_reset">Reset All Data</button>
+                
+                <div class="mb-6">
+                    <h3 class="text-xs font-bold text-[var(--text-sec)] mb-2 uppercase tracking-wider">Font Size</h3>
+                    <div class="flex gap-2">
+                        <button onclick="UI.setFontSize('small')" class="flex-1 py-2 rounded border border-[var(--line)] text-xs font-bold">A-</button>
+                        <button onclick="UI.setFontSize('medium')" class="flex-1 py-2 rounded border border-[var(--line)] text-xs font-bold">A</button>
+                        <button onclick="UI.setFontSize('large')" class="flex-1 py-2 rounded border border-[var(--line)] text-sm font-bold">A+</button>
                     </div>
                 </div>
-                <div class="simon-sig pt-4 border-t border-[var(--line)]">developed by simon</div>
+
+                <div class="mb-6 p-4 bg-[var(--line)]/20 rounded-lg">
+                    <h3 class="font-bold uppercase text-xs tracking-wider mb-3">Daily Goals</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Calories</label><input type="number" id="goal-cals" class="w-full p-1 rounded text-xs bg-white/50" placeholder="2000" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Sleep (h)</label><input type="number" id="goal-sleep" class="w-full p-1 rounded text-xs bg-white/50" placeholder="8" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Focus (h)</label><input type="number" id="goal-focus" class="w-full p-1 rounded text-xs bg-white/50" placeholder="4" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Exercise (h)</label><input type="number" id="goal-exercise" class="w-full p-1 rounded text-xs bg-white/50" placeholder="1" onchange="UI.saveGoals()"></div>
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <div><label class="text-xs font-bold text-[var(--text-sec)] block mb-1">API KEY</label><input type="password" id="user-api-key" class="w-full bg-[var(--line)] rounded p-2 text-xs font-mono"></div>
+                    <div><label class="text-xs font-bold text-[var(--text-sec)] block mb-1">Personal Info</label><input type="text" id="user-zodiac" class="w-full bg-[var(--line)] rounded p-2 text-xs mb-2" placeholder="Zodiac"><input type="text" id="user-bazi" class="w-full bg-[var(--line)] rounded p-2 text-xs" placeholder="Birth Date"></div>
+                    <div class="prose prose-sm text-[var(--text)] opacity-80 text-xs"><h3 class="font-bold uppercase tracking-wider mb-2">Manual</h3><ul class="list-disc pl-4 space-y-2"><li><strong>Flow:</strong> Timeline stream.</li><li><strong>Vision:</strong> Food Analysis.</li><li><strong>Oracle:</strong> AI Advice.</li></ul></div>
+                </div>
             </div>
+            <div class="p-4 border-t border-[var(--line)] text-center"><p class="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 font-display">Developed by Simon</p></div>
         </div>
     </div>
 
-    <div id="summary-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[60]">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-md" onclick="UI.closeWeeklySummary()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-md rounded-2xl shadow-2xl overflow-hidden relative z-50 border border-[var(--line)]">
-            <div class="bg-[var(--primary)] p-6 text-white relative overflow-hidden">
-                <div class="absolute inset-0 opacity-20 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')]"></div>
-                <h2 class="text-2xl font-display font-bold relative z-10" data-i18n="ai_title">AI Oracle</h2>
-                <p class="text-xs opacity-80 relative z-10">AI Summary & Fortune</p>
-                <button onclick="UI.closeWeeklySummary()" class="absolute top-4 right-4 text-white/80"><i data-lucide="x" class="w-5 h-5"></i></button>
-            </div>
-            <div class="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
-                <div class="flex justify-center gap-2 mb-4">
-                    <button onclick="UI.setPersona('western')" id="persona-western" class="px-3 py-1 text-xs font-bold rounded-full bg-[var(--primary)] text-white">🔮 Western</button>
-                    <button onclick="UI.setPersona('eastern')" id="persona-eastern" class="px-3 py-1 text-xs font-bold rounded-full bg-[var(--line)] text-[var(--text)]">☯️ Eastern</button>
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div><label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_zodiac">Zodiac</label><input type="text" id="user-zodiac" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="e.g. Scorpio"></div>
-                    <div><label class="text-[10px] uppercase font-bold text-[var(--text-sec)]" data-i18n="label_birth">Birth Date</label><input type="text" id="user-bazi" class="w-full bg-[var(--bg)]/50 border border-[var(--line)] rounded p-2 text-sm outline-none" placeholder="YYYY-MM-DD"></div>
-                </div>
-                <button onclick="UI.generateReport()" class="w-full bg-[var(--primary)] text-white py-3 rounded-lg font-bold text-sm shadow-lg active:scale-95 transition-transform" data-i18n="btn_consult">Consult</button>
-                <div id="summary-ai-content" class="md-render text-sm leading-relaxed font-serif border-t border-[var(--line)] pt-4 mt-4 empty:hidden"></div>
-                <div class="mt-2 border-t border-[var(--line)] pt-2">
-                    <input type="password" id="user-api-key" class="w-full text-xs text-center bg-transparent border-none outline-none opacity-30 hover:opacity-100 transition-opacity" placeholder="Gemini API Key">
-                </div>
-            </div>
-        </div>
-    </div>
+    <div id="summary-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="UI.closeWeeklySummary()"></div><div id="oracle-card" class="oracle-western w-full max-w-2xl h-[85vh] rounded-2xl relative z-10 border border-[var(--card-border)] flex flex-col shadow-2xl overflow-hidden transition-colors duration-500"><div class="oracle-decor-top"></div><div class="p-6 border-b border-white/10 flex justify-between items-center relative z-20"><h2 class="font-display font-bold text-2xl text-white drop-shadow-md">AI Oracle</h2><button onclick="UI.closeWeeklySummary()" class="text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div><div id="oracle-input-view" class="p-8 flex flex-col items-center justify-center h-full relative z-20 space-y-6"><div class="text-center text-white/80 mb-4"><i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-2 opacity-80"></i><p class="text-sm">Reveal the path of your week...</p></div><div class="w-full max-w-xs space-y-4"><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block">Zodiac</label><input type="text" id="oracle-zodiac" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="e.g. Leo"></div><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block">Birth Date</label><input type="text" id="oracle-bazi" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="YYYY-MM-DD"></div></div><div class="flex gap-4 mt-4"><button onclick="UI.setPersona('western')" class="persona-btn active" id="btn-western">🔮 Western</button><button onclick="UI.setPersona('eastern')" class="persona-btn" id="btn-eastern">☯️ Eastern</button></div><button onclick="UI.generateReport()" class="mt-4 bg-white text-black font-bold px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-transform flex items-center gap-2">Start Divination <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div><div id="oracle-result-view" class="hidden p-8 overflow-y-auto flex-1 text-white/90 md-render relative z-20 font-serif leading-relaxed text-lg"><div id="summary-ai-content"></div><button onclick="UI.resetOracle()" class="mt-8 text-xs opacity-50 hover:opacity-100 underline text-center w-full">Ask Again</button></div></div></div>
 
-    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50">
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--line)] transition-all animate-in zoom-in-95 duration-300">
-            <div class="p-6 sm:p-8 overflow-y-auto no-scrollbar flex-1">
-                <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl sm:text-3xl font-bold font-display text-[var(--text)] leading-tight" id="detail-title"></h2>
-                    <button onclick="UI.closeDetail()" class="p-1 bg-[var(--line)]/20 rounded-full"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button>
-                </div>
-                <div class="flex gap-3 mb-6 text-xs font-num text-[var(--text-sec)] uppercase tracking-widest items-center">
-                    <span id="detail-date"></span> <span class="text-[var(--primary)]" id="detail-time"></span>
-                    <div id="detail-icons" class="flex gap-2 ml-auto text-[var(--text)]"></div>
-                </div>
-                <div id="detail-image-container" class="mb-6 hidden">
-                    <img id="detail-image" class="w-full rounded-xl shadow-md object-cover max-h-64">
-                </div>
-                <div id="detail-content" class="md-render text-lg leading-loose text-[var(--text)] font-serif opacity-90"></div>
-            </div>
-            <div class="p-4 border-t border-[var(--line)]/30 flex justify-between bg-[var(--card-bg)]/50">
-                <button onclick="UI.confirmDeleteEntry()" class="text-red-500 p-2 flex gap-2 items-center"><i data-lucide="trash-2" class="w-5 h-5"></i> <span class="text-xs font-bold uppercase" data-i18n="btn_delete">Delete</span></button>
-                <button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] p-2 flex gap-2 items-center"><span class="text-xs font-bold uppercase" data-i18n="btn_edit">Edit</span> <i data-lucide="edit-3" class="w-5 h-5"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-        <div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center animate-in zoom-in-95 duration-200">
-            <div class="mx-auto w-12 h-12 bg-red-100 text-red-500 rounded-full flex items-center justify-center mb-4">
-                <i data-lucide="alert-triangle" class="w-6 h-6"></i>
-            </div>
-            <h3 class="text-lg font-bold text-[var(--text)] mb-2" data-i18n="delete_title">Delete Memory?</h3>
-            <p class="text-sm text-[var(--text-sec)] mb-6" data-i18n="delete_desc">This action cannot be undone.</p>
-            <div class="flex gap-3 justify-center">
-                <button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold" data-i18n="btn_cancel">Cancel</button>
-                <button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold shadow-md hover:bg-red-600" data-i18n="btn_delete">Delete</button>
-            </div>
-        </div>
-    </div>
+    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div><div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--card-border)]"><div class="p-6 overflow-y-auto"><div class="flex justify-between items-start mb-4"><h2 class="text-2xl font-bold font-display text-[var(--text)]" id="detail-title"></h2><button onclick="UI.closeDetail()"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button></div><div class="text-xs font-bold text-[var(--text-sec)] mb-4 flex gap-2 items-center flex-wrap"><span id="detail-date"></span> <span id="detail-lunar" class="opacity-60 font-serif border-l border-[var(--line)] pl-2"></span> <span class="text-[var(--primary)]" id="detail-time"></span><span id="detail-calories" class="ml-auto text-orange-500 font-bold hidden"></span></div><div id="detail-image-container" class="mb-4 hidden"><img id="detail-image" class="w-full rounded-lg shadow-sm"></div><div id="detail-content" class="md-render text-[var(--text)] leading-loose"></div></div><div class="p-4 border-t border-[var(--line)] flex justify-between bg-[var(--card-bg)]"><button onclick="UI.confirmDeleteEntry()" class="text-red-500 text-xs font-bold uppercase">Delete</button><button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] text-xs font-bold uppercase">Edit</button></div></div></div>
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]"><div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div><div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center"><h3 class="text-lg font-bold text-[var(--text)] mb-2">Delete?</h3><p class="text-sm text-[var(--text-sec)] mb-6">Undone.</p><div class="flex gap-3 justify-center"><button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold">Cancel</button><button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">Delete</button></div></div></div>
 
     <script src="db.js"></script>
     <script src="app.js"></script>
