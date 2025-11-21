@@ -78,7 +78,18 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 .glow-purple { box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); border-color: rgba(168, 85, 247, 0.5); animation: pulseGlow 3s infinite ease-in-out; }
 @keyframes pulseGlow { 0% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); } 50% { box-shadow: 0 0 35px rgba(168, 85, 247, 0.8); } 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); } }
 
-#filter-fab-group { position: fixed; bottom: 100px; left: 24px; display: flex; flex-direction: column; gap: 16px; z-index: 45; align-items: flex-start; transition: opacity 0.3s; pointer-events: auto; }
+/* FIX: FORCE POINTER EVENTS AND Z-INDEX FOR FLOATING BUTTONS */
+#filter-fab-group, .fab-ai-btn, .fab-btn { 
+    pointer-events: auto !important; 
+    z-index: 200 !important; 
+    cursor: pointer !important;
+}
+
+/* CRITICAL FIX: MODALS MUST BE HIGHER THAN BUTTONS (9999 > 200) */
+.modal-overlay { z-index: 9998 !important; }
+.modal-content { z-index: 9999 !important; }
+
+#filter-fab-group { position: fixed; bottom: 100px; left: 24px; display: flex; flex-direction: column; gap: 16px; align-items: flex-start; transition: opacity 0.3s; }
 .filter-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .filter-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.5); transition: all 0.3s; }
 .f-anni.active { background-color: #fbbf24; border-color: transparent; box-shadow: 0 0 15px #fbbf24; transform: scale(1.2); }

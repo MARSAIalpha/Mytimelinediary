@@ -154,6 +154,7 @@ const UI = {
         document.getElementById('goal-exercise').value = this.state.goals.exercise;
         document.getElementById('goal-meditation').value = this.state.goals.meditation || 15;
         document.getElementById('goal-cals').value = this.state.goals.cals;
+        this.switchView('timeline');
     },
     saveGoals: function() {
         this.state.goals = {
@@ -177,7 +178,7 @@ const UI = {
         const isTl = (v === 'timeline');
         document.getElementById('center-guide-layer').style.opacity = isTl ? '1' : '0'; 
         
-        // --- FIX: FORCE HIDE VISIBILITY TOGGLE FOR FILTER, AI, & WRITE BUTTONS ---
+        // --- FIX: VISIBILITY TOGGLE FOR FILTER, AI, & WRITE BUTTONS ---
         const filterGroup = document.getElementById('filter-fab-group');
         const aiBtn = document.getElementById('btn-ai-summary');
         const writeBtn = document.getElementById('btn-write');
@@ -200,7 +201,7 @@ const UI = {
         ['grid','gallery','data'].forEach(k=>{document.getElementById(`btn-sub-${k}`).classList.remove('active');}); document.getElementById(`btn-sub-${v}`).classList.add('active');
         document.getElementById('calendar-container').classList.add('hidden'); document.getElementById('gallery-container').classList.add('hidden'); document.getElementById('data-container').classList.add('hidden');
         
-        // --- FIX: HOLIDAY BUTTON ONLY IN GRID ---
+        // --- HOLIDAY BUTTON LOGIC ---
         const holBtn = document.getElementById('btn-update-holidays');
         if (v === 'grid') {
              holBtn.classList.remove('hidden');
@@ -353,38 +354,71 @@ const UI = {
     endTask: async function(category) { if(confirm(`End ${category} session?`)) { const payload = { ts: Date.now(), title: `${category} Finished`, content: `Completed ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'end', taskCat: category, img: null }; await DataManager.add(payload); } },
     updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
     analyzeFoodImage: async function() {
-        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "...";
-        try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: `Identify food. Return JSON: {"food": "Name", "calories": 500, "desc": "Short description"}. No markdown.`},{inlineData: {mimeType: img.split(';')[0].split(':')[1], data: img.split(',')[1]}}]}]}) }); const json = await res.json(); const txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim(); const data = JSON.parse(txt); document.getElementById('editor-title').value = data.food; document.getElementById('editor-content').value = data.desc; document.getElementById('editor-calories').value = data.calories; alert(`Identified: ${data.food} (~${data.calories} kcal)`); } catch(e) { console.error(e); alert("AI Analysis Failed"); } finally { btn.innerText = originalText; }
+        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value; if (!k || k === UI.DEFAULT_KEY) return alert("Please enter your API Key in Settings first!");
+        const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "...";
+        try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: `Identify food. Return JSON: {"food": "Name", "calories": 500, "desc": "Short description"}. No markdown.`},{inlineData: {mimeType: img.split(';')[0].split(':')[1], data: img.split(',')[1]}}]}]}) }); const json = await res.json(); const txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim(); const data = JSON.parse(txt); document.getElementById('editor-title').value = data.food; document.getElementById('editor-content').value = data.desc; document.getElementById('editor-calories').value = data.calories; alert(`Identified: ${data.food} (~${data.calories} kcal)`); } catch(e) { console.error(e); alert("AI Analysis Failed: " + e.message); } finally { btn.innerText = originalText; }
     },
-    renderDashboard: async function() {
-        const allData = await DataManager.getAll(); const now = new Date(); const weekData = allData.filter(e => e.ts > (now.getTime() - 604800000)); const chrono = [...weekData].sort((a,b) => a.ts - b.ts);
-        const calculateDuration = (cat) => { let total = 0; chrono.forEach((e, idx) => { if(e.isTask && e.taskCat === cat && e.taskType === 'end') { for(let i=idx-1; i>=0; i--) { if(chrono[i].isTask && chrono[i].taskCat === cat && chrono[i].taskType === 'start') { total += (e.ts - chrono[i].ts); break; } } } }); return total; };
+    
+    // --- AI Summary Logic Fixed ---
+    generateReport: async function() {
+        const k = document.getElementById('user-api-key').value; if (!k || k === UI.DEFAULT_KEY) return alert("Please enter your API Key in Settings first!");
+        const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
+        const bazi = document.getElementById('oracle-bazi').value || "Unknown";
+        const container = document.getElementById('summary-ai-content');
+        const userLang = this.state.lang === 'zh' ? 'Chinese' : 'English';
         
-        const goals = this.state.goals;
-        document.getElementById('target-exercise-disp').innerText = goals.exercise;
-        document.getElementById('target-sleep-disp').innerText = goals.sleep;
-        document.getElementById('target-focus-disp').innerText = goals.focus;
-        document.getElementById('target-meditation-disp').innerText = goals.meditation || 15;
-        document.getElementById('target-calories-disp').innerText = goals.cals;
-
-        const msToMin = (ms) => Math.round(ms / 60000);
-        const msToHr = (ms) => (ms / 3600000).toFixed(1);
-
-        const durEx = calculateDuration('Exercise'); const durSleep = calculateDuration('Sleep'); const durFocus = calculateDuration('Focus'); const durMed = calculateDuration('Meditation');
-
-        document.getElementById('stat-exercise').innerText = `${msToMin(durEx)}m`; document.getElementById('bar-exercise').style.width = `${Math.min((msToMin(durEx)/goals.exercise)*100, 100)}%`;
-        document.getElementById('stat-sleep').innerText = `${msToHr(durSleep)}h`; document.getElementById('bar-sleep').style.width = `${Math.min((msToHr(durSleep)/goals.sleep)*100, 100)}%`;
-        document.getElementById('stat-focus').innerText = `${msToMin(durFocus)}m`; document.getElementById('bar-focus').style.width = `${Math.min((msToMin(durFocus)/goals.focus)*100, 100)}%`;
-        document.getElementById('stat-meditation').innerText = `${msToMin(durMed)}m`; document.getElementById('bar-meditation').style.width = `${Math.min((msToMin(durMed)/(goals.meditation||15))*100, 100)}%`;
+        document.getElementById('oracle-input-view').classList.add('hidden');
+        document.getElementById('oracle-result-view').classList.remove('hidden');
+        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Connecting...</p></div>';
         
-        const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; const dailyCals = new Array(7).fill(0); let weeklyTotal = 0; weekData.forEach(e => { if(e.calories) { const dayIdx = new Date(e.ts).getDay(); dailyCals[dayIdx] += parseInt(e.calories); weeklyTotal += parseInt(e.calories); } });
-        document.getElementById('stat-calories-total').innerText = `${weeklyTotal} kcal`; const maxCal = Math.max(...dailyCals, goals.cals + 500); 
-        const chartHtml = dailyCals.map((val, idx) => {
-            const colorClass = val > goals.cals ? 'bg-red-400' : 'bg-green-400';
-            return `<div class="cal-bar-col"><div class="cal-bar-bg"><div class="cal-bar-fill ${colorClass}" style="height: ${(val/maxCal)*100}%"></div></div><div class="cal-bar-val">${val > 0 ? val : ''}</div><div class="cal-label">${days[idx]}</div></div>`;
-        }).join(''); 
-        document.getElementById('calorie-chart').innerHTML = chartHtml + `<div class="absolute top-0 left-0 w-full h-[1px] border-t border-dashed border-red-300 opacity-50" style="bottom: ${(goals.cals/maxCal)*100}%"></div>`;
-        this.renderDashboardTasks(allData); lucide.createIcons();
+        const allData = await DataManager.getAll();
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
+
+        let personaPrompt = '';
+        if (this.state.persona === 'western') {
+            personaPrompt = this.state.lang === 'zh' ? `角色：神秘西方占星师。根据星座: ${zodiac}。` : `Role: Western Astrologer. Zodiac: ${zodiac}.`;
+        } else if (this.state.persona === 'eastern') {
+            personaPrompt = this.state.lang === 'zh' ? `角色：道家高人。生辰: ${bazi}。` : `Role: Taoist Hermit. Birth info: ${bazi}.`;
+        } else {
+            personaPrompt = this.state.lang === 'zh' ? `角色：人生教练。` : `Role: Life Coach.`;
+        }
+
+        const prompt = `${personaPrompt} Task: Write a weekly review letter in ${userLang} based on: ${recentData.substring(0, 1000)}`;
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${k}`, { 
+                method:'POST', headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({contents:[{parts:[{text: prompt}]}]}) 
+            });
+            const json = await res.json();
+            if (json.error) throw new Error(json.error.message);
+            const mdText = json.candidates[0].content.parts[0].text;
+            container.innerHTML = marked.parse(mdText);
+        } catch(e) {
+            container.innerHTML = `<p class='text-center text-red-400'>Error: ${e.message}</p><button onclick="UI.resetOracle()" class="mt-4 block mx-auto border px-4 py-2 rounded">Retry</button>`;
+        }
+    },
+    resetOracle: function() {
+        document.getElementById('oracle-input-view').classList.remove('hidden');
+        document.getElementById('oracle-result-view').classList.add('hidden');
+    },
+    saveOracleResult: async function() {
+        const content = document.getElementById('summary-ai-content').innerText;
+        if(!content || content.length < 10) return;
+        const payload = {
+            ts: Date.now(),
+            title: `🔮 Oracle Report (${new Date().toLocaleDateString()})`,
+            content: content,
+            mood: 'sparkles',
+            weather: UI.state.weather,
+            img: null,
+            anni: false,
+            isTask: false
+        };
+        await DataManager.add(payload);
+        alert("Report saved to Timeline!");
+        this.closeWeeklySummary();
     },
     renderDashboardTasks: function(allData) {
         const container = document.getElementById('dashboard-todo-list'); container.innerHTML = '';
@@ -392,13 +426,6 @@ const UI = {
         const tasks = allData.filter(e => e.recurrence && e.recurrence !== 'none');
         
         const activeTasks = tasks.filter(t => {
-            if (t.recurrence === 'none') {
-                const taskTime = new Date(t.ts);
-                const isToday = taskTime.toDateString() === today.toDateString();
-                if (!isToday) return false; 
-                return true;
-            }
-
             if (t.recurrence === 'daily') return true;
             if (t.recurrence === 'weekly') return new Date(t.ts).getDay() === dayOfWeek;
             if (t.recurrence === 'workday') return !isWeekend;
@@ -411,7 +438,6 @@ const UI = {
         activeTasks.forEach(t => { 
             const div = document.createElement('div'); div.className = 'todo-item cursor-pointer'; 
             div.innerHTML = `<div class="todo-check"><i data-lucide="circle" class="w-4 h-4"></i></div><div class="todo-text">${t.title}</div>`; 
-            
             div.onclick = () => { 
                 const check = div.querySelector('.todo-check');
                 const text = div.querySelector('.todo-text');
@@ -454,34 +480,15 @@ const UI = {
         document.getElementById('editor-entry-type').value = t;
         ['diary','task','anni'].forEach(k => { document.getElementById(`type-${k}`).classList.replace('bg-[var(--card-bg)]', 'hover:bg-[var(--card-bg)]/50'); document.getElementById(`type-${k}`).classList.remove('shadow-sm', 'text-[var(--text)]'); document.getElementById(`type-${k}`).classList.add('text-[var(--text-sec)]'); });
         document.getElementById(`type-${t}`).classList.add('bg-[var(--card-bg)]', 'shadow-sm', 'text-[var(--text)]');
-        
-        if (t === 'task') {
-            document.getElementById('task-settings').style.display = 'block';
-        } else if (t === 'anni') {
-            document.getElementById('task-settings').style.display = 'block';
-            document.getElementById('editor-recurrence').value = 'yearly';
-        } else {
-            document.getElementById('task-settings').style.display = 'none';
-        }
+        document.getElementById('task-settings').style.display = (t === 'task' || t === 'anni') ? 'block' : 'none';
+        if(t==='anni') document.getElementById('editor-recurrence').value = 'yearly';
     },
     setFontSize: function(size) { document.body.setAttribute('data-font', size); },
     openEditor: function(dStr, exist) { 
         const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); 
         if(exist) { 
             const d=new Date(exist.ts); document.getElementById('editor-id').value=exist.id; document.getElementById('editor-title').value=exist.title; document.getElementById('editor-content').value=exist.content; document.getElementById('editor-date').value=d.toISOString().split('T')[0]; document.getElementById('editor-time').value=this.formatTime(d); document.getElementById('editor-calories').value = exist.calories || '';
-            if(exist.recurrence && exist.recurrence !== 'none') { 
-                if (exist.anni) {
-                    this.setEditorType('anni');
-                    document.getElementById('editor-recurrence').value = exist.recurrence;
-                } else {
-                    this.setEditorType('task'); 
-                    document.getElementById('editor-recurrence').value = exist.recurrence; 
-                }
-            } else if (exist.anni) { 
-                this.setEditorType('anni'); 
-            } else { 
-                this.setEditorType('diary'); 
-            }
+            if(exist.recurrence && exist.recurrence !== 'none') { this.setEditorType('task'); document.getElementById('editor-recurrence').value = exist.recurrence; if(exist.anni) this.setEditorType('anni'); } else if (exist.anni) { this.setEditorType('anni'); } else { this.setEditorType('diary'); }
             if(exist.img){ this.state.tempImage=exist.img; document.getElementById('preview-img').src=exist.img; document.getElementById('image-preview-area').classList.remove('hidden'); } 
         } else { 
             const n=new Date(); document.getElementById('editor-id').value=''; document.getElementById('editor-title').value=''; document.getElementById('editor-content').value=''; document.getElementById('editor-calories').value=''; document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; document.getElementById('editor-time').value=n.toTimeString().slice(0,5); this.setEditorType('diary');
@@ -530,26 +537,16 @@ const UI = {
             let lunarText = ''; if (window.Lunar) { try { const solar = Solar.fromYmd(y, m+1, i); lunarText = solar.getLunar().getDayInChinese(); } catch(e){} }
             d.innerHTML = `<span>${i}</span><span class="calendar-lunar">${lunarText}</span>`;
             const de = allData.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); 
-            if(de.length>0) { d.classList.add('has-entry', 'font-bold'); d.onclick=()=>this.openDetail(de[0]); } else { d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); } g.appendChild(d); 
+            if(de.length>0) { 
+                d.classList.add('has-entry', 'font-bold'); 
+                d.onclick = () => this.openDetail(de[0]); // FIXED: Directly bind click to open details
+            } else { 
+                d.onclick = () => this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); 
+            } 
+            g.appendChild(d); 
         } 
-        // HIDDEN THE LIST AS REQUESTED
-        // this.renderArchiveList(allData.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); 
     },
-    renderArchiveList: function(entries) {
-         const container = document.getElementById('month-entries'); const emptyState = document.getElementById('month-empty-state'); 
-         if(!container) return; container.innerHTML = '';
-         if (entries.length === 0) { container.classList.add('hidden'); emptyState.classList.remove('hidden'); } 
-         else { container.classList.remove('hidden'); emptyState.classList.add('hidden'); 
-             entries.forEach(entry => {
-                 const date = new Date(entry.ts); const div = document.createElement('div');
-                 div.className = 'flex items-center gap-4 p-3 bg-[var(--bg)]/30 rounded-lg border border-[var(--line)]/50 cursor-pointer hover:bg-[var(--line)]/20 transition-colors mb-2';
-                 div.onclick = () => UI.openDetail(entry);
-                 div.innerHTML = `<div class="text-lg font-bold font-num opacity-70 w-8 text-center">${date.getDate()}</div><div class="flex-1 min-w-0"><div class="font-bold text-sm truncate text-[var(--text)]">${entry.title}</div></div><i data-lucide="chevron-right" class="w-4 h-4 opacity-50"></i>`;
-                 container.appendChild(div);
-             });
-             lucide.createIcons();
-         }
-    },
+    renderArchiveList: function(entries) { /* Deprecated in favor of Data Tab */ },
     formatTime: (d) => d.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
     getMoodIcon: (m) => ({smile:'smile',meh:'meh',frown:'frown',heart:'heart'}[m]||'smile'),
     getWeatherIcon: (w) => ({sun:'sun',cloud:'cloud',rain:'cloud-rain'}[w]||'sun')
@@ -560,19 +557,17 @@ if (typeof DataManager !== 'undefined') {
         const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value || "Untitled"; const c = document.getElementById('editor-content').value; const d = document.getElementById('editor-date').value; const tm = document.getElementById('editor-time').value; 
         const cal = document.getElementById('editor-calories').value;
         const type = document.getElementById('editor-entry-type').value;
-        let anni = false, anniType = null, recurrence = 'none';
-        if (type === 'anni') { anni = true; anniType = document.getElementById('editor-anni-type').value; }
+        let anni = false, recurrence = 'none';
+        if (type === 'anni') { anni = true; }
         if (type === 'task' || type === 'anni') { recurrence = document.getElementById('editor-recurrence').value; }
         
         if(d) { 
             const [y,m,day] = d.split('-').map(Number); const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; const ts = new Date(y,m-1,day,hr,min).getTime(); 
             const save = async (processedImg) => { 
-                const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: processedImg, calories: cal ? parseInt(cal) : null, anni, anniType, recurrence }; 
+                const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: processedImg, calories: cal ? parseInt(cal) : null, anni, recurrence }; 
                 if (id) await this.update(id, payload); else await this.add(payload); 
                 UI.closeEditor(); 
-                if(document.getElementById('view-calendar').classList.contains('active-view')) {
-                   UI.renderCalendar(); UI.renderGallery();
-                }
+                if(document.getElementById('view-calendar').classList.contains('active-view')) { UI.renderCalendar(); UI.renderGallery(); }
             };
             const img = UI.state.tempImage; if (img && img.startsWith('data:')) { this.compressImage(img, 1200, 0.8, save); } else { save(img); }
         } else { alert('Date required'); }
