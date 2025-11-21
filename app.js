@@ -56,12 +56,32 @@ const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig
 let currentThemeConfig = TIME_THEMES.day.particleConfig; let currentWeatherState = 'sun';
 
 const ParticleSystem = {
-    canvas: null, ctx: null, particles: [], width: 0, height: 0, running: false,
-    init: function() { this.canvas = document.getElementById('world-canvas'); this.ctx = this.canvas.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); this.switchTheme('day'); this.running = true; this.animate(); },
-    resize: function() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; },
+    canvas: null, ctx: null, particles: [], width: 0, height: 0, running: false, dpr: 1,
+    init: function() { 
+        this.canvas = document.getElementById('world-canvas'); 
+        this.ctx = this.canvas.getContext('2d'); 
+        this.dpr = window.devicePixelRatio || 1; // HDPI fix
+        this.resize(); 
+        window.addEventListener('resize', () => this.resize()); 
+        this.switchTheme('day'); 
+        this.running = true; 
+        this.animate(); 
+    },
+    resize: function() { 
+        this.width = window.innerWidth; 
+        this.height = window.innerHeight; 
+        this.canvas.width = this.width * this.dpr; 
+        this.canvas.height = this.height * this.dpr; 
+        this.ctx.scale(this.dpr, this.dpr); // Scale context for retina
+    },
     setWeather: function(weather) { currentWeatherState = weather; this.resetParticles(); },
     switchTheme: function(themeKey) { const theme = TIME_THEMES[themeKey] || TIME_THEMES.day; document.documentElement.style.setProperty('--bg-start', theme.bgGradient[0]); document.documentElement.style.setProperty('--bg-end', theme.bgGradient[1]); currentThemeConfig = theme.particleConfig; this.resetParticles(); },
-    resetParticles: function() { this.particles = []; const count = currentWeatherState==='rain' ? 200 : currentThemeConfig.count; for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); },
+    resetParticles: function() { 
+        this.particles = []; 
+        const baseCount = currentWeatherState==='rain' ? 200 : currentThemeConfig.count; 
+        const count = baseCount * (window.innerWidth < 600 ? 0.5 : 1); // Reduce on mobile
+        for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); 
+    },
     animate: function() { if(!this.running) return; this.ctx.clearRect(0, 0, this.width, this.height); this.particles.forEach(p => { p.update(); p.draw(this.ctx); }); requestAnimationFrame(() => this.animate()); }
 };
 class Particle {
@@ -78,10 +98,11 @@ class Particle {
             // Slow breathing effect
             this.blinkSpeed = Math.random() * 0.002 + 0.0005; 
             this.blinkOffset = Math.random() * Math.PI * 2;
+            this.speed = 0; // Stars don't move
         } else if (this.type === 'rain') {
             this.y = initial ? Math.random() * this.ch : -20;
-            this.speed = Math.random() * 10 + 10;
-            this.wind = 1;
+            this.speed = Math.random() * 8 + 8; // Slightly slower rain
+            this.wind = -1; // Slight wind
         } else if (this.type === 'beam') {
             this.width = Math.random() * 100 + 50;
             this.angle = 45 * (Math.PI/180);
@@ -89,8 +110,8 @@ class Particle {
     }
     update() {
         if(this.type === 'star') {
-            // Stars don't move x/y, just opacity breathing
-            this.opacity = 0.3 + Math.sin(Date.now() * this.blinkSpeed + this.blinkOffset) * 0.3;
+            // Stars fixed, breathing opacity
+            this.opacity = 0.4 + Math.sin(Date.now() * this.blinkSpeed + this.blinkOffset) * 0.3;
         } else if (this.type === 'rain') {
             this.y += this.speed; this.x += this.wind;
             if (this.y > this.ch) this.reset(false);
@@ -292,7 +313,7 @@ const UI = {
         this.renderDashboardTasks(allData); lucide.createIcons();
     },
     
-    // --- REVISED AI LOGIC ---
+    // --- REVISED AI LOGIC (NATURAL FLOW) ---
     generateReport: async function() {
         const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY;
         const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
@@ -302,7 +323,7 @@ const UI = {
         
         document.getElementById('oracle-input-view').classList.add('hidden');
         document.getElementById('oracle-result-view').classList.remove('hidden');
-        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Thinking...</p></div>';
+        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Connecting...</p></div>';
         
         const allData = await DataManager.getAll();
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
@@ -312,38 +333,36 @@ const UI = {
         
         if (this.state.persona === 'western') {
             if (this.state.lang === 'zh') {
-                personaPrompt = `你是一位神秘优雅的西方占星师。用诗意、优美的中文回复，提及星辰、月相和宇宙的指引。根据星座: ${zodiac}。`;
+                personaPrompt = `角色：神秘优雅的占星师。语调：如诗般优美，提及星辰轨迹。根据星座: ${zodiac}。`;
             } else {
-                personaPrompt = `You are a mystical, elegant Western Astrologer. Use poetic, evocative English. Speak of stars, planetary alignments, and cosmic whispers. Zodiac: ${zodiac}.`;
+                personaPrompt = `Role: Mystical Western Astrologer. Tone: Poetic, mentioning stars and alignments. Zodiac: ${zodiac}.`;
             }
         } else if (this.state.persona === 'eastern') {
             if (this.state.lang === 'zh') {
-                personaPrompt = `你是一位仙风道骨的得道高人（贫道）。用古朴、充满哲理的中文回复，引用易经卦象或自然万物之理（如风、水、山、泽）。生辰: ${bazi}。`;
+                personaPrompt = `角色：隐居山林的得道高人。语调：古朴透彻，自称“贫道”，引用自然意象（风、水）。生辰: ${bazi}。`;
             } else {
-                personaPrompt = `You are a wise Taoist Sage. Use calm, profound English with metaphors from nature (wind, water, mountain). Refer to ancient wisdom. Birth info: ${bazi}.`;
+                personaPrompt = `Role: Wise Taoist Hermit. Tone: Profound, ancient wisdom, nature metaphors. Birth info: ${bazi}.`;
             }
         } else {
             if (this.state.lang === 'zh') {
-                personaPrompt = `你是一位雷厉风行、讲究科学的人生教练。用干练、有力、一针见血的中文回复。使用心理学框架（如原子习惯、心流）。拒绝迷信，只讲行动。`;
+                personaPrompt = `角色：顶级人生教练。语调：科学、干练、鼓舞人心。基于行为心理学。`;
             } else {
-                personaPrompt = `You are a no-nonsense, evidence-based Life Coach. Use direct, empowering, and scientific English. Use frameworks like Atomic Habits or CBT. No fluff, just action.`;
+                personaPrompt = `Role: Elite Life Coach. Tone: Scientific, direct, empowering. Based on behavioral psychology.`;
             }
         }
 
         const prompt = `
         ${personaPrompt}
         
-        Task: Write a personalized narrative report for the user based on their last 7 days of logs:
-        ${recentData.substring(0, 2000)}
+        Task: Write a personalized letter to the user based on their last 7 days:
+        ${recentData.substring(0, 1500)}
         
         Requirements:
-        1. **Language**: Strictly use ${userLang}.
-        2. **Structure**: Do NOT use headers like "Part 1" or "Review". Instead, write a flowing narrative. 
-           - First, gently review their past week (acknowledge struggles or wins). 
-           - Then, seamlessly transition into guidance/prediction for the coming week.
-        3. **Tone**: Strictly adhere to the persona defined above. Immerse the user in the role.
-        4. **Length**: Keep it concise (under 250 words).
-        5. **Format**: Use Markdown for emphasis (bolding key advice).
+        1. **Language**: Strictly ${userLang}.
+        2. **Format**: ONE continuous narrative. NO headings like "Part 1" or "Review".
+        3. **Flow**: Start by gently reflecting on their past week's journey (achievements or struggles). Then, naturally weave in guidance and predictions for the coming week based on your persona.
+        4. **Style**: Immersive and convincing. Make the user feel seen.
+        5. **Length**: Concise (approx 150-200 words).
         `;
 
         try {
@@ -355,7 +374,7 @@ const UI = {
             const mdText = json.candidates[0].content.parts[0].text;
             container.innerHTML = marked.parse(mdText);
         } catch(e) {
-            container.innerHTML = "<p class='text-center text-red-400'>The connection was interrupted.</p>";
+            container.innerHTML = "<p class='text-center text-red-400'>Connection faded.</p>";
         }
     },
     resetOracle: function() {
