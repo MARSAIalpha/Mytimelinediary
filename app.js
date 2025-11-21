@@ -237,6 +237,72 @@ const UI = {
         document.getElementById('calorie-chart').innerHTML = chartHtml + `<div class="absolute top-0 left-0 w-full h-[1px] border-t border-dashed border-red-300 opacity-50" style="bottom: ${(goals.cals/maxCal)*100}%"></div>`;
         this.renderDashboardTasks(allData); lucide.createIcons();
     },
+    
+    // --- NEW AI LOGIC ---
+    generateReport: async function() {
+        const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY;
+        const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
+        const bazi = document.getElementById('oracle-bazi').value || "Unknown";
+        const container = document.getElementById('summary-ai-content');
+        
+        document.getElementById('oracle-input-view').classList.add('hidden');
+        document.getElementById('oracle-result-view').classList.remove('hidden');
+        container.innerHTML = '<div class="text-center mt-10"><i class="animate-spin" data-lucide="loader-2"></i><p class="mt-4 opacity-70">Consulting the stars...</p></div>';
+        lucide.createIcons();
+
+        const allData = await DataManager.getAll();
+        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+        const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
+
+        const stylePrompt = this.state.persona === 'western' 
+            ? `Act as a professional Western Astrologer. Zodiac: ${zodiac}.` 
+            : `扮演一位精通易经八卦的东方大师. 生辰八字: ${bazi}.`;
+
+        const structurePrompt = `
+        Output ONLY Markdown.
+        Part 1 (Review): Briefly analyze the user's last 7 days of activity based on these logs:
+        ${recentData.substring(0, 2000)}
+        Encourage them on their progress.
+        
+        Part 2 (Fortune): 
+        ${this.state.persona === 'western' ? 'Provide a Horoscope forecast for the coming week regarding career and wellness based on the Zodiac.' : '根据易经卦象为用户下周的运势（事业、健康）进行预测，给出富有哲理的建议。'}
+        `;
+
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { 
+                method:'POST', headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({contents:[{parts:[{text: stylePrompt + structurePrompt}]}]}) 
+            });
+            const json = await res.json();
+            const mdText = json.candidates[0].content.parts[0].text;
+            container.innerHTML = marked.parse(mdText);
+        } catch(e) {
+            container.innerHTML = "<p class='text-center text-red-400'>The connection to the ether was interrupted.</p>";
+        }
+    },
+    resetOracle: function() {
+        document.getElementById('oracle-input-view').classList.remove('hidden');
+        document.getElementById('oracle-result-view').classList.add('hidden');
+    },
+    saveOracleResult: async function() {
+        const content = document.getElementById('summary-ai-content').innerText;
+        if(!content || content.length < 10) return;
+        const payload = {
+            ts: Date.now(),
+            title: `🔮 Oracle Report (${new Date().toLocaleDateString()})`,
+            content: content,
+            mood: 'sparkles',
+            weather: UI.state.weather,
+            img: null,
+            anni: false,
+            isTask: false
+        };
+        await DataManager.add(payload);
+        alert("Report saved to Timeline!");
+        this.closeWeeklySummary();
+    },
+    // --------------------
+
     renderDashboardTasks: function(allData) {
         const container = document.getElementById('dashboard-todo-list'); container.innerHTML = '';
         const today = new Date(); const dayOfWeek = today.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
