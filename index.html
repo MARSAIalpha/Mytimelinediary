@@ -26,7 +26,6 @@
             <button onclick="UI.switchView('dashboard')" id="btn-dashboard" class="nav-btn" data-i18n="nav_dashboard">DASHBOARD</button>
             <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn" data-i18n="nav_calendar">CALENDAR</button>
         </div>
-        <button onclick="UI.openWeeklySummary()" class="absolute right-6 p-3 rounded-full text-[var(--text)] active:scale-90 transition-transform hover:bg-[var(--line)]"><i data-lucide="sparkles" class="w-6 h-6 text-[var(--primary)]"></i></button>
     </header>
 
     <div id="focus-hud">
@@ -36,9 +35,9 @@
     </div>
 
     <div id="filter-fab-group">
-        <div class="filter-row" onclick="UI.toggleFilter('anni')"><span class="filter-label label-anni" data-i18n="filter_anni">ANN</span><div class="filter-dot f-anni active"></div></div>
-        <div class="filter-row" onclick="UI.toggleFilter('holiday')"><span class="filter-label label-holiday" data-i18n="filter_holiday">HOL</span><div class="filter-dot f-holiday active"></div></div>
-        <div class="filter-row" onclick="UI.toggleFilter('normal')"><span class="filter-label label-normal" data-i18n="filter_diary">DIARY</span><div class="filter-dot f-normal active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('anni')"><div class="filter-dot f-anni active"></div><span class="filter-label label-anni" data-i18n="filter_anni">ANN</span></div>
+        <div class="filter-row" onclick="UI.toggleFilter('holiday')"><div class="filter-dot f-holiday active"></div><span class="filter-label label-holiday" data-i18n="filter_holiday">HOL</span></div>
+        <div class="filter-row" onclick="UI.toggleFilter('normal')"><div class="filter-dot f-normal active"></div><span class="filter-label label-normal" data-i18n="filter_diary">DIARY</span></div>
     </div>
 
     <div id="center-guide-layer"><div class="guide-beam"></div><div class="guide-cursor" id="beam-cursor"></div></div>
@@ -162,6 +161,11 @@
     </main>
 
     <div id="prompt-bubble" class="hidden">What's on your mind?</div>
+    
+    <button onclick="UI.openWeeklySummary()" class="fab-ai-btn fixed bottom-24 right-6 w-14 h-14 bg-[var(--card-bg)] backdrop-blur-xl text-[var(--primary)] rounded-full shadow-xl flex items-center justify-center z-40 active:scale-90 transition-transform border border-[var(--primary)]/30 animate-pulse-slow">
+        <i data-lucide="sparkles" class="w-6 h-6"></i>
+    </button>
+
     <button onclick="UI.openEditor()" class="fab-btn fixed bottom-8 right-6 w-14 h-14 bg-[var(--primary)] text-white rounded-full shadow-xl flex items-center justify-center z-40 active:scale-90 transition-transform">
         <i data-lucide="pen-tool" class="w-6 h-6"></i>
     </button>

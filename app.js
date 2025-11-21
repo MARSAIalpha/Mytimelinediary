@@ -52,23 +52,73 @@ const I18N = {
     } 
 };
 
-const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig: { type: 'mist', count: 50 } }, day: { bgGradient: ['#A0E6FF', '#FFFACD'], particleConfig: { type: 'beam_only', count: 8 } }, dusk: { bgGradient: ['#24243e', '#FFC3A0'], particleConfig: { type: 'ember', count: 100 } }, night: { bgGradient: ['#0B1026', '#1F2F4F'], particleConfig: { type: 'star', count: 120 } } };
+const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig: { type: 'mist', count: 50 } }, day: { bgGradient: ['#A0E6FF', '#FFFACD'], particleConfig: { type: 'beam', count: 15 } }, dusk: { bgGradient: ['#24243e', '#FFC3A0'], particleConfig: { type: 'none', count: 0 } }, night: { bgGradient: ['#0B1026', '#1F2F4F'], particleConfig: { type: 'star', count: 80 } } };
 let currentThemeConfig = TIME_THEMES.day.particleConfig; let currentWeatherState = 'sun';
 
 const ParticleSystem = {
     canvas: null, ctx: null, particles: [], width: 0, height: 0, running: false,
     init: function() { this.canvas = document.getElementById('world-canvas'); this.ctx = this.canvas.getContext('2d'); this.resize(); window.addEventListener('resize', () => this.resize()); this.switchTheme('day'); this.running = true; this.animate(); },
     resize: function() { this.width = window.innerWidth; this.height = window.innerHeight; this.canvas.width = this.width; this.canvas.height = this.height; },
-    setWeather: function(weather) { currentWeatherState = weather; if(weather==='rain') { this.resetParticles(); } },
+    setWeather: function(weather) { currentWeatherState = weather; this.resetParticles(); },
     switchTheme: function(themeKey) { const theme = TIME_THEMES[themeKey] || TIME_THEMES.day; document.documentElement.style.setProperty('--bg-start', theme.bgGradient[0]); document.documentElement.style.setProperty('--bg-end', theme.bgGradient[1]); currentThemeConfig = theme.particleConfig; this.resetParticles(); },
-    resetParticles: function() { this.particles = []; const count = currentWeatherState==='rain' ? 300 : currentThemeConfig.count; for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); },
+    resetParticles: function() { this.particles = []; const count = currentWeatherState==='rain' ? 200 : currentThemeConfig.count; for(let i=0; i<count; i++) this.particles.push(new Particle(this.width, this.height)); },
     animate: function() { if(!this.running) return; this.ctx.clearRect(0, 0, this.width, this.height); this.particles.forEach(p => { p.update(); p.draw(this.ctx); }); requestAnimationFrame(() => this.animate()); }
 };
 class Particle {
     constructor(w, h) { this.cw = w; this.ch = h; this.reset(true); }
-    reset() { this.x = Math.random() * this.cw; this.y = Math.random() * this.ch; this.type = currentWeatherState==='rain' ? 'rain' : currentThemeConfig.type; this.opacity = Math.random() * 0.5 + 0.1; if(this.type==='rain') { this.y = Math.random() * -this.ch; this.speedY = Math.random() * 5 + 5; } else if(this.type==='mist') { this.speedX = 0.5; this.speedY = 0; } else if(this.type==='ember') { this.speedY = -1; this.y = this.ch; } else { this.speedY = 0.2; } }
-    update() { this.y += this.speedY; this.x += (this.speedX||0); if (this.y > this.ch) { this.y = -10; if(this.type==='rain') this.x = Math.random()*this.cw; } if (this.x > this.cw) this.x = 0; if (this.y < 0) this.y = this.ch; }
-    draw(ctx) { ctx.fillStyle = `rgba(255,255,255,${this.opacity})`; if(this.type==='rain') { ctx.strokeStyle=`rgba(255,255,255,${this.opacity})`; ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(this.x,this.y+10); ctx.stroke(); } else { ctx.beginPath(); ctx.arc(this.x, this.y, this.type==='mist'?20:1.5, 0, Math.PI*2); ctx.fill(); } }
+    reset(initial) { 
+        this.type = currentWeatherState==='rain' ? 'rain' : currentThemeConfig.type;
+        this.x = Math.random() * this.cw; 
+        this.y = Math.random() * this.ch;
+        this.opacity = Math.random() * 0.5 + 0.2;
+        this.speed = Math.random() * 0.5 + 0.2;
+        
+        if(this.type === 'star') {
+            this.size = Math.random() * 1.5 + 0.5;
+            // Slow breathing effect
+            this.blinkSpeed = Math.random() * 0.002 + 0.0005; 
+            this.blinkOffset = Math.random() * Math.PI * 2;
+        } else if (this.type === 'rain') {
+            this.y = initial ? Math.random() * this.ch : -20;
+            this.speed = Math.random() * 10 + 10;
+            this.wind = 1;
+        } else if (this.type === 'beam') {
+            this.width = Math.random() * 100 + 50;
+            this.angle = 45 * (Math.PI/180);
+        }
+    }
+    update() {
+        if(this.type === 'star') {
+            // Stars don't move x/y, just opacity breathing
+            this.opacity = 0.3 + Math.sin(Date.now() * this.blinkSpeed + this.blinkOffset) * 0.3;
+        } else if (this.type === 'rain') {
+            this.y += this.speed; this.x += this.wind;
+            if (this.y > this.ch) this.reset(false);
+        } else if (this.type === 'beam') {
+            this.x += this.speed * 0.5; this.y += this.speed * 0.2;
+            if(this.x > this.cw || this.y > this.ch) { this.x = -100; this.y = Math.random() * this.ch; }
+        } else if (this.type === 'mist') {
+            this.x += Math.sin(this.y * 0.01) * 0.5;
+            this.y -= this.speed;
+            if(this.y < 0) this.reset(false);
+        }
+    }
+    draw(ctx) { 
+        ctx.fillStyle = `rgba(255,255,255,${this.opacity})`; 
+        if(this.type==='rain') { 
+            ctx.strokeStyle=`rgba(255,255,255,${this.opacity * 0.6})`; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(this.x,this.y); ctx.lineTo(this.x+1,this.y+15); ctx.stroke(); 
+        } else if (this.type === 'beam') {
+            let g = ctx.createLinearGradient(this.x, this.y, this.x+50, this.y+50);
+            g.addColorStop(0, `rgba(255,255,255,0)`); g.addColorStop(0.5, `rgba(255,255,255,${this.opacity*0.2})`); g.addColorStop(1, `rgba(255,255,255,0)`);
+            ctx.fillStyle = g; ctx.beginPath(); ctx.arc(this.x, this.y, this.width, 0, Math.PI*2); ctx.fill();
+        } else if (this.type === 'star') {
+            ctx.shadowBlur = 5; ctx.shadowColor = "white";
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2); ctx.fill();
+            ctx.shadowBlur = 0;
+        } else if (this.type !== 'none') { 
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.type==='mist'?15:2, 0, Math.PI*2); ctx.fill(); 
+        } 
+    }
 }
 
 const UI = {
@@ -242,49 +292,64 @@ const UI = {
         this.renderDashboardTasks(allData); lucide.createIcons();
     },
     
-    // --- NEW AI LOGIC ---
+    // --- REVISED AI LOGIC ---
     generateReport: async function() {
         const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY;
         const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
         const bazi = document.getElementById('oracle-bazi').value || "Unknown";
         const container = document.getElementById('summary-ai-content');
+        const userLang = this.state.lang === 'zh' ? 'Chinese' : 'English';
         
         document.getElementById('oracle-input-view').classList.add('hidden');
         document.getElementById('oracle-result-view').classList.remove('hidden');
-        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Consulting...</p></div>';
+        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Thinking...</p></div>';
         
         const allData = await DataManager.getAll();
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
 
-        let stylePrompt = '';
-        let fortunePrompt = '';
-
+        let personaPrompt = '';
+        
         if (this.state.persona === 'western') {
-            stylePrompt = `Act as a professional Western Astrologer. Zodiac: ${zodiac}.`;
-            fortunePrompt = 'Provide a Horoscope forecast for the coming week regarding career and wellness based on the Zodiac.';
+            if (this.state.lang === 'zh') {
+                personaPrompt = `你是一位神秘优雅的西方占星师。用诗意、优美的中文回复，提及星辰、月相和宇宙的指引。根据星座: ${zodiac}。`;
+            } else {
+                personaPrompt = `You are a mystical, elegant Western Astrologer. Use poetic, evocative English. Speak of stars, planetary alignments, and cosmic whispers. Zodiac: ${zodiac}.`;
+            }
         } else if (this.state.persona === 'eastern') {
-            stylePrompt = `扮演一位精通易经八卦的东方大师. 生辰八字: ${bazi}.`;
-            fortunePrompt = '根据易经卦象为用户下周的运势（事业、健康）进行预测，给出富有哲理的建议。';
+            if (this.state.lang === 'zh') {
+                personaPrompt = `你是一位仙风道骨的得道高人（贫道）。用古朴、充满哲理的中文回复，引用易经卦象或自然万物之理（如风、水、山、泽）。生辰: ${bazi}。`;
+            } else {
+                personaPrompt = `You are a wise Taoist Sage. Use calm, profound English with metaphors from nature (wind, water, mountain). Refer to ancient wisdom. Birth info: ${bazi}.`;
+            }
         } else {
-            stylePrompt = `Act as an evidence-based Life Coach & Behavioral Psychologist. Use scientific frameworks (e.g., CBT, Atomic Habits, Flow State).`;
-            fortunePrompt = 'Provide a concrete, actionable growth plan for the coming week based on behavioral psychology. Focus on habit formation and mental resilience. No superstition.';
+            if (this.state.lang === 'zh') {
+                personaPrompt = `你是一位雷厉风行、讲究科学的人生教练。用干练、有力、一针见血的中文回复。使用心理学框架（如原子习惯、心流）。拒绝迷信，只讲行动。`;
+            } else {
+                personaPrompt = `You are a no-nonsense, evidence-based Life Coach. Use direct, empowering, and scientific English. Use frameworks like Atomic Habits or CBT. No fluff, just action.`;
+            }
         }
 
-        const structurePrompt = `
-        Output ONLY Markdown.
-        Part 1 (Review): Briefly analyze the user's last 7 days of activity based on these logs:
-        ${recentData.substring(0, 2000)}
-        Encourage them on their progress.
+        const prompt = `
+        ${personaPrompt}
         
-        Part 2 (Guidance): 
-        ${fortunePrompt}
+        Task: Write a personalized narrative report for the user based on their last 7 days of logs:
+        ${recentData.substring(0, 2000)}
+        
+        Requirements:
+        1. **Language**: Strictly use ${userLang}.
+        2. **Structure**: Do NOT use headers like "Part 1" or "Review". Instead, write a flowing narrative. 
+           - First, gently review their past week (acknowledge struggles or wins). 
+           - Then, seamlessly transition into guidance/prediction for the coming week.
+        3. **Tone**: Strictly adhere to the persona defined above. Immerse the user in the role.
+        4. **Length**: Keep it concise (under 250 words).
+        5. **Format**: Use Markdown for emphasis (bolding key advice).
         `;
 
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { 
                 method:'POST', headers:{'Content-Type':'application/json'}, 
-                body:JSON.stringify({contents:[{parts:[{text: stylePrompt + structurePrompt}]}]}) 
+                body:JSON.stringify({contents:[{parts:[{text: prompt}]}]}) 
             });
             const json = await res.json();
             const mdText = json.candidates[0].content.parts[0].text;
