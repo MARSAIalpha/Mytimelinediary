@@ -1,7 +1,7 @@
 const DEFAULT_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
 const I18N = { 
     en: { btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", future: "Future Unwritten", origin: "The Beginning", nav_timeline: "TIMELINE", nav_dashboard: "DASHBOARD", nav_calendar: "CALENDAR", dashboard_title: "Life Rhythm", dashboard_tasks: "Pending Tasks", stat_nutrition: "Nutrition (Week)", empty_gallery: "No images.", info_title: "Settings & Guide", data_title: "Data Management", storage_title: "Storage Usage", btn_backup: "Backup JSON", btn_restore: "Restore", btn_reset: "Reset All Data", btn_save: "Save", btn_delete: "Delete", btn_edit: "Edit", btn_cancel: "Cancel", btn_export: "Export MD", btn_export_pdf: "Export PDF", btn_consult: "Start Divination", label_zodiac: "Zodiac", label_birth: "Birth Date", ai_title: "AI Oracle", delete_title: "Delete Memory?", delete_desc: "This action cannot be undone.", archive_title: "Archive", empty_month: "No entries.", label_all_entries: "All Entries", doc_f1_t: "Flow Timeline", doc_f1_d: "Record life in a continuous stream.", doc_f2_t: "AI Vision", doc_f2_d: "Identify food calories from photos.", doc_f3_t: "Rhythm Dashboard", doc_f3_d: "Track habits.", doc_f4_t: "Oracle", doc_f4_d: "Western/Eastern fortune telling.", label_font_size: "Font Size" }, 
-    zh: { btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", future: "未来篇章", origin: "起源之时", nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", btn_cancel: "取消", btn_export: "导出 MD", btn_export_pdf: "导出 PDF", btn_consult: "开始推演", label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", empty_month: "无记录。", label_all_entries: "所有条目", doc_f1_t: "时光流", doc_f1_d: "像河流一样记录生活。", doc_f2_t: "AI 视觉", doc_f2_d: "识别食物热量。", doc_f3_t: "生活韵律", doc_f3_d: "追踪习惯数据。", doc_f4_t: "预言家", doc_f4_d: "东西方双风格算命。", label_font_size: "字体大小" } 
+    zh: { btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", future: "未知未来", origin: "起源之时", nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", btn_cancel: "取消", btn_export: "导出 MD", btn_export_pdf: "导出 PDF", btn_consult: "开始推演", label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", empty_month: "无记录。", label_all_entries: "所有条目", doc_f1_t: "时光流", doc_f1_d: "像河流一样记录生活。", doc_f2_t: "AI 视觉", doc_f2_d: "识别食物热量。", doc_f3_t: "生活韵律", doc_f3_d: "追踪习惯数据。", doc_f4_t: "预言家", doc_f4_d: "东西方双风格算命。", label_font_size: "字体大小" } 
 };
 
 const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig: { type: 'mist', count: 50 } }, day: { bgGradient: ['#A0E6FF', '#FFFACD'], particleConfig: { type: 'beam_only', count: 8 } }, dusk: { bgGradient: ['#24243e', '#FFC3A0'], particleConfig: { type: 'ember', count: 100 } }, night: { bgGradient: ['#0B1026', '#1F2F4F'], particleConfig: { type: 'star', count: 120 } } };
@@ -60,6 +60,24 @@ const UI = {
         ['grid','gallery','data'].forEach(k=>{document.getElementById(`btn-sub-${k}`).classList.remove('active');}); document.getElementById(`btn-sub-${v}`).classList.add('active');
         document.getElementById('calendar-container').classList.add('hidden'); document.getElementById('gallery-container').classList.add('hidden'); document.getElementById('data-container').classList.add('hidden');
         if(v==='grid') document.getElementById('calendar-container').classList.remove('hidden'); else if(v==='gallery') { document.getElementById('gallery-container').classList.remove('hidden'); this.renderGallery(); } else if(v==='data') { document.getElementById('data-container').classList.remove('hidden'); this.renderDataList(); }
+    },
+    renderGallery: async function() {
+        const c = document.getElementById('gallery-grid-view'); c.innerHTML = ''; const all = await DataManager.getAll(); const imgs = all.filter(e => e.img).sort((a,b) => b.ts - a.ts);
+        if(imgs.length === 0) { document.getElementById('gallery-empty').classList.remove('hidden'); return; }
+        document.getElementById('gallery-empty').classList.add('hidden');
+        
+        let lastDate = '';
+        imgs.forEach(e => {
+            const dateStr = new Date(e.ts).toLocaleDateString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {year:'numeric', month:'long', day:'numeric'});
+            if (dateStr !== lastDate) {
+                const h = document.createElement('div'); h.className = 'gallery-date-header'; h.innerText = dateStr; c.appendChild(h);
+                lastDate = dateStr;
+            }
+            const div = document.createElement('div'); div.className = 'gallery-item';
+            div.innerHTML = `<img src="${e.img}" loading="lazy">`;
+            div.onclick = () => UI.openDetail(e);
+            c.appendChild(div);
+        });
     },
     renderDataList: async function() {
         const list = document.getElementById('archive-list'); list.innerHTML = ''; const allData = await DataManager.getAll();
@@ -151,7 +169,14 @@ const UI = {
         activeTasks.forEach(t => { const div = document.createElement('div'); div.className = 'todo-item cursor-pointer'; div.innerHTML = `<div class="todo-check"><i data-lucide="circle" class="w-4 h-4"></i></div><div class="todo-text">${t.title}</div>`; div.onclick = () => { div.querySelector('.todo-check').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>'; div.querySelector('.todo-text').classList.add('todo-done'); }; container.appendChild(div); });
     },
     setLanguage: function(lang) { this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; }); document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; this.renderCalendar(); this.renderTimeline(); },
-    setPersona: function(p) { this.state.persona = p; const card = document.getElementById('oracle-card'); if(p==='western') { card.classList.remove('oracle-eastern'); card.classList.add('oracle-western'); document.getElementById('btn-western').classList.add('active'); document.getElementById('btn-eastern').classList.remove('active'); } else { card.classList.remove('oracle-western'); card.classList.add('oracle-eastern'); document.getElementById('btn-eastern').classList.add('active'); document.getElementById('btn-western').classList.remove('active'); } },
+    setPersona: function(p) { this.state.persona = p; const card = document.getElementById('oracle-card'); 
+        // Removed the UI class switching for oracle-eastern, just toggle button state
+        if(p==='western') { 
+            document.getElementById('btn-western').classList.add('active'); document.getElementById('btn-eastern').classList.remove('active'); 
+        } else { 
+            document.getElementById('btn-eastern').classList.add('active'); document.getElementById('btn-western').classList.remove('active'); 
+        } 
+    },
     setEditorType: function(t) {
         document.getElementById('editor-entry-type').value = t;
         ['diary','task','anni'].forEach(k => { document.getElementById(`type-${k}`).classList.replace('bg-[var(--card-bg)]', 'hover:bg-[var(--card-bg)]/50'); document.getElementById(`type-${k}`).classList.remove('shadow-sm', 'text-[var(--text)]'); document.getElementById(`type-${k}`).classList.add('text-[var(--text-sec)]'); });

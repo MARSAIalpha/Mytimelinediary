@@ -15,7 +15,7 @@
     
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="antialiased h-screen flex flex-col select-none" data-theme="day" data-font="medium">
+<body class="antialiased h-screen flex flex-col select-none" data-theme="day">
 
     <canvas id="world-canvas"></canvas>
     <div class="orbit-wrapper"><div id="orbit-wheel" class="orbit-wheel"><div class="celestial-body sun-body"></div><div class="celestial-body moon-body"><div class="crescent-shape"></div></div></div></div>
@@ -121,7 +121,7 @@
                              <button onclick="UI.switchSubView('gallery')" id="btn-sub-gallery" class="nav-btn"><i data-lucide="image" class="w-4 h-4"></i></button>
                              <button onclick="UI.switchSubView('data')" id="btn-sub-data" class="nav-btn"><i data-lucide="database" class="w-4 h-4"></i></button>
                          </div>
-                        <button onclick="DataManager.updateHolidays()" class="text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)] px-3 py-1 rounded-full">Sync</button>
+                        <button onclick="DataManager.updateHolidays()" class="text-[10px] font-bold text-[var(--primary)] border border-[var(--primary)] px-3 py-1 rounded-full uppercase tracking-wider">Update</button>
                     </div>
                     
                     <div id="calendar-container">
@@ -138,7 +138,7 @@
                     </div>
 
                     <div id="gallery-container" class="hidden">
-                        <div id="gallery-grid-view" class="grid grid-cols-3 gap-2"></div>
+                        <div id="gallery-grid-view" class="grid grid-cols-3 gap-3"></div>
                         <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm">No images.</p></div>
                     </div>
 
@@ -252,15 +252,6 @@
                 <div class="flex justify-center gap-4 mb-6 border-b border-[var(--line)] pb-4">
                     <button onclick="UI.setLanguage('en')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white text-xs font-bold" id="lang-en">English</button>
                     <button onclick="UI.setLanguage('zh')" class="px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white text-xs font-bold" id="lang-zh">中文</button>
-                </div>
-                
-                <div class="mb-6">
-                    <h3 class="text-xs font-bold text-[var(--text-sec)] mb-2 uppercase tracking-wider">Font Size</h3>
-                    <div class="flex gap-2">
-                        <button onclick="UI.setFontSize('small')" class="flex-1 py-2 rounded border border-[var(--line)] text-xs font-bold">A-</button>
-                        <button onclick="UI.setFontSize('medium')" class="flex-1 py-2 rounded border border-[var(--line)] text-xs font-bold">A</button>
-                        <button onclick="UI.setFontSize('large')" class="flex-1 py-2 rounded border border-[var(--line)] text-sm font-bold">A+</button>
-                    </div>
                 </div>
 
                 <div class="mb-6 p-4 bg-[var(--line)]/20 rounded-lg">
