@@ -176,6 +176,22 @@ const UI = {
         
         const isTl = (v === 'timeline');
         document.getElementById('center-guide-layer').style.opacity = isTl ? '1' : '0'; 
+        
+        // --- FIX: FORCE HIDE VISIBILITY TOGGLE FOR FILTER, AI, & WRITE BUTTONS ---
+        const filterGroup = document.getElementById('filter-fab-group');
+        const aiBtn = document.getElementById('btn-ai-summary');
+        const writeBtn = document.getElementById('btn-write');
+        
+        if (isTl) {
+            filterGroup.classList.remove('hidden');
+            aiBtn.classList.remove('hidden');
+            writeBtn.classList.remove('hidden');
+        } else {
+            filterGroup.classList.add('hidden');
+            aiBtn.classList.add('hidden');
+            writeBtn.classList.add('hidden');
+        }
+        
         if(isTl) { document.getElementById('view-timeline').classList.replace('hidden-view','active-view'); document.getElementById('focus-hud').classList.remove('opacity-0'); setTimeout(() => { this.handleScroll(); this.drawTaskConnectors(); }, 150); } 
         else if (v === 'calendar') { document.getElementById('view-calendar').classList.replace('hidden-view','active-view'); this.renderCalendar(); } 
         else if (v === 'dashboard') { document.getElementById('view-dashboard').classList.replace('hidden-view','active-view'); this.renderDashboard(); }
@@ -184,11 +200,20 @@ const UI = {
         ['grid','gallery','data'].forEach(k=>{document.getElementById(`btn-sub-${k}`).classList.remove('active');}); document.getElementById(`btn-sub-${v}`).classList.add('active');
         document.getElementById('calendar-container').classList.add('hidden'); document.getElementById('gallery-container').classList.add('hidden'); document.getElementById('data-container').classList.add('hidden');
         
+        // --- FIX: HOLIDAY BUTTON ONLY IN GRID ---
+        const holBtn = document.getElementById('btn-update-holidays');
+        if (v === 'grid') {
+             holBtn.classList.remove('hidden');
+             document.getElementById('calendar-container').classList.remove('hidden'); 
+        } else {
+             holBtn.classList.add('hidden');
+        }
+
         if (v !== 'data' && this.state.selectionMode) {
             this.toggleSelectionMode();
         }
         
-        if(v==='grid') document.getElementById('calendar-container').classList.remove('hidden'); else if(v==='gallery') { document.getElementById('gallery-container').classList.remove('hidden'); this.renderGallery(); } else if(v==='data') { document.getElementById('data-container').classList.remove('hidden'); this.renderDataList(); }
+        if(v==='gallery') { document.getElementById('gallery-container').classList.remove('hidden'); this.renderGallery(); } else if(v==='data') { document.getElementById('data-container').classList.remove('hidden'); this.renderDataList(); }
     },
     renderGallery: async function() {
         const c = document.getElementById('gallery-grid-view'); c.innerHTML = ''; const all = await DataManager.getAll(); const imgs = all.filter(e => e.img).sort((a,b) => b.ts - a.ts);

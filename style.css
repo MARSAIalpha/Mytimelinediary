@@ -130,3 +130,6 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 .md-render h1 { font-size: 1.4em; font-weight: 800; margin: 0.5em 0 0.2em; color: var(--text); border-bottom: 1px solid var(--line); padding-bottom: 4px; } .md-render p { margin-bottom: 0.5em; line-height: 1.5; font-size: 1.1em; } .md-render img { max-width: 100%; border-radius: 8px; margin: 8px 0; }
 .simon-sig { font-family: 'Oswald', sans-serif; font-weight: 300; letter-spacing: 0.1em; opacity: 0.5; font-size: 0.7rem; text-align: center; margin-top: 2rem; color: var(--text-sec); }
 .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+/* FORCE HIDE UTILITY - Place at end to override ID selectors */
+.hidden { display: none !important; }
