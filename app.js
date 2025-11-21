@@ -22,7 +22,8 @@ const I18N = {
         filter_anni: "ANN", filter_holiday: "HOL", filter_diary: "DIARY",
         type_diary: "Diary", type_routine: "Routine", type_anni: "Anniversary",
         label_recurrence: "Recurrence", rec_none: "One-off", rec_daily: "Daily", rec_weekly: "Weekly", rec_workday: "Workdays",
-        label_track: "Track:", ph_title: "Title...", ph_content: "Start writing...", btn_ask_again: "Ask Again", label_est: "Est. 2025"
+        label_track: "Track:", ph_title: "Title...", ph_content: "Start writing...", btn_ask_again: "Ask Again", label_est: "Est. 2025",
+        btn_coach: "Life Coach"
     }, 
     zh: { 
         btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", 
@@ -46,7 +47,8 @@ const I18N = {
         filter_anni: "纪念日", filter_holiday: "节假日", filter_diary: "日记",
         type_diary: "日记", type_routine: "习惯", type_anni: "纪念日",
         label_recurrence: "重复", rec_none: "一次性", rec_daily: "每天", rec_weekly: "每周", rec_workday: "工作日",
-        label_track: "追踪:", ph_title: "标题...", ph_content: "开始记录...", btn_ask_again: "再次询问", label_est: "始于 2025"
+        label_track: "追踪:", ph_title: "标题...", ph_content: "开始记录...", btn_ask_again: "再次询问", label_est: "始于 2025",
+        btn_coach: "人生教练"
     } 
 };
 
@@ -172,7 +174,6 @@ const UI = {
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
             let activeColor = '#f59e0b'; let extraHtml = ''; let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
             let cardClass = this.state.selectedIds.has(i.id) ? 'selected ' : '';
-            // Glow purple for saved oracle reports
             if (i.mood === 'sparkles') cardClass += ' glow-purple';
             
             if (i.isHoliday) { activeColor = '#22c55e'; cardClass+='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
@@ -250,15 +251,25 @@ const UI = {
         
         document.getElementById('oracle-input-view').classList.add('hidden');
         document.getElementById('oracle-result-view').classList.remove('hidden');
-        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Consulting the stars...</p></div>';
+        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Consulting...</p></div>';
         
         const allData = await DataManager.getAll();
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
 
-        const stylePrompt = this.state.persona === 'western' 
-            ? `Act as a professional Western Astrologer. Zodiac: ${zodiac}.` 
-            : `扮演一位精通易经八卦的东方大师. 生辰八字: ${bazi}.`;
+        let stylePrompt = '';
+        let fortunePrompt = '';
+
+        if (this.state.persona === 'western') {
+            stylePrompt = `Act as a professional Western Astrologer. Zodiac: ${zodiac}.`;
+            fortunePrompt = 'Provide a Horoscope forecast for the coming week regarding career and wellness based on the Zodiac.';
+        } else if (this.state.persona === 'eastern') {
+            stylePrompt = `扮演一位精通易经八卦的东方大师. 生辰八字: ${bazi}.`;
+            fortunePrompt = '根据易经卦象为用户下周的运势（事业、健康）进行预测，给出富有哲理的建议。';
+        } else {
+            stylePrompt = `Act as an evidence-based Life Coach & Behavioral Psychologist. Use scientific frameworks (e.g., CBT, Atomic Habits, Flow State).`;
+            fortunePrompt = 'Provide a concrete, actionable growth plan for the coming week based on behavioral psychology. Focus on habit formation and mental resilience. No superstition.';
+        }
 
         const structurePrompt = `
         Output ONLY Markdown.
@@ -266,8 +277,8 @@ const UI = {
         ${recentData.substring(0, 2000)}
         Encourage them on their progress.
         
-        Part 2 (Fortune): 
-        ${this.state.persona === 'western' ? 'Provide a Horoscope forecast for the coming week regarding career and wellness based on the Zodiac.' : '根据易经卦象为用户下周的运势（事业、健康）进行预测，给出富有哲理的建议。'}
+        Part 2 (Guidance): 
+        ${fortunePrompt}
         `;
 
         try {
@@ -279,7 +290,7 @@ const UI = {
             const mdText = json.candidates[0].content.parts[0].text;
             container.innerHTML = marked.parse(mdText);
         } catch(e) {
-            container.innerHTML = "<p class='text-center text-red-400'>The connection to the ether was interrupted.</p>";
+            container.innerHTML = "<p class='text-center text-red-400'>The connection was interrupted.</p>";
         }
     },
     resetOracle: function() {
@@ -326,8 +337,13 @@ const UI = {
         this.renderCalendar(); this.renderTimeline(); 
     },
     setPersona: function(p) { this.state.persona = p; 
-        if(p==='western') { document.getElementById('btn-western').classList.add('active'); document.getElementById('btn-eastern').classList.remove('active'); } 
-        else { document.getElementById('btn-eastern').classList.add('active'); document.getElementById('btn-western').classList.remove('active'); } 
+        ['western', 'eastern', 'coach'].forEach(k => {
+            const btn = document.getElementById(`btn-${k}`);
+            if (btn) {
+                if (k === p) btn.classList.add('active'); 
+                else btn.classList.remove('active');
+            }
+        });
     },
     setEditorType: function(t) {
         document.getElementById('editor-entry-type').value = t;
