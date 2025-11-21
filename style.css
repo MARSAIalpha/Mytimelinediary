@@ -41,8 +41,8 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 .hud-meta { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sec); opacity: 0.9; margin-top: 0.2rem; }
 
 #center-guide-layer { position: fixed; top: 50%; left: 0; width: 100%; height: 0; z-index: 0; pointer-events: none; transform: translateY(-0.5px); transition: opacity 0.3s ease; }
-/* Fixed Beam Logic: Starts at 0, width is rail-x */
-.guide-beam { position: absolute; left: 0; width: var(--rail-x); height: 2px; background-color: var(--current-beam-color); opacity: 0.5; top: 0; transform: translateY(-50%); transition: background-color 0.3s ease; pointer-events: none; }
+/* Fixed Beam Logic: Starts AFTER HUD (7rem), width is remainder to rail */
+.guide-beam { position: absolute; left: 7rem; width: calc(var(--rail-x) - 7rem); height: 2px; background-color: var(--current-beam-color); opacity: 0.5; top: 0; transform: translateY(-50%); transition: background-color 0.3s ease; pointer-events: none; }
 .guide-cursor { position: absolute; left: var(--rail-x); top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--current-beam-color); transform: translate(-50%, -50%); box-shadow: 0 0 8px 1px var(--current-beam-color); transition: top 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.3s, box-shadow 0.3s; opacity: 1; z-index: 30; pointer-events: none; }
 
 .timeline-rail-outer { position: fixed; left: 0; top: 0; bottom: 0; width: 100%; pointer-events: none; z-index: 1; mask-image: linear-gradient(to bottom, transparent 5%, black 20%, black 80%, transparent 95%); }
@@ -98,6 +98,8 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
     :root { --rail-x: 6rem; } 
     #focus-hud { left: 0.25rem; width: 3.5rem; } 
     .entry-card-wrapper { padding-left: calc(var(--rail-x) + 1rem); padding-right: 1rem; } 
+    /* Mobile Beam: Starts at 4rem, width is remainder */
+    .guide-beam { left: 4rem; width: calc(var(--rail-x) - 4rem); }
     /* Ensure Filter stays left on mobile */
     #filter-fab-group { bottom: 100px; left: 16px; right: auto !important; } 
 }
