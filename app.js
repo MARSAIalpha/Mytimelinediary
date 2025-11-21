@@ -1,4 +1,4 @@
-const DEFAULT_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
+const DEFAULT_KEY = "AIzaSyCdaSTI8ssWQkr5JTBc7IksQ5il8loNqTQ";
 const I18N = { 
     en: { 
         btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", 
@@ -70,7 +70,7 @@ class Particle {
 }
 
 const UI = {
-    DEFAULT_KEY: "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE",
+    DEFAULT_KEY: "AIzaSyCdaSTI8ssWQkr5JTBc7IksQ5il8loNqTQ",
     state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true}, selectedIds: new Set(), selectionMode: false, goals: {sleep:8, focus:60, exercise:30, meditation:15, cals:2000} },
     cachedEntryItems: [],
     init: async function() { 
@@ -172,6 +172,9 @@ const UI = {
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
             let activeColor = '#f59e0b'; let extraHtml = ''; let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
             let cardClass = this.state.selectedIds.has(i.id) ? 'selected ' : '';
+            // Glow purple for saved oracle reports
+            if (i.mood === 'sparkles') cardClass += ' glow-purple';
+            
             if (i.isHoliday) { activeColor = '#22c55e'; cardClass+='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
             if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+='card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
             if (i.isTask) { if (i.taskCat === 'Exercise') activeColor = '#ef4444'; if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; if (i.taskCat === 'Focus') activeColor = '#10b981'; if (i.taskCat === 'Meditation') activeColor = '#a855f7'; }
@@ -204,7 +207,7 @@ const UI = {
     endTask: async function(category) { if(confirm(`End ${category} session?`)) { const payload = { ts: Date.now(), title: `${category} Finished`, content: `Completed ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'end', taskCat: category, img: null }; await DataManager.add(payload); } },
     updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
     analyzeFoodImage: async function() {
-        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "...";
+        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "Analyzing...";
         try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: `Identify food. Return JSON: {"food": "Name", "calories": 500, "desc": "Short description"}. No markdown.`},{inlineData: {mimeType: img.split(';')[0].split(':')[1], data: img.split(',')[1]}}]}]}) }); const json = await res.json(); const txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim(); const data = JSON.parse(txt); document.getElementById('editor-title').value = data.food; document.getElementById('editor-content').value = data.desc; document.getElementById('editor-calories').value = data.calories; alert(`Identified: ${data.food} (~${data.calories} kcal)`); } catch(e) { console.error(e); alert("AI Analysis Failed"); } finally { btn.innerText = originalText; }
     },
     renderDashboard: async function() {
@@ -247,9 +250,8 @@ const UI = {
         
         document.getElementById('oracle-input-view').classList.add('hidden');
         document.getElementById('oracle-result-view').classList.remove('hidden');
-        container.innerHTML = '<div class="text-center mt-10"><i class="animate-spin" data-lucide="loader-2"></i><p class="mt-4 opacity-70">Consulting the stars...</p></div>';
-        lucide.createIcons();
-
+        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Consulting the stars...</p></div>';
+        
         const allData = await DataManager.getAll();
         const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
         const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
