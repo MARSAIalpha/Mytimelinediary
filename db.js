@@ -72,10 +72,17 @@ const DataManager = {
         const entries = await this.getAll();
         const newEntries = [];
         const HOLIDAYS_CHECK = [
+            // 2025 Main
             { name: "春节", date: "2025-01-29" }, { name: "元宵节", date: "2025-02-12" },
             { name: "清明节", date: "2025-04-04" }, { name: "端午节", date: "2025-05-31" },
-            { name: "七夕节", date: "2025-08-29" }, { name: "中秋节", date: "2025-10-06" },
-            { name: "重阳节", date: "2025-10-29" }, { name: "国庆节", date: "2025-10-01" }
+            { name: "七夕节", date: "2025-08-29" }, 
+            // 2025 Late
+            { name: "中秋节", date: "2025-10-06" }, { name: "国庆节", date: "2025-10-01" },
+            { name: "重阳节", date: "2025-10-29" }, { name: "圣诞节", date: "2025-12-25" },
+            // 2026 Early
+            { name: "元旦", date: "2026-01-01" }, { name: "除夕", date: "2026-02-16" },
+            { name: "春节", date: "2026-02-17" }, { name: "情人节", date: "2026-02-14" },
+            { name: "元宵节", date: "2026-03-03" }
         ];
         HOLIDAYS_CHECK.forEach(h => {
             const hDate = new Date(h.date).toDateString();
@@ -90,7 +97,7 @@ const DataManager = {
         }
     },
 
-    updateHolidays: async function() { await this.checkAndAddHolidays(); alert("Holidays Updated!"); UI.renderCalendar(); UI.renderTimeline(); },
+    updateHolidays: async function() { await this.checkAndAddHolidays(); alert("Holidays Updated for 2025/2026!"); UI.renderCalendar(); UI.renderTimeline(); },
 
     compressImage: function(base64, maxWidth, quality, callback) {
         const img = new Image(); img.src = base64;
