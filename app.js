@@ -1,7 +1,7 @@
 const DEFAULT_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
 const I18N = { 
-    en: { btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", future: "Future Unwritten", origin: "The Beginning", nav_timeline: "TIMELINE", nav_dashboard: "DASHBOARD", nav_calendar: "CALENDAR", dashboard_title: "Life Rhythm", dashboard_tasks: "Pending Tasks", stat_nutrition: "Nutrition (Week)", empty_gallery: "No images.", info_title: "Settings & Guide", data_title: "Data Management", storage_title: "Storage Usage", btn_backup: "Backup JSON", btn_restore: "Restore", btn_reset: "Reset All Data", btn_save: "Save", btn_delete: "Delete", btn_edit: "Edit", btn_cancel: "Cancel", btn_export: "Export MD", btn_export_pdf: "Export PDF", btn_consult: "Start Divination", label_zodiac: "Zodiac", label_birth: "Birth Date", ai_title: "AI Oracle", delete_title: "Delete Memory?", delete_desc: "This action cannot be undone.", archive_title: "Archive", empty_month: "No entries.", label_all_entries: "All Entries", doc_f1_t: "Flow Timeline", doc_f1_d: "Record life in a continuous stream.", doc_f2_t: "AI Vision", doc_f2_d: "Identify food calories from photos.", doc_f3_t: "Rhythm Dashboard", doc_f3_d: "Track habits.", doc_f4_t: "Oracle", doc_f4_d: "Western/Eastern fortune telling.", label_font_size: "Font Size" }, 
-    zh: { btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", future: "未知未来", origin: "起源之时", nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", btn_cancel: "取消", btn_export: "导出 MD", btn_export_pdf: "导出 PDF", btn_consult: "开始推演", label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", empty_month: "无记录。", label_all_entries: "所有条目", doc_f1_t: "时光流", doc_f1_d: "像河流一样记录生活。", doc_f2_t: "AI 视觉", doc_f2_d: "识别食物热量。", doc_f3_t: "生活韵律", doc_f3_d: "追踪习惯数据。", doc_f4_t: "预言家", doc_f4_d: "东西方双风格算命。", label_font_size: "字体大小" } 
+    en: { btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", future: "Future Unwritten", origin: "The Beginning", nav_timeline: "TIMELINE", nav_dashboard: "DASHBOARD", nav_calendar: "CALENDAR", dashboard_title: "Life Rhythm", dashboard_tasks: "Pending Tasks", stat_nutrition: "Nutrition (Week)", empty_gallery: "No images.", info_title: "Settings & Guide", data_title: "Data Management", storage_title: "Storage Usage", btn_backup: "Backup JSON", btn_restore: "Restore", btn_reset: "Reset All Data", btn_save: "Save", btn_delete: "Delete", btn_edit: "Edit", btn_cancel: "Cancel", btn_export: "Export MD", btn_export_pdf: "Export PDF", btn_consult: "Start Divination", label_zodiac: "Zodiac", label_birth: "Birth Date", ai_title: "AI Oracle", delete_title: "Delete Memory?", delete_desc: "This action cannot be undone.", archive_title: "Archive", empty_month: "No entries.", label_all_entries: "All Entries", doc_f1_t: "Flow Timeline", doc_f1_d: "Record life in a continuous stream.", doc_f2_t: "AI Vision", doc_f2_d: "Identify food calories from photos.", doc_f3_t: "Rhythm Dashboard", doc_f3_d: "Track habits.", doc_f4_t: "Oracle", doc_f4_d: "Western/Eastern fortune telling.", label_font_size: "Font Size", btn_select: "Select", btn_cancel_select: "Cancel" }, 
+    zh: { btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", future: "未知未来", origin: "起源之时", nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", btn_cancel: "取消", btn_export: "导出 MD", btn_export_pdf: "导出 PDF", btn_consult: "开始推演", label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", empty_month: "无记录。", label_all_entries: "所有条目", doc_f1_t: "时光流", doc_f1_d: "像河流一样记录生活。", doc_f2_t: "AI 视觉", doc_f2_d: "识别食物热量。", doc_f3_t: "生活韵律", doc_f3_d: "追踪习惯数据。", doc_f4_t: "预言家", doc_f4_d: "东西方双风格算命。", label_font_size: "字体大小", btn_select: "选择", btn_cancel_select: "取消" } 
 };
 
 const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig: { type: 'mist', count: 50 } }, day: { bgGradient: ['#A0E6FF', '#FFFACD'], particleConfig: { type: 'beam_only', count: 8 } }, dusk: { bgGradient: ['#24243e', '#FFC3A0'], particleConfig: { type: 'ember', count: 100 } }, night: { bgGradient: ['#0B1026', '#1F2F4F'], particleConfig: { type: 'star', count: 120 } } };
@@ -25,7 +25,7 @@ class Particle {
 
 const UI = {
     DEFAULT_KEY: "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE",
-    state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true}, selectedIds: new Set(), goals: {sleep:8, focus:4, exercise:1, cals:2000} },
+    state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true}, selectedIds: new Set(), selectionMode: false, goals: {sleep:8, focus:4, exercise:1, cals:2000} },
     cachedEntryItems: [],
     init: async function() { 
         await DataManager.init(); ParticleSystem.init(); lucide.createIcons(); this.initScrollObserver(); 
@@ -79,16 +79,53 @@ const UI = {
             c.appendChild(div);
         });
     },
+    toggleSelectionMode: function() {
+        this.state.selectionMode = !this.state.selectionMode;
+        const btnText = document.getElementById('select-btn-text');
+        const t = I18N[this.state.lang];
+        if (this.state.selectionMode) {
+            btnText.innerText = t.btn_cancel_select || "Cancel";
+            document.getElementById('export-bar').classList.remove('hidden');
+            document.getElementById('btn-select-mode').classList.replace('bg-[var(--text)]', 'bg-red-500');
+            document.getElementById('btn-select-mode').classList.replace('text-[var(--card-bg)]', 'text-white');
+        } else {
+            this.state.selectedIds.clear();
+            btnText.innerText = t.btn_select || "Select";
+            document.getElementById('export-bar').classList.add('hidden');
+            document.getElementById('btn-select-mode').classList.replace('bg-red-500', 'bg-[var(--text)]');
+            document.getElementById('btn-select-mode').classList.replace('text-white', 'text-[var(--card-bg)]');
+            this.renderTimeline(); // Refresh to remove selected styles
+            this.renderDataList();
+            document.getElementById('selected-count').innerText = '0';
+        }
+    },
+    handleEntryClick: function(id) {
+        if (this.state.selectionMode) {
+            const card = document.querySelector(`#entry-${id} .entry-card`);
+            if (this.state.selectedIds.has(id)) {
+                this.state.selectedIds.delete(id);
+                card.classList.remove('selected');
+            } else {
+                this.state.selectedIds.add(id);
+                card.classList.add('selected');
+            }
+            document.getElementById('selected-count').innerText = this.state.selectedIds.size;
+        } else {
+            this.openDetailById(id);
+        }
+    },
     renderDataList: async function() {
         const list = document.getElementById('archive-list'); list.innerHTML = ''; const allData = await DataManager.getAll();
         allData.sort((a,b) => b.ts - a.ts).forEach(e => {
-            const div = document.createElement('div'); div.className = 'archive-item'; const isSel = this.state.selectedIds.has(e.id); if(isSel) div.classList.add('selected');
-            div.onclick = () => { if(this.state.selectedIds.has(e.id)) { this.state.selectedIds.delete(e.id); div.classList.remove('selected'); } else { this.state.selectedIds.add(e.id); div.classList.add('selected'); } const count = this.state.selectedIds.size; document.getElementById('selected-count').innerText = count; document.getElementById('export-bar').classList.remove('hidden'); };
+            const div = document.createElement('div'); div.className = 'archive-item'; 
+            const isSel = this.state.selectedIds.has(e.id); if(isSel) div.classList.add('selected');
+            div.onclick = () => { 
+                if(this.state.selectedIds.has(e.id)) { this.state.selectedIds.delete(e.id); div.classList.remove('selected'); } else { this.state.selectedIds.add(e.id); div.classList.add('selected'); } 
+                const count = this.state.selectedIds.size; document.getElementById('selected-count').innerText = count; 
+                if(count > 0) document.getElementById('export-bar').classList.remove('hidden');
+            };
             div.innerHTML = `<div class="archive-checkbox"></div><div class="text-xs font-bold flex-1">${new Date(e.ts).toLocaleDateString()} - ${e.title}</div>`; list.appendChild(div);
         });
-    },
-    exportSelectedPDF: async function() {
-        if (this.state.selectedIds.size === 0) return alert("Select items first"); const allData = await DataManager.getAll(); const selected = allData.filter(e => this.state.selectedIds.has(e.id)); const originalGetAll = DataManager.getAll; DataManager.getAll = async () => selected; await DataManager.exportPDF(); DataManager.getAll = originalGetAll;
     },
     exportSelectedMarkdown: async function() {
         if (this.state.selectedIds.size === 0) return alert("Select items first"); const allData = await DataManager.getAll(); const selected = allData.filter(e => this.state.selectedIds.has(e.id)); await DataManager.exportSelectedMarkdown(new Set(selected.map(e=>e.id)));
@@ -102,14 +139,14 @@ const UI = {
             const d = new Date(i.ts); const div = document.createElement('div'); div.className = `entry-item`; div.dataset.ts = i.ts; div.id = `entry-${i.id}`; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
             let activeColor = '#f59e0b'; let extraHtml = ''; let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
-            let cardClass = '';
-            if (i.isHoliday) { activeColor = '#22c55e'; cardClass='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
-            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass='card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
+            let cardClass = this.state.selectedIds.has(i.id) ? 'selected ' : '';
+            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
+            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+='card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
             if (i.isTask) { if (i.taskCat === 'Exercise') activeColor = '#ef4444'; if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; if (i.taskCat === 'Focus') activeColor = '#10b981'; }
             if (i.calories) { extraHtml += `<div class="inline-block bg-orange-100 text-orange-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="utensils" class="inline w-3 h-3"></i> ${i.calories} kcal</div>`; }
             if (i.isTask && !catState[i.taskCat]) { catState[i.taskCat] = i.taskType; if (i.taskType === 'start') { extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; } }
             div.style.setProperty('--node-active-color', activeColor);
-            div.innerHTML = `<div class="timeline-node-wrapper"><div class="timeline-node"></div></div><div class="entry-card-wrapper"><div class="entry-card ${cardClass}" onclick="UI.openDetailById(${i.id})" style="${!i.img ? 'padding-left:1.2rem' : ''}">${thumbHtml}<div class="card-main-col"><div class="card-mood"><i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i></div><div class="flex flex-wrap gap-2 mb-1">${extraHtml}</div><h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2">${i.title}</h3><p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${i.content.replace(/<[^>]*>/g, '').substring(0,80)}</p></div></div></div>`;
+            div.innerHTML = `<div class="timeline-node-wrapper"><div class="timeline-node"></div></div><div class="entry-card-wrapper"><div class="entry-card ${cardClass}" onclick="UI.handleEntryClick(${i.id})" style="${!i.img ? 'padding-left:1.2rem' : ''}">${thumbHtml}<div class="card-main-col"><div class="card-mood"><i data-lucide="${this.getMoodIcon(i.mood)}" class="w-4 h-4"></i></div><div class="flex flex-wrap gap-2 mb-1">${extraHtml}</div><h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2">${i.title}</h3><p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${i.content.replace(/<[^>]*>/g, '').substring(0,80)}</p></div></div></div>`;
             c.appendChild(div);
         });
         lucide.createIcons(); this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); setTimeout(() => { this.handleScroll(); this.drawTaskConnectors(); }, 150);
@@ -121,7 +158,14 @@ const UI = {
     initScrollObserver: function() { const main = document.getElementById('main-container'); let ticking = false; main.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { this.handleScroll(); ticking = false; }); ticking = true; } }, { passive: true }); },
     handleScroll: function() {
         const entries = this.cachedEntryItems; if(!entries || entries.length === 0) return; const viewCenter = window.innerHeight / 2; let closest = null; let minDiff = Infinity; let closestRawDiff = 0;
-        entries.forEach(el => { const rect = el.getBoundingClientRect(); const dist = Math.abs(rect.top + rect.height/2 - viewCenter); if(dist < minDiff) { minDiff = dist; closest = el; closestRawDiff = rect.top + rect.height/2 - viewCenter; } el.classList.remove('active-focus'); const card = el.querySelector('.entry-card'); const range = 400; let scale = 0.85; let opacity = 0.5; if (dist < range) { const ratio = 1 - (dist / range); const ease = ratio * ratio; scale = 0.85 + (ease * 0.2); opacity = 0.5 + (ease * 0.5); } if (card) { card.style.transform = `scale(${scale})`; card.style.opacity = opacity; card.style.zIndex = dist < 60 ? 50 : 1; } });
+        entries.forEach(el => { const rect = el.getBoundingClientRect(); const dist = Math.abs(rect.top + rect.height/2 - viewCenter); if(dist < minDiff) { minDiff = dist; closest = el; closestRawDiff = rect.top + rect.height/2 - viewCenter; } el.classList.remove('active-focus'); const card = el.querySelector('.entry-card'); const range = 400; let scale = 0.85; let opacity = 0.5; if (dist < range) { const ratio = 1 - (dist / range); const ease = ratio * ratio; scale = 0.85 + (ease * 0.2); opacity = 0.5 + (ease * 0.5); } if (card) { 
+             // Preserve scale if selected
+             if(!card.classList.contains('selected')) {
+                card.style.transform = `scale(${scale})`; card.style.opacity = opacity; card.style.zIndex = dist < 60 ? 50 : 1; 
+             } else {
+                card.style.opacity = 1; card.style.zIndex = 50;
+             }
+        } });
         if(closest) {
             closest.classList.add('active-focus'); const cursor = document.getElementById('beam-cursor'); const magnetRange = 25; let magnetY = 0; if (Math.abs(closestRawDiff) < magnetRange) { magnetY = closestRawDiff; } cursor.style.top = `calc(50% + ${magnetY}px)`;
             const activeColor = closest.style.getPropertyValue('--node-active-color') || '#f59e0b'; document.documentElement.style.setProperty('--current-beam-color', activeColor);
@@ -258,28 +302,6 @@ const UI = {
 };
 
 if (typeof DataManager !== 'undefined') {
-    // EXPORT PDF (FIXED)
-    DataManager.exportPDF = async function() {
-        const allData = await this.getAll();
-        if (allData.length === 0) return alert("No entries.");
-        alert("Generating PDF...");
-        // Create temporary printable element
-        const el = document.createElement('div');
-        el.style.cssText = 'position:absolute;left:-9999px;top:0;width:800px;padding:40px;background:white;color:black;font-family:serif;z-index:9999;';
-        // Reconstruct HTML for PDF with images
-        el.innerHTML = `<h1 style="text-align:center;margin-bottom:40px;font-size:32px;">Timeline Journal</h1>` + allData.sort((a,b)=>b.ts-a.ts).map(e => `
-            <div style="margin-bottom:30px;border-bottom:1px solid #ccc;padding-bottom:20px;page-break-inside:avoid;">
-                <h2 style="font-size:20px;margin:0 0 5px 0;">${e.title}</h2>
-                <div style="font-size:12px;color:#666;margin-bottom:10px;">${new Date(e.ts).toLocaleString()} ${e.calories?`| ${e.calories} kcal`:''}</div>
-                ${e.img ? `<img src="${e.img}" style="max-width:100%;max-height:400px;border-radius:8px;margin:10px 0;display:block;">` : ''}
-                <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;">${e.content}</div>
-            </div>`).join('');
-        document.body.appendChild(el);
-        try { 
-            await html2pdf().set({ margin:10, filename:`timeline_export.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2, useCORS:true}, jsPDF:{unit:'mm',format:'a4'} }).from(el).save(); 
-        } catch (e) { alert("PDF Error: " + e.message); } finally { document.body.removeChild(el); }
-    };
-
     DataManager.saveFromEditor = function() {
         const id = document.getElementById('editor-id').value; const t = document.getElementById('editor-title').value; const c = document.getElementById('editor-content').value; const d = document.getElementById('editor-date').value; const tm = document.getElementById('editor-time').value; 
         const cal = document.getElementById('editor-calories').value;
