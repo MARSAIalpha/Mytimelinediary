@@ -1,7 +1,53 @@
 const DEFAULT_KEY = "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE";
 const I18N = { 
-    en: { btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", future: "Future Unwritten", origin: "The Beginning", nav_timeline: "TIMELINE", nav_dashboard: "DASHBOARD", nav_calendar: "CALENDAR", dashboard_title: "Life Rhythm", dashboard_tasks: "Pending Tasks", stat_nutrition: "Nutrition (Week)", empty_gallery: "No images.", info_title: "Settings & Guide", data_title: "Data Management", storage_title: "Storage Usage", btn_backup: "Backup JSON", btn_restore: "Restore", btn_reset: "Reset All Data", btn_save: "Save", btn_delete: "Delete", btn_edit: "Edit", btn_cancel: "Cancel", btn_export: "Export MD", btn_export_pdf: "Export PDF", btn_consult: "Start Divination", label_zodiac: "Zodiac", label_birth: "Birth Date", ai_title: "AI Oracle", delete_title: "Delete Memory?", delete_desc: "This action cannot be undone.", archive_title: "Archive", empty_month: "No entries.", label_all_entries: "All Entries", doc_f1_t: "Flow Timeline", doc_f1_d: "Record life in a continuous stream.", doc_f2_t: "AI Vision", doc_f2_d: "Identify food calories from photos.", doc_f3_t: "Rhythm Dashboard", doc_f3_d: "Track habits.", doc_f4_t: "Oracle", doc_f4_d: "Western/Eastern fortune telling.", label_font_size: "Font Size", btn_select: "Select", btn_cancel_select: "Cancel" }, 
-    zh: { btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", future: "未知未来", origin: "起源之时", nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", btn_cancel: "取消", btn_export: "导出 MD", btn_export_pdf: "导出 PDF", btn_consult: "开始推演", label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", empty_month: "无记录。", label_all_entries: "所有条目", doc_f1_t: "时光流", doc_f1_d: "像河流一样记录生活。", doc_f2_t: "AI 视觉", doc_f2_d: "识别食物热量。", doc_f3_t: "生活韵律", doc_f3_d: "追踪习惯数据。", doc_f4_t: "预言家", doc_f4_d: "东西方双风格算命。", label_font_size: "字体大小", btn_select: "选择", btn_cancel_select: "取消" } 
+    en: { 
+        btn_timeline: "TIMELINE", btn_calendar: "CALENDAR", btn_dashboard: "DASHBOARD", 
+        future: "Future Unwritten", origin: "The Beginning", 
+        nav_timeline: "TIMELINE", nav_dashboard: "DASHBOARD", nav_calendar: "CALENDAR", 
+        dashboard_title: "Life Rhythm", dashboard_tasks: "Pending Tasks", stat_nutrition: "Nutrition (Week)", 
+        empty_gallery: "No images.", info_title: "Settings & Guide", data_title: "Data Management", 
+        storage_title: "Storage Usage", btn_backup: "Backup JSON", btn_restore: "Restore", 
+        btn_reset: "Reset All Data", btn_save: "Save", btn_delete: "Delete", btn_edit: "Edit", 
+        btn_cancel: "Cancel", btn_export: "Export MD", btn_consult: "Start Divination", 
+        label_zodiac: "Zodiac", label_birth: "Birth Date", ai_title: "AI Oracle", 
+        delete_title: "Delete Memory?", delete_desc: "This action cannot be undone.", archive_title: "Archive", 
+        empty_month: "No entries.", label_all_entries: "All Entries", 
+        doc_f1: "Flow: Timeline stream.", doc_f2: "Vision: Food Analysis.", doc_f4: "Oracle: AI Advice.", 
+        label_font_size: "Font Size", btn_select: "Select", btn_cancel_select: "Cancel",
+        cat_exercise: "Exercise", cat_sleep: "Sleep", cat_focus: "Focus", cat_meditation: "Meditation",
+        lbl_target: "Target", lbl_actual: "Actual", lbl_daily_goals: "Daily Goals", 
+        label_personal_info: "Personal Info", label_manual: "Manual",
+        btn_photo: "Photo", btn_inspire: "Inspire", btn_todo: "Todo", 
+        btn_analyze: "Analyze Calories", btn_remove: "Remove",
+        filter_anni: "ANN", filter_holiday: "HOL", filter_diary: "DIARY",
+        type_diary: "Diary", type_routine: "Routine", type_anni: "Anniversary",
+        label_recurrence: "Recurrence", rec_none: "One-off", rec_daily: "Daily", rec_weekly: "Weekly", rec_workday: "Workdays",
+        label_track: "Track:", ph_title: "Title...", ph_content: "Start writing...", btn_ask_again: "Ask Again", label_est: "Est. 2025"
+    }, 
+    zh: { 
+        btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", 
+        future: "未知未来", origin: "起源之时", 
+        nav_timeline: "时间轴", nav_dashboard: "仪表盘", nav_calendar: "日历", 
+        dashboard_title: "生活韵律", dashboard_tasks: "待办事项", stat_nutrition: "本周营养", 
+        empty_gallery: "无图片", info_title: "设置与指南", data_title: "数据管理", 
+        storage_title: "存储空间", btn_backup: "备份 JSON", btn_restore: "恢复数据", 
+        btn_reset: "重置所有", btn_save: "保存", btn_delete: "删除", btn_edit: "编辑", 
+        btn_cancel: "取消", btn_export: "导出 MD", btn_consult: "开始推演", 
+        label_zodiac: "星座", label_birth: "生日", ai_title: "AI 预言", 
+        delete_title: "删除回忆？", delete_desc: "此操作无法撤销。", archive_title: "归档", 
+        empty_month: "无记录。", label_all_entries: "所有条目", 
+        doc_f1: "时光流: 像河流一样记录生活。", doc_f2: "AI 视觉: 识别食物热量。", doc_f4: "预言家: AI算命。", 
+        label_font_size: "字体大小", btn_select: "选择", btn_cancel_select: "取消",
+        cat_exercise: "运动", cat_sleep: "睡眠", cat_focus: "专注", cat_meditation: "冥想",
+        lbl_target: "目标", lbl_actual: "实际", lbl_daily_goals: "每日目标", 
+        label_personal_info: "个人信息", label_manual: "使用说明",
+        btn_photo: "照片", btn_inspire: "灵感", btn_todo: "待办", 
+        btn_analyze: "识别热量", btn_remove: "移除",
+        filter_anni: "纪念日", filter_holiday: "节假日", filter_diary: "日记",
+        type_diary: "日记", type_routine: "习惯", type_anni: "纪念日",
+        label_recurrence: "重复", rec_none: "一次性", rec_daily: "每天", rec_weekly: "每周", rec_workday: "工作日",
+        label_track: "追踪:", ph_title: "标题...", ph_content: "开始记录...", btn_ask_again: "再次询问", label_est: "始于 2025"
+    } 
 };
 
 const TIME_THEMES = { dawn: { bgGradient: ['#E6F0FF', '#FFF8E1'], particleConfig: { type: 'mist', count: 50 } }, day: { bgGradient: ['#A0E6FF', '#FFFACD'], particleConfig: { type: 'beam_only', count: 8 } }, dusk: { bgGradient: ['#24243e', '#FFC3A0'], particleConfig: { type: 'ember', count: 100 } }, night: { bgGradient: ['#0B1026', '#1F2F4F'], particleConfig: { type: 'star', count: 120 } } };
@@ -25,7 +71,7 @@ class Particle {
 
 const UI = {
     DEFAULT_KEY: "AIzaSyDjPO6FOcgwrWWVXfovoqsmIJD4xaeUiXE",
-    state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true}, selectedIds: new Set(), selectionMode: false, goals: {sleep:8, focus:4, exercise:1, cals:2000} },
+    state: { mood: 'smile', weather: 'sun', calendarDate: new Date(), currentDetailId: null, tempImage: null, lang: 'en', currentRotation: 0, persona: 'western', filters: {anni:true, holiday:true, normal:true}, selectedIds: new Set(), selectionMode: false, goals: {sleep:8, focus:60, exercise:30, meditation:15, cals:2000} },
     cachedEntryItems: [],
     init: async function() { 
         await DataManager.init(); ParticleSystem.init(); lucide.createIcons(); this.initScrollObserver(); 
@@ -35,13 +81,15 @@ const UI = {
         document.getElementById('goal-sleep').value = this.state.goals.sleep;
         document.getElementById('goal-focus').value = this.state.goals.focus;
         document.getElementById('goal-exercise').value = this.state.goals.exercise;
+        document.getElementById('goal-meditation').value = this.state.goals.meditation || 15;
         document.getElementById('goal-cals').value = this.state.goals.cals;
     },
     saveGoals: function() {
         this.state.goals = {
             sleep: Number(document.getElementById('goal-sleep').value) || 8,
-            focus: Number(document.getElementById('goal-focus').value) || 4,
-            exercise: Number(document.getElementById('goal-exercise').value) || 1,
+            focus: Number(document.getElementById('goal-focus').value) || 60,
+            exercise: Number(document.getElementById('goal-exercise').value) || 30,
+            meditation: Number(document.getElementById('goal-meditation').value) || 15,
             cals: Number(document.getElementById('goal-cals').value) || 2000
         };
         localStorage.setItem('user_goals', JSON.stringify(this.state.goals));
@@ -65,18 +113,11 @@ const UI = {
         const c = document.getElementById('gallery-grid-view'); c.innerHTML = ''; const all = await DataManager.getAll(); const imgs = all.filter(e => e.img).sort((a,b) => b.ts - a.ts);
         if(imgs.length === 0) { document.getElementById('gallery-empty').classList.remove('hidden'); return; }
         document.getElementById('gallery-empty').classList.add('hidden');
-        
         let lastDate = '';
         imgs.forEach(e => {
             const dateStr = new Date(e.ts).toLocaleDateString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {year:'numeric', month:'long', day:'numeric'});
-            if (dateStr !== lastDate) {
-                const h = document.createElement('div'); h.className = 'gallery-date-header'; h.innerText = dateStr; c.appendChild(h);
-                lastDate = dateStr;
-            }
-            const div = document.createElement('div'); div.className = 'gallery-item';
-            div.innerHTML = `<img src="${e.img}" loading="lazy">`;
-            div.onclick = () => UI.openDetail(e);
-            c.appendChild(div);
+            if (dateStr !== lastDate) { const h = document.createElement('div'); h.className = 'gallery-date-header'; h.innerText = dateStr; c.appendChild(h); lastDate = dateStr; }
+            const div = document.createElement('div'); div.className = 'gallery-item'; div.innerHTML = `<img src="${e.img}" loading="lazy">`; div.onclick = () => UI.openDetail(e); c.appendChild(div);
         });
     },
     toggleSelectionMode: function() {
@@ -94,33 +135,24 @@ const UI = {
             document.getElementById('export-bar').classList.add('hidden');
             document.getElementById('btn-select-mode').classList.replace('bg-red-500', 'bg-[var(--text)]');
             document.getElementById('btn-select-mode').classList.replace('text-white', 'text-[var(--card-bg)]');
-            this.renderTimeline(); // Refresh to remove selected styles
-            this.renderDataList();
-            document.getElementById('selected-count').innerText = '0';
+            this.renderTimeline(); this.renderDataList(); document.getElementById('selected-count').innerText = '0';
         }
     },
     handleEntryClick: function(id) {
         if (this.state.selectionMode) {
             const card = document.querySelector(`#entry-${id} .entry-card`);
-            if (this.state.selectedIds.has(id)) {
-                this.state.selectedIds.delete(id);
-                card.classList.remove('selected');
-            } else {
-                this.state.selectedIds.add(id);
-                card.classList.add('selected');
-            }
+            if (this.state.selectedIds.has(id)) { this.state.selectedIds.delete(id); card.classList.remove('selected'); } 
+            else { this.state.selectedIds.add(id); card.classList.add('selected'); }
             document.getElementById('selected-count').innerText = this.state.selectedIds.size;
-        } else {
-            this.openDetailById(id);
-        }
+        } else { this.openDetailById(id); }
     },
     renderDataList: async function() {
         const list = document.getElementById('archive-list'); list.innerHTML = ''; const allData = await DataManager.getAll();
         allData.sort((a,b) => b.ts - a.ts).forEach(e => {
-            const div = document.createElement('div'); div.className = 'archive-item'; 
-            const isSel = this.state.selectedIds.has(e.id); if(isSel) div.classList.add('selected');
+            const div = document.createElement('div'); div.className = 'archive-item'; const isSel = this.state.selectedIds.has(e.id); if(isSel) div.classList.add('selected');
             div.onclick = () => { 
-                if(this.state.selectedIds.has(e.id)) { this.state.selectedIds.delete(e.id); div.classList.remove('selected'); } else { this.state.selectedIds.add(e.id); div.classList.add('selected'); } 
+                if(this.state.selectedIds.has(e.id)) { this.state.selectedIds.delete(e.id); div.classList.remove('selected'); } 
+                else { this.state.selectedIds.add(e.id); div.classList.add('selected'); } 
                 const count = this.state.selectedIds.size; document.getElementById('selected-count').innerText = count; 
                 if(count > 0) document.getElementById('export-bar').classList.remove('hidden');
             };
@@ -134,7 +166,7 @@ const UI = {
         const c = document.getElementById('diary-list'); c.innerHTML = ''; const layer = document.getElementById('task-lines-layer'); if(layer) layer.innerHTML = ''; else { const l = document.createElement('div'); l.id = 'task-lines-layer'; l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; c.appendChild(l); }
         const allData = await DataManager.getAll(); let entries = allData.sort((a, b) => b.ts - a.ts); entries = entries.filter(e => { if(e.isHoliday) return this.state.filters.holiday; if(e.anni) return this.state.filters.anni; return this.state.filters.normal; });
         if(entries.length === 0) { c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; return; }
-        const catState = { 'Exercise': null, 'Sleep': null, 'Focus': null };
+        const catState = { 'Exercise': null, 'Sleep': null, 'Focus': null, 'Meditation': null };
         entries.forEach(i => {
             const d = new Date(i.ts); const div = document.createElement('div'); div.className = `entry-item`; div.dataset.ts = i.ts; div.id = `entry-${i.id}`; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
@@ -142,7 +174,7 @@ const UI = {
             let cardClass = this.state.selectedIds.has(i.id) ? 'selected ' : '';
             if (i.isHoliday) { activeColor = '#22c55e'; cardClass+='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
             if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+='card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
-            if (i.isTask) { if (i.taskCat === 'Exercise') activeColor = '#ef4444'; if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; if (i.taskCat === 'Focus') activeColor = '#10b981'; }
+            if (i.isTask) { if (i.taskCat === 'Exercise') activeColor = '#ef4444'; if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; if (i.taskCat === 'Focus') activeColor = '#10b981'; if (i.taskCat === 'Meditation') activeColor = '#a855f7'; }
             if (i.calories) { extraHtml += `<div class="inline-block bg-orange-100 text-orange-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="utensils" class="inline w-3 h-3"></i> ${i.calories} kcal</div>`; }
             if (i.isTask && !catState[i.taskCat]) { catState[i.taskCat] = i.taskType; if (i.taskType === 'start') { extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; } }
             div.style.setProperty('--node-active-color', activeColor);
@@ -152,19 +184,14 @@ const UI = {
         lucide.createIcons(); this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); setTimeout(() => { this.handleScroll(); this.drawTaskConnectors(); }, 150);
     },
     drawTaskConnectors: function() {
-        const layer = document.getElementById('task-lines-layer'); if (!layer) return; layer.innerHTML = ''; const entries = this.cachedEntryItems; if (!entries.length) return; const catColors = { 'Exercise': 'linear-gradient(to bottom, #ef4444, #fca5a5)', 'Sleep': 'linear-gradient(to bottom, #3b82f6, #93c5fd)', 'Focus': 'linear-gradient(to bottom, #10b981, #6ee7b7)' }; const getCenterY = (el) => { return el.offsetTop + el.offsetHeight / 2; }; 
-        entries.forEach(endNode => { if (endNode.dataset.taskType === 'end') { const cat = endNode.dataset.taskCat; let startNode = null; for(let i = entries.indexOf(endNode) + 1; i < entries.length; i++) { const candidate = entries[i]; if (candidate.dataset.taskType === 'start' && candidate.dataset.taskCat === cat) { startNode = candidate; break; } if (candidate.dataset.taskType === 'end' && candidate.dataset.taskCat === cat) break; } if (startNode) { const endY = getCenterY(endNode); const startY = getCenterY(startNode); const height = Math.abs(startY - endY); const diffMs = parseInt(endNode.dataset.ts) - parseInt(startNode.dataset.ts); const hrs = Math.floor(diffMs / 3600000); const mins = Math.round((diffMs % 3600000) / 60000); const line = document.createElement('div'); line.className = 'task-highlight-line'; line.style.top = `${endY}px`; line.style.height = `${height}px`; line.style.background = catColors[cat] || '#ccc'; line.innerHTML = `<div class="task-line-label label-mid">${hrs}h ${mins}m</div>`; layer.appendChild(line); } } });
+        const layer = document.getElementById('task-lines-layer'); if (!layer) return; layer.innerHTML = ''; const entries = this.cachedEntryItems; if (!entries.length) return; const catColors = { 'Exercise': 'linear-gradient(to bottom, #ef4444, #fca5a5)', 'Sleep': 'linear-gradient(to bottom, #3b82f6, #93c5fd)', 'Focus': 'linear-gradient(to bottom, #10b981, #6ee7b7)', 'Meditation': 'linear-gradient(to bottom, #a855f7, #d8b4fe)' }; const getCenterY = (el) => { return el.offsetTop + el.offsetHeight / 2; }; 
+        entries.forEach(endNode => { if (endNode.dataset.taskType === 'end') { const cat = endNode.dataset.taskCat; let startNode = null; for(let i = entries.indexOf(endNode) + 1; i < entries.length; i++) { const candidate = entries[i]; if (candidate.dataset.taskType === 'start' && candidate.dataset.taskCat === cat) { startNode = candidate; break; } if (candidate.dataset.taskType === 'end' && candidate.dataset.taskCat === cat) break; } if (startNode) { const endY = getCenterY(endNode); const startY = getCenterY(startNode); const height = Math.abs(startY - endY); const diffMs = parseInt(endNode.dataset.ts) - parseInt(startNode.dataset.ts); const hrs = Math.floor(diffMs / 3600000); const mins = Math.round((diffMs % 3600000) / 60000); const line = document.createElement('div'); line.className = 'task-highlight-line'; line.style.top = `${endY}px`; line.style.height = `${height}px`; line.style.background = catColors[cat] || '#ccc'; line.innerHTML = `<div class="task-line-label label-mid">${hrs > 0 ? hrs + 'h ' : ''}${mins}m</div>`; layer.appendChild(line); } } });
     },
     initScrollObserver: function() { const main = document.getElementById('main-container'); let ticking = false; main.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { this.handleScroll(); ticking = false; }); ticking = true; } }, { passive: true }); },
     handleScroll: function() {
         const entries = this.cachedEntryItems; if(!entries || entries.length === 0) return; const viewCenter = window.innerHeight / 2; let closest = null; let minDiff = Infinity; let closestRawDiff = 0;
         entries.forEach(el => { const rect = el.getBoundingClientRect(); const dist = Math.abs(rect.top + rect.height/2 - viewCenter); if(dist < minDiff) { minDiff = dist; closest = el; closestRawDiff = rect.top + rect.height/2 - viewCenter; } el.classList.remove('active-focus'); const card = el.querySelector('.entry-card'); const range = 400; let scale = 0.85; let opacity = 0.5; if (dist < range) { const ratio = 1 - (dist / range); const ease = ratio * ratio; scale = 0.85 + (ease * 0.2); opacity = 0.5 + (ease * 0.5); } if (card) { 
-             // Preserve scale if selected
-             if(!card.classList.contains('selected')) {
-                card.style.transform = `scale(${scale})`; card.style.opacity = opacity; card.style.zIndex = dist < 60 ? 50 : 1; 
-             } else {
-                card.style.opacity = 1; card.style.zIndex = 50;
-             }
+             if(!card.classList.contains('selected')) { card.style.transform = `scale(${scale})`; card.style.opacity = opacity; card.style.zIndex = dist < 60 ? 50 : 1; } else { card.style.opacity = 1; card.style.zIndex = 50; }
         } });
         if(closest) {
             closest.classList.add('active-focus'); const cursor = document.getElementById('beam-cursor'); const magnetRange = 25; let magnetY = 0; if (Math.abs(closestRawDiff) < magnetRange) { magnetY = closestRawDiff; } cursor.style.top = `calc(50% + ${magnetY}px)`;
@@ -177,22 +204,29 @@ const UI = {
     endTask: async function(category) { if(confirm(`End ${category} session?`)) { const payload = { ts: Date.now(), title: `${category} Finished`, content: `Completed ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'end', taskCat: category, img: null }; await DataManager.add(payload); } },
     updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
     analyzeFoodImage: async function() {
-        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "Analyzing...";
+        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "...";
         try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: `Identify food. Return JSON: {"food": "Name", "calories": 500, "desc": "Short description"}. No markdown.`},{inlineData: {mimeType: img.split(';')[0].split(':')[1], data: img.split(',')[1]}}]}]}) }); const json = await res.json(); const txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim(); const data = JSON.parse(txt); document.getElementById('editor-title').value = data.food; document.getElementById('editor-content').value = data.desc; document.getElementById('editor-calories').value = data.calories; alert(`Identified: ${data.food} (~${data.calories} kcal)`); } catch(e) { console.error(e); alert("AI Analysis Failed"); } finally { btn.innerText = originalText; }
     },
     renderDashboard: async function() {
         const allData = await DataManager.getAll(); const now = new Date(); const weekData = allData.filter(e => e.ts > (now.getTime() - 604800000)); const chrono = [...weekData].sort((a,b) => a.ts - b.ts);
-        const calculateDuration = (cat) => { let total = 0; chrono.forEach((e, idx) => { if(e.isTask && e.taskCat === cat && e.taskType === 'end') { for(let i=idx-1; i>=0; i--) { if(chrono[i].isTask && chrono[i].taskCat === cat && chrono[i].taskType === 'start') { total += (e.ts - chrono[i].ts); break; } } } }); return (total / 3600000).toFixed(1); };
+        const calculateDuration = (cat) => { let total = 0; chrono.forEach((e, idx) => { if(e.isTask && e.taskCat === cat && e.taskType === 'end') { for(let i=idx-1; i>=0; i--) { if(chrono[i].isTask && chrono[i].taskCat === cat && chrono[i].taskType === 'start') { total += (e.ts - chrono[i].ts); break; } } } }); return total; };
         
         const goals = this.state.goals;
         document.getElementById('target-exercise-disp').innerText = goals.exercise;
         document.getElementById('target-sleep-disp').innerText = goals.sleep;
         document.getElementById('target-focus-disp').innerText = goals.focus;
+        document.getElementById('target-meditation-disp').innerText = goals.meditation || 15;
         document.getElementById('target-calories-disp').innerText = goals.cals;
 
-        document.getElementById('stat-exercise').innerText = `${calculateDuration('Exercise')}h`; document.getElementById('bar-exercise').style.width = `${Math.min((calculateDuration('Exercise')/goals.exercise)*100, 100)}%`;
-        document.getElementById('stat-sleep').innerText = `${calculateDuration('Sleep')}h`; document.getElementById('bar-sleep').style.width = `${Math.min((calculateDuration('Sleep')/goals.sleep)*100, 100)}%`;
-        document.getElementById('stat-focus').innerText = `${calculateDuration('Focus')}h`; document.getElementById('bar-focus').style.width = `${Math.min((calculateDuration('Focus')/goals.focus)*100, 100)}%`;
+        const msToMin = (ms) => Math.round(ms / 60000);
+        const msToHr = (ms) => (ms / 3600000).toFixed(1);
+
+        const durEx = calculateDuration('Exercise'); const durSleep = calculateDuration('Sleep'); const durFocus = calculateDuration('Focus'); const durMed = calculateDuration('Meditation');
+
+        document.getElementById('stat-exercise').innerText = `${msToMin(durEx)}m`; document.getElementById('bar-exercise').style.width = `${Math.min((msToMin(durEx)/goals.exercise)*100, 100)}%`;
+        document.getElementById('stat-sleep').innerText = `${msToHr(durSleep)}h`; document.getElementById('bar-sleep').style.width = `${Math.min((msToHr(durSleep)/goals.sleep)*100, 100)}%`;
+        document.getElementById('stat-focus').innerText = `${msToMin(durFocus)}m`; document.getElementById('bar-focus').style.width = `${Math.min((msToMin(durFocus)/goals.focus)*100, 100)}%`;
+        document.getElementById('stat-meditation').innerText = `${msToMin(durMed)}m`; document.getElementById('bar-meditation').style.width = `${Math.min((msToMin(durMed)/(goals.meditation||15))*100, 100)}%`;
         
         const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; const dailyCals = new Array(7).fill(0); let weeklyTotal = 0; weekData.forEach(e => { if(e.calories) { const dayIdx = new Date(e.ts).getDay(); dailyCals[dayIdx] += parseInt(e.calories); weeklyTotal += parseInt(e.calories); } });
         document.getElementById('stat-calories-total').innerText = `${weeklyTotal} kcal`; const maxCal = Math.max(...dailyCals, goals.cals + 500); 
@@ -201,7 +235,6 @@ const UI = {
             return `<div class="cal-bar-col"><div class="cal-bar-val">${val > 0 ? val : ''}</div><div class="cal-bar-bg"><div class="cal-bar-fill ${colorClass}" style="height: ${(val/maxCal)*100}%"></div></div><div class="cal-label">${days[idx]}</div></div>`;
         }).join(''); 
         document.getElementById('calorie-chart').innerHTML = chartHtml + `<div class="absolute top-0 left-0 w-full h-[1px] border-t border-dashed border-red-300 opacity-50" style="bottom: ${(goals.cals/maxCal)*100}%"></div>`;
-        
         this.renderDashboardTasks(allData); lucide.createIcons();
     },
     renderDashboardTasks: function(allData) {
@@ -209,17 +242,24 @@ const UI = {
         const today = new Date(); const dayOfWeek = today.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
         const tasks = allData.filter(e => e.recurrence && e.recurrence !== 'none');
         const activeTasks = tasks.filter(t => { if (t.recurrence === 'daily') return true; if (t.recurrence === 'weekly') return new Date(t.ts).getDay() === dayOfWeek; if (t.recurrence === 'workday') return !isWeekend; return false; });
-        if(activeTasks.length === 0) { container.innerHTML = '<div class="text-sm opacity-50 p-2">No pending tasks for today.</div>'; return; }
+        if(activeTasks.length === 0) { container.innerHTML = '<div class="text-sm opacity-50 p-2">No pending tasks.</div>'; return; }
         activeTasks.forEach(t => { const div = document.createElement('div'); div.className = 'todo-item cursor-pointer'; div.innerHTML = `<div class="todo-check"><i data-lucide="circle" class="w-4 h-4"></i></div><div class="todo-text">${t.title}</div>`; div.onclick = () => { div.querySelector('.todo-check').innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>'; div.querySelector('.todo-text').classList.add('todo-done'); }; container.appendChild(div); });
     },
-    setLanguage: function(lang) { this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; }); document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; this.renderCalendar(); this.renderTimeline(); },
-    setPersona: function(p) { this.state.persona = p; const card = document.getElementById('oracle-card'); 
-        // Removed the UI class switching for oracle-eastern, just toggle button state
-        if(p==='western') { 
-            document.getElementById('btn-western').classList.add('active'); document.getElementById('btn-eastern').classList.remove('active'); 
-        } else { 
-            document.getElementById('btn-eastern').classList.add('active'); document.getElementById('btn-western').classList.remove('active'); 
-        } 
+    setLanguage: function(lang) { 
+        this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; 
+        document.querySelectorAll('[data-i18n]').forEach(el => { 
+            const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; 
+        }); 
+        document.querySelectorAll('[data-placeholder]').forEach(el => { 
+            const k = el.getAttribute('data-placeholder'); if (t[k]) el.placeholder = t[k]; 
+        });
+        document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
+        document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
+        this.renderCalendar(); this.renderTimeline(); 
+    },
+    setPersona: function(p) { this.state.persona = p; 
+        if(p==='western') { document.getElementById('btn-western').classList.add('active'); document.getElementById('btn-eastern').classList.remove('active'); } 
+        else { document.getElementById('btn-eastern').classList.add('active'); document.getElementById('btn-western').classList.remove('active'); } 
     },
     setEditorType: function(t) {
         document.getElementById('editor-entry-type').value = t;
@@ -227,9 +267,7 @@ const UI = {
         document.getElementById(`type-${t}`).classList.add('bg-[var(--card-bg)]', 'shadow-sm', 'text-[var(--text)]');
         document.getElementById('task-settings').style.display = (t === 'task') ? 'block' : 'none';
     },
-    setFontSize: function(size) {
-        document.body.setAttribute('data-font', size);
-    },
+    setFontSize: function(size) { document.body.setAttribute('data-font', size); },
     openEditor: function(dStr, exist) { 
         const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); 
         if(exist) { 
@@ -261,7 +299,13 @@ const UI = {
     editCurrentEntry: async function() { const id = this.state.currentDetailId; this.closeDetail(); this.openEditor(null, await DataManager.getById(id)); },
     openWeeklySummary: function() { document.getElementById('summary-modal').classList.remove('hidden'); },
     closeWeeklySummary: function() { document.getElementById('summary-modal').classList.add('hidden'); },
-    editorInsertMD: function(syntax) { const t = document.getElementById('editor-content'); t.value += syntax; },
+    editorInsertMD: function(syntax) { const t = document.getElementById('editor-content'); const start = t.selectionStart; const end = t.selectionEnd; const text = t.value; t.value = text.substring(0, start) + syntax + text.substring(end); t.focus(); t.selectionStart = t.selectionEnd = start + syntax.length; },
+    editorInsertWrap: function(startSyntax, endSyntax) { 
+        const t = document.getElementById('editor-content'); const start = t.selectionStart; const end = t.selectionEnd; const text = t.value; const selection = text.substring(start, end); 
+        if(selection) { t.value = text.substring(0, start) + startSyntax + selection + endSyntax + text.substring(end); t.selectionStart = start; t.selectionEnd = end + startSyntax.length + endSyntax.length; } 
+        else { t.value = text.substring(0, start) + startSyntax + "text" + endSyntax + text.substring(end); t.selectionStart = start + startSyntax.length; t.selectionEnd = start + startSyntax.length + 4; }
+        t.focus();
+    },
     openInfo: function() { DataManager.updateStats(); document.getElementById('info-modal')?.classList.remove('hidden'); },
     closeInfo: function() { document.getElementById('info-modal')?.classList.add('hidden'); },
     changeMonth: function(o) { const d = new Date(this.state.calendarDate); d.setMonth(d.getMonth() + o); this.state.calendarDate = d; this.renderCalendar(); },

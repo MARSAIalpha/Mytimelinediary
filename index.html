@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#0077be">
     <title>Timeline Flow</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Ma+Shan+Zheng&family=Lato:wght@300;400;700;900&family=Oswald:wght@300;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700;900&family=Noto+Sans+SC:wght@300;400;700&family=Cinzel:wght@700&family=Ma+Shan+Zheng&display=swap" rel="stylesheet">
     
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -21,13 +21,14 @@
     <div class="orbit-wrapper"><div id="orbit-wheel" class="orbit-wheel"><div class="celestial-body sun-body"></div><div class="celestial-body moon-body"><div class="crescent-shape"></div></div></div></div>
 
     <header class="fixed top-0 w-full h-16 z-50 flex items-center justify-between px-4 bg-gradient-to-b from-[rgba(255,255,255,0.1)] to-transparent backdrop-blur-[2px]">
-        <div class="w-10"></div> <div class="nav-capsule shadow-lg">
+        <div class="w-8"></div> 
+        <div class="nav-capsule shadow-lg scale-90 origin-top">
             <button onclick="UI.switchView('timeline')" id="btn-timeline" class="nav-btn active" data-i18n="nav_timeline">TIMELINE</button>
             <button onclick="UI.switchView('dashboard')" id="btn-dashboard" class="nav-btn" data-i18n="nav_dashboard">DASHBOARD</button>
             <button onclick="UI.switchView('calendar')" id="btn-calendar" class="nav-btn" data-i18n="nav_calendar">CALENDAR</button>
         </div>
-        <div class="flex gap-2 w-10 justify-end">
-             <button onclick="UI.openInfo()" class="p-2 rounded-full text-[var(--text)] hover:bg-[var(--line)] transition-colors"><i data-lucide="info" class="w-5 h-5"></i></button>
+        <div class="flex gap-2 w-8 justify-end">
+             <button onclick="UI.openInfo()" class="p-2 rounded-full text-[var(--text)] hover:bg-[var(--line)] transition-colors"><i data-lucide="settings" class="w-5 h-5"></i></button>
              <button onclick="UI.openWeeklySummary()" class="p-2 rounded-full text-[var(--text)] active:scale-90 transition-transform hover:bg-[var(--line)]"><i data-lucide="sparkles" class="w-5 h-5 text-[var(--primary)]"></i></button>
         </div>
     </header>
@@ -39,9 +40,9 @@
     </div>
 
     <div id="filter-fab-group">
-        <div class="filter-row" onclick="UI.toggleFilter('anni')"><span class="filter-label label-anni">ANN</span><div class="filter-dot f-anni active"></div></div>
-        <div class="filter-row" onclick="UI.toggleFilter('holiday')"><span class="filter-label label-holiday">HOL</span><div class="filter-dot f-holiday active"></div></div>
-        <div class="filter-row" onclick="UI.toggleFilter('normal')"><span class="filter-label label-normal">DIARY</span><div class="filter-dot f-normal active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('anni')"><span class="filter-label label-anni" data-i18n="filter_anni">ANN</span><div class="filter-dot f-anni active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('holiday')"><span class="filter-label label-holiday" data-i18n="filter_holiday">HOL</span><div class="filter-dot f-holiday active"></div></div>
+        <div class="filter-row" onclick="UI.toggleFilter('normal')"><span class="filter-label label-normal" data-i18n="filter_diary">DIARY</span><div class="filter-dot f-normal active"></div></div>
     </div>
 
     <div id="center-guide-layer"><div class="guide-beam"></div><div class="guide-cursor" id="beam-cursor"></div></div>
@@ -58,47 +59,54 @@
         <div class="w-full px-0 relative min-h-full pb-32">
             
             <div id="view-timeline" class="active-view relative">
-                <div id="future-placeholder" class="list-placeholder"><span>Future Unwritten</span></div>
+                <div id="future-placeholder" class="list-placeholder"><span data-i18n="future">Future Unwritten</span></div>
                 <div class="timeline-rail-outer"><div class="timeline-rail-container"><div class="rail-center-glow"></div><div class="timeline-rail-line"></div><div class="timeline-rail-flow"></div></div></div>
                 <div id="diary-list" class="relative"><div id="task-lines-layer" class="absolute top-0 left-0 w-full h-full pointer-events-none z-0"></div></div>
-                <div id="origin-placeholder" class="list-placeholder"><span>The Beginning</span></div>
+                <div id="origin-placeholder" class="list-placeholder"><span data-i18n="origin">The Beginning</span></div>
             </div>
 
             <div id="view-dashboard" class="hidden-view pt-24 pb-12">
                 <div class="max-w-2xl mx-auto px-4">
-                    <h2 class="text-2xl font-display font-bold mb-4 text-[var(--text)]" data-i18n="dashboard_title">Life Rhythm</h2>
+                    <h2 class="text-2xl font-bold mb-4 text-[var(--text)]" data-i18n="dashboard_title">Life Rhythm</h2>
+                    
                     <div class="dashboard-grid mb-8">
                         <div class="stat-card" style="--stat-accent: #ef4444;">
-                            <div class="stat-label text-[#ef4444]"><i data-lucide="flame" class="inline w-3 h-3 mr-1"></i> Exercise</div>
+                            <div class="stat-label text-[#ef4444]"><i data-lucide="flame" class="inline w-3 h-3 mr-1"></i> <span data-i18n="cat_exercise">Exercise</span></div>
                             <div class="stat-value" id="stat-exercise">--</div>
                             <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#ef4444]" id="bar-exercise"></div></div>
-                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-exercise-disp">1</span>h</div>
+                            <div class="text-[10px] text-right mt-1 opacity-50"><span data-i18n="lbl_target">Target</span>: <span id="target-exercise-disp">60</span>m</div>
                         </div>
                         <div class="stat-card" style="--stat-accent: #3b82f6;">
-                            <div class="stat-label text-[#3b82f6]"><i data-lucide="moon" class="inline w-3 h-3 mr-1"></i> Sleep</div>
+                            <div class="stat-label text-[#3b82f6]"><i data-lucide="moon" class="inline w-3 h-3 mr-1"></i> <span data-i18n="cat_sleep">Sleep</span></div>
                             <div class="stat-value" id="stat-sleep">--</div>
                             <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#3b82f6]" id="bar-sleep"></div></div>
-                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-sleep-disp">8</span>h</div>
+                            <div class="text-[10px] text-right mt-1 opacity-50"><span data-i18n="lbl_target">Target</span>: <span id="target-sleep-disp">8</span>h</div>
                         </div>
                         <div class="stat-card" style="--stat-accent: #10b981;">
-                            <div class="stat-label text-[#10b981]"><i data-lucide="zap" class="inline w-3 h-3 mr-1"></i> Focus</div>
+                            <div class="stat-label text-[#10b981]"><i data-lucide="zap" class="inline w-3 h-3 mr-1"></i> <span data-i18n="cat_focus">Focus</span></div>
                             <div class="stat-value" id="stat-focus">--</div>
                             <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#10b981]" id="bar-focus"></div></div>
-                            <div class="text-[10px] text-right mt-1 opacity-50">Target: <span id="target-focus-disp">4</span>h</div>
+                            <div class="text-[10px] text-right mt-1 opacity-50"><span data-i18n="lbl_target">Target</span>: <span id="target-focus-disp">240</span>m</div>
+                        </div>
+                        <div class="stat-card" style="--stat-accent: #a855f7;">
+                            <div class="stat-label text-[#a855f7]"><i data-lucide="flower" class="inline w-3 h-3 mr-1"></i> <span data-i18n="cat_meditation">Meditation</span></div>
+                            <div class="stat-value" id="stat-meditation">--</div>
+                            <div class="stat-chart-bar"><div class="stat-chart-fill bg-[#a855f7]" id="bar-meditation"></div></div>
+                            <div class="text-[10px] text-right mt-1 opacity-50"><span data-i18n="lbl_target">Target</span>: <span id="target-meditation-disp">30</span>m</div>
                         </div>
                     </div>
 
                     <div class="bg-[var(--card-bg)] rounded-xl p-6 border border-[var(--line)] shadow-lg backdrop-blur-xl mb-8">
                         <div class="flex justify-between items-center mb-6 border-b border-[var(--line)] pb-2">
                             <h3 class="text-lg font-bold text-[var(--text)] flex items-center gap-2"><i data-lucide="utensils" class="w-5 h-5 text-orange-500"></i> <span data-i18n="stat_nutrition">Nutrition</span></h3>
-                            <div class="text-right"><div class="text-[10px] text-[var(--text-sec)] uppercase font-bold">Target / Actual</div><div class="text-xs font-bold font-num"><span class="opacity-50" id="target-calories-disp">2000</span> / <span class="text-orange-500" id="stat-calories-total">0</span> kcal</div></div>
+                            <div class="text-right"><div class="text-[10px] text-[var(--text-sec)] uppercase font-bold"><span data-i18n="lbl_target">Target</span> / <span data-i18n="lbl_actual">Actual</span></div><div class="text-xs font-bold font-num"><span class="opacity-50" id="target-calories-disp">2000</span> / <span class="text-orange-500" id="stat-calories-total">0</span> kcal</div></div>
                         </div>
                         <div class="h-40 flex items-end gap-2 relative" id="calorie-chart">
                              <div class="absolute left-0 w-full border-t border-dashed border-red-400 opacity-50 z-0" style="bottom: 0; height: 1px; pointer-events: none;" id="cal-target-line"></div>
                         </div>
                     </div>
 
-                    <h2 class="text-2xl font-display font-bold mb-4 text-[var(--text)]" data-i18n="dashboard_tasks">Pending Tasks</h2>
+                    <h2 class="text-2xl font-bold mb-4 text-[var(--text)]" data-i18n="dashboard_tasks">Pending Tasks</h2>
                     <div id="dashboard-todo-list" class="bg-[var(--card-bg)] rounded-xl p-4 border border-[var(--line)] shadow-lg backdrop-blur-xl min-h-[100px]"></div>
                 </div>
             </div>
@@ -111,13 +119,13 @@
                              <button onclick="UI.switchSubView('gallery')" id="btn-sub-gallery" class="nav-btn"><i data-lucide="image" class="w-4 h-4"></i></button>
                              <button onclick="UI.switchSubView('data')" id="btn-sub-data" class="nav-btn"><i data-lucide="database" class="w-4 h-4"></i></button>
                          </div>
-                         </div>
+                    </div>
                     
                     <div id="calendar-container">
                         <div class="flex justify-between items-center mb-4 border-b border-[var(--line)] pb-4">
                             <button onclick="UI.changeMonth(-1)"><i data-lucide="chevron-left" class="w-6 h-6 text-[var(--text)]"></i></button>
                             <div class="text-center" onclick="UI.resetCalendarToday()">
-                                <h2 class="text-3xl font-display font-bold text-[var(--primary)]" id="cal-month-display">Nov</h2>
+                                <h2 class="text-3xl font-bold text-[var(--primary)]" id="cal-month-display">Nov</h2>
                                 <div class="text-xs font-num text-[var(--text-sec)] tracking-widest" id="cal-year-display">2025</div>
                             </div>
                             <button onclick="UI.changeMonth(1)"><i data-lucide="chevron-right" class="w-6 h-6 text-[var(--text)]"></i></button>
@@ -128,19 +136,19 @@
 
                     <div id="gallery-container" class="hidden">
                         <div id="gallery-grid-view" class="grid grid-cols-3 gap-3"></div>
-                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm">No images.</p></div>
+                        <div id="gallery-empty" class="text-center py-12 text-[var(--text-sec)] hidden"><p class="italic opacity-70 text-sm" data-i18n="empty_gallery">No images.</p></div>
                     </div>
 
                     <div id="data-container" class="hidden flex-1">
-                        <h3 class="font-display font-bold text-lg mb-4 text-[var(--text)]">Data Center</h3>
+                        <h3 class="font-bold text-lg mb-4 text-[var(--text)]" data-i18n="data_title">Data Center</h3>
                         <div class="grid grid-cols-2 gap-4 mb-6">
-                            <button onclick="DataManager.exportBackup()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="download" class="w-6 h-6"></i><span class="text-xs font-bold uppercase">Backup JSON</span></button>
-                            <button onclick="document.getElementById('backup-input').click()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="upload" class="w-6 h-6"></i><span class="text-xs font-bold uppercase">Restore JSON</span></button>
+                            <button onclick="DataManager.exportBackup()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="download" class="w-6 h-6"></i><span class="text-xs font-bold uppercase" data-i18n="btn_backup">Backup JSON</span></button>
+                            <button onclick="document.getElementById('backup-input').click()" class="p-4 bg-[var(--line)] rounded-xl flex flex-col items-center justify-center gap-2 hover:bg-[var(--primary)] hover:text-white transition-colors"><i data-lucide="upload" class="w-6 h-6"></i><span class="text-xs font-bold uppercase" data-i18n="btn_restore">Restore JSON</span></button>
                             <input type="file" id="backup-input" class="hidden" onchange="DataManager.importBackup(this)">
                         </div>
                         <div class="flex justify-between items-center mb-2 border-b border-[var(--line)] pb-2">
-                            <span class="text-xs font-bold text-[var(--text-sec)] uppercase tracking-wider">All Entries</span>
-                            <button onclick="UI.toggleSelectionMode()" class="bg-[var(--text)] text-[var(--card-bg)] text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1" id="btn-select-mode"><i data-lucide="check-square" class="w-3 h-3"></i> <span id="select-btn-text">Select</span></button>
+                            <span class="text-xs font-bold text-[var(--text-sec)] uppercase tracking-wider" data-i18n="label_all_entries">All Entries</span>
+                            <button onclick="UI.toggleSelectionMode()" class="bg-[var(--text)] text-[var(--card-bg)] text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1" id="btn-select-mode"><i data-lucide="check-square" class="w-3 h-3"></i> <span id="select-btn-text" data-i18n="btn_select">Select</span></button>
                         </div>
                         <div id="archive-list" class="space-y-2 max-h-[40vh] overflow-y-auto pr-2"></div>
                     </div>
@@ -150,9 +158,9 @@
             <div id="page-footer" class="w-full py-20 flex flex-col items-center justify-center gap-4 opacity-60 hover:opacity-100 transition-opacity cursor-pointer" onclick="UI.openInfo()">
                  <div class="flex items-center gap-2">
                     <i data-lucide="hourglass" class="w-6 h-6 text-[var(--text)]"></i>
-                    <h1 class="text-2xl font-bold tracking-[0.3em] font-display uppercase text-[var(--text)]">Timeline</h1>
+                    <h1 class="text-2xl font-bold tracking-[0.3em] uppercase text-[var(--text)]">Timeline</h1>
                 </div>
-                <div class="text-[10px] uppercase tracking-widest opacity-50">Est. 2025</div>
+                <div class="text-[10px] uppercase tracking-widest opacity-50" data-i18n="label_est">Est. 2025</div>
             </div>
 
         </div>
@@ -172,38 +180,39 @@
                     <input type="date" id="editor-date" class="bg-transparent border-none outline-none">
                     <input type="time" id="editor-time" class="bg-transparent border-none outline-none text-[var(--primary)]">
                 </div>
-                <button onclick="DataManager.saveFromEditor()" class="text-[var(--primary)] font-bold text-sm uppercase">Save</button>
+                <button onclick="DataManager.saveFromEditor()" class="text-[var(--primary)] font-bold text-sm uppercase" data-i18n="btn_save">Save</button>
             </div>
             <div class="p-4 flex-1 overflow-y-auto">
                 <input type="hidden" id="editor-id">
                 <input type="number" id="editor-calories" class="hidden">
 
                 <div class="flex gap-2 mb-4 p-1 bg-[var(--line)] rounded-lg">
-                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors bg-[var(--card-bg)] shadow-sm text-[var(--text)]" id="type-diary" onclick="UI.setEditorType('diary')">Diary</button>
-                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-task" onclick="UI.setEditorType('task')">Routine</button>
-                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-anni" onclick="UI.setEditorType('anni')">Anniversary</button>
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors bg-[var(--card-bg)] shadow-sm text-[var(--text)]" id="type-diary" onclick="UI.setEditorType('diary')" data-i18n="type_diary">Diary</button>
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-task" onclick="UI.setEditorType('task')" data-i18n="type_routine">Routine</button>
+                    <button type="button" class="flex-1 py-2 text-xs font-bold rounded-md transition-colors text-[var(--text-sec)] hover:bg-[var(--card-bg)]/50" id="type-anni" onclick="UI.setEditorType('anni')" data-i18n="type_anni">Anniversary</button>
                 </div>
 
                 <div id="task-settings" class="hidden mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg animate-in slide-in-from-top-2">
                     <div class="flex justify-between items-center">
-                        <span class="text-xs font-bold text-yellow-800 uppercase"><i data-lucide="repeat" class="inline w-3 h-3 mr-1"></i> Recurrence</span>
+                        <span class="text-xs font-bold text-yellow-800 uppercase"><i data-lucide="repeat" class="inline w-3 h-3 mr-1"></i> <span data-i18n="label_recurrence">Recurrence</span></span>
                         <select id="editor-recurrence" class="bg-white text-xs font-bold text-yellow-900 border border-yellow-300 rounded px-2 py-1 outline-none">
-                            <option value="none">One-off</option>
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="workday">Workdays</option>
+                            <option value="none" data-i18n="rec_none">One-off</option>
+                            <option value="daily" data-i18n="rec_daily">Daily</option>
+                            <option value="weekly" data-i18n="rec_weekly">Weekly</option>
+                            <option value="workday" data-i18n="rec_workday">Workdays</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="mb-6 flex items-center gap-2 overflow-x-auto no-scrollbar">
-                    <span class="text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider mr-1">Track:</span>
-                    <button onclick="UI.quickSaveTask('Exercise')" class="quick-task-btn group border-red-200 text-red-600 hover:bg-red-50"><i data-lucide="flame" class="w-3 h-3"></i><span>Exercise</span></button>
-                    <button onclick="UI.quickSaveTask('Sleep')" class="quick-task-btn group border-blue-200 text-blue-600 hover:bg-blue-50"><i data-lucide="moon" class="w-3 h-3"></i><span>Sleep</span></button>
-                    <button onclick="UI.quickSaveTask('Focus')" class="quick-task-btn group border-emerald-200 text-emerald-600 hover:bg-emerald-50"><i data-lucide="zap" class="w-3 h-3"></i><span>Focus</span></button>
+                    <span class="text-[10px] font-bold text-[var(--text-sec)] uppercase tracking-wider mr-1" data-i18n="label_track">Track:</span>
+                    <button onclick="UI.quickSaveTask('Exercise')" class="quick-task-btn group border-red-200 text-red-600 hover:bg-red-50"><i data-lucide="flame" class="w-3 h-3"></i><span data-i18n="cat_exercise">Exercise</span></button>
+                    <button onclick="UI.quickSaveTask('Sleep')" class="quick-task-btn group border-blue-200 text-blue-600 hover:bg-blue-50"><i data-lucide="moon" class="w-3 h-3"></i><span data-i18n="cat_sleep">Sleep</span></button>
+                    <button onclick="UI.quickSaveTask('Focus')" class="quick-task-btn group border-emerald-200 text-emerald-600 hover:bg-emerald-50"><i data-lucide="zap" class="w-3 h-3"></i><span data-i18n="cat_focus">Focus</span></button>
+                    <button onclick="UI.quickSaveTask('Meditation')" class="quick-task-btn group border-purple-200 text-purple-600 hover:bg-purple-50"><i data-lucide="flower" class="w-3 h-3"></i><span data-i18n="cat_meditation">Meditation</span></button>
                 </div>
 
-                <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl font-bold mb-4 outline-none text-[var(--text)] font-display">
+                <input id="editor-title" type="text" placeholder="Title..." class="w-full bg-transparent text-2xl font-bold mb-4 outline-none text-[var(--text)]" data-placeholder="ph_title">
                 
                 <div class="flex gap-2 mb-4 overflow-x-auto no-scrollbar">
                      <div class="flex gap-1 p-1 bg-[var(--line)] rounded-lg"><button onclick="UI.selectMood('smile')" class="mood-btn p-2 rounded" id="mood-smile"><i data-lucide="smile" class="w-5 h-5"></i></button><button onclick="UI.selectMood('meh')" class="mood-btn p-2 rounded" id="mood-meh"><i data-lucide="meh" class="w-5 h-5"></i></button><button onclick="UI.selectMood('frown')" class="mood-btn p-2 rounded" id="mood-frown"><i data-lucide="frown" class="w-5 h-5"></i></button></div>
@@ -211,18 +220,25 @@
                 </div>
 
                 <div class="editor-tools-wrapper flex gap-2 mb-2 overflow-x-auto">
-                    <button class="block-btn" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-4 h-4"></i> Photo</button>
-                    <button class="block-btn" onclick="DataManager.fetchInspiration()"><i data-lucide="sparkles" class="w-4 h-4"></i> Inspire</button>
-                    <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')"><i data-lucide="check-square" class="w-4 h-4"></i> Todo</button>
+                    <button class="block-btn" onclick="UI.triggerImageUpload()"><i data-lucide="image" class="w-4 h-4"></i> <span data-i18n="btn_photo">Photo</span></button>
+                    <button class="block-btn" onclick="DataManager.fetchInspiration()"><i data-lucide="sparkles" class="w-4 h-4"></i> <span data-i18n="btn_inspire">Inspire</span></button>
+                    <button class="block-btn" onclick="UI.editorInsertMD('- [ ] ')"><i data-lucide="check-square" class="w-4 h-4"></i> <span data-i18n="btn_todo">Todo</span></button>
                 </div>
                 
-                <textarea id="editor-content" class="w-full h-[20vh] bg-[var(--card-bg)]/50 p-3 rounded-lg border border-[var(--line)] outline-none resize-none text-[var(--text)] leading-relaxed" placeholder="Start writing..."></textarea>
+                <div id="editor-toolbar" class="flex gap-1 mb-1 p-1 bg-[var(--line)]/30 rounded-t-lg overflow-x-auto border-b border-[var(--line)]">
+                    <button onclick="UI.editorInsertWrap('**', '**')" class="p-2 hover:bg-[var(--card-bg)] rounded"><i data-lucide="bold" class="w-3 h-3 text-[var(--text)]"></i></button>
+                    <button onclick="UI.editorInsertWrap('*', '*')" class="p-2 hover:bg-[var(--card-bg)] rounded"><i data-lucide="italic" class="w-3 h-3 text-[var(--text)]"></i></button>
+                    <button onclick="UI.editorInsertMD('# ')" class="p-2 hover:bg-[var(--card-bg)] rounded"><i data-lucide="heading" class="w-3 h-3 text-[var(--text)]"></i></button>
+                    <button onclick="UI.editorInsertMD('- ')" class="p-2 hover:bg-[var(--card-bg)] rounded"><i data-lucide="list" class="w-3 h-3 text-[var(--text)]"></i></button>
+                    <button onclick="UI.editorInsertMD('> ')" class="p-2 hover:bg-[var(--card-bg)] rounded"><i data-lucide="quote" class="w-3 h-3 text-[var(--text)]"></i></button>
+                </div>
+                <textarea id="editor-content" class="w-full h-[30vh] bg-[var(--card-bg)]/50 p-3 rounded-b-lg border border-[var(--line)] outline-none resize-none text-[var(--text)] leading-relaxed font-sans" placeholder="Start writing..." data-placeholder="ph_content"></textarea>
                 
                 <div id="image-preview-area" class="mt-4 hidden p-2 border border-[var(--line)] rounded-lg bg-[var(--bg)]/50">
                     <img id="preview-img" class="max-h-40 rounded-lg mb-2">
                     <div class="flex gap-2 justify-between">
-                        <button onclick="UI.analyzeFoodImage()" class="bg-orange-500 text-white text-xs font-bold px-3 py-2 rounded flex items-center gap-2"><i data-lucide="utensils" class="w-3 h-3"></i> Analyze Calories</button>
-                        <button onclick="UI.clearImage()" class="text-red-500 text-xs font-bold">Remove</button>
+                        <button onclick="UI.analyzeFoodImage()" class="bg-orange-500 text-white text-xs font-bold px-3 py-2 rounded flex items-center gap-2"><i data-lucide="utensils" class="w-3 h-3"></i> <span data-i18n="btn_analyze">Analyze Calories</span></button>
+                        <button onclick="UI.clearImage()" class="text-red-500 text-xs font-bold" data-i18n="btn_remove">Remove</button>
                     </div>
                 </div>
 
@@ -243,7 +259,7 @@
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="UI.closeInfo()"></div>
         <div class="bg-[var(--card-bg)] w-full max-w-md p-6 rounded-2xl relative z-10 border border-[var(--card-border)] shadow-2xl flex flex-col h-[85vh]">
             <div class="p-4 border-b border-[var(--line)] flex justify-between items-center">
-                <h2 class="text-xl font-bold font-display text-[var(--text)]">Settings</h2>
+                <h2 class="text-xl font-bold text-[var(--text)]" data-i18n="info_title">Settings</h2>
                 <button onclick="UI.closeInfo()"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             <div class="p-6 flex-1 overflow-y-auto text-[var(--text)]">
@@ -253,31 +269,39 @@
                 </div>
 
                 <div class="mb-6 p-4 bg-[var(--line)]/20 rounded-lg">
-                    <h3 class="font-bold uppercase text-xs tracking-wider mb-3">Daily Goals</h3>
+                    <h3 class="font-bold uppercase text-xs tracking-wider mb-3" data-i18n="lbl_daily_goals">Daily Goals</h3>
                     <div class="grid grid-cols-2 gap-3">
-                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Calories</label><input type="number" id="goal-cals" class="w-full p-1 rounded text-xs bg-white/50" placeholder="2000" onchange="UI.saveGoals()"></div>
-                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Sleep (h)</label><input type="number" id="goal-sleep" class="w-full p-1 rounded text-xs bg-white/50" placeholder="8" onchange="UI.saveGoals()"></div>
-                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Focus (h)</label><input type="number" id="goal-focus" class="w-full p-1 rounded text-xs bg-white/50" placeholder="4" onchange="UI.saveGoals()"></div>
-                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]">Exercise (h)</label><input type="number" id="goal-exercise" class="w-full p-1 rounded text-xs bg-white/50" placeholder="1" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]" data-i18n="lbl_cal">Calories</label><input type="number" id="goal-cals" class="w-full p-1 rounded text-xs bg-white/50" placeholder="2000" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]"><span data-i18n="cat_sleep">Sleep</span> (h)</label><input type="number" id="goal-sleep" class="w-full p-1 rounded text-xs bg-white/50" placeholder="8" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]"><span data-i18n="cat_focus">Focus</span> (min)</label><input type="number" id="goal-focus" class="w-full p-1 rounded text-xs bg-white/50" placeholder="60" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]"><span data-i18n="cat_exercise">Exercise</span> (min)</label><input type="number" id="goal-exercise" class="w-full p-1 rounded text-xs bg-white/50" placeholder="30" onchange="UI.saveGoals()"></div>
+                        <div><label class="text-[10px] font-bold text-[var(--text-sec)]"><span data-i18n="cat_meditation">Meditation</span> (min)</label><input type="number" id="goal-meditation" class="w-full p-1 rounded text-xs bg-white/50" placeholder="15" onchange="UI.saveGoals()"></div>
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div><label class="text-xs font-bold text-[var(--text-sec)] block mb-1">API KEY</label><input type="password" id="user-api-key" class="w-full bg-[var(--line)] rounded p-2 text-xs font-mono"></div>
-                    <div><label class="text-xs font-bold text-[var(--text-sec)] block mb-1">Personal Info</label><input type="text" id="user-zodiac" class="w-full bg-[var(--line)] rounded p-2 text-xs mb-2" placeholder="Zodiac"><input type="text" id="user-bazi" class="w-full bg-[var(--line)] rounded p-2 text-xs" placeholder="Birth Date"></div>
-                    <div class="prose prose-sm text-[var(--text)] opacity-80 text-xs"><h3 class="font-bold uppercase tracking-wider mb-2">Manual</h3><ul class="list-disc pl-4 space-y-2"><li><strong>Flow:</strong> Timeline stream.</li><li><strong>Vision:</strong> Food Analysis.</li><li><strong>Oracle:</strong> AI Advice.</li></ul></div>
+                    <div><label class="text-xs font-bold text-[var(--text-sec)] block mb-1" data-i18n="label_personal_info">Personal Info</label><input type="text" id="user-zodiac" class="w-full bg-[var(--line)] rounded p-2 text-xs mb-2" placeholder="Zodiac"><input type="text" id="user-bazi" class="w-full bg-[var(--line)] rounded p-2 text-xs" placeholder="Birth Date"></div>
+                    <div class="prose prose-sm text-[var(--text)] opacity-80 text-xs">
+                        <h3 class="font-bold uppercase tracking-wider mb-2" data-i18n="label_manual">Manual</h3>
+                        <ul class="list-disc pl-4 space-y-2">
+                            <li data-i18n="doc_f1">Flow: Timeline stream.</li>
+                            <li data-i18n="doc_f2">Vision: Food Analysis.</li>
+                            <li data-i18n="doc_f4">Oracle: AI Advice.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="p-4 border-t border-[var(--line)] text-center"><p class="text-[10px] uppercase tracking-[0.2em] font-bold opacity-40 font-display">Developed by Simon</p></div>
         </div>
     </div>
 
-    <div id="summary-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="UI.closeWeeklySummary()"></div><div id="oracle-card" class="oracle-western w-full max-w-2xl h-[85vh] rounded-2xl relative z-10 border border-[var(--card-border)] flex flex-col shadow-2xl overflow-hidden transition-colors duration-500"><div class="oracle-decor-top"></div><div class="p-6 border-b border-white/10 flex justify-between items-center relative z-20"><h2 class="font-display font-bold text-2xl text-white drop-shadow-md">AI Oracle</h2><button onclick="UI.closeWeeklySummary()" class="text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div><div id="oracle-input-view" class="p-8 flex flex-col items-center justify-center h-full relative z-20 space-y-6"><div class="text-center text-white/80 mb-4"><i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-2 opacity-80"></i><p class="text-sm">Reveal the path of your week...</p></div><div class="w-full max-w-xs space-y-4"><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block">Zodiac</label><input type="text" id="oracle-zodiac" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="e.g. Leo"></div><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block">Birth Date</label><input type="text" id="oracle-bazi" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="YYYY-MM-DD"></div></div><div class="flex gap-4 mt-4"><button onclick="UI.setPersona('western')" class="persona-btn active" id="btn-western">🔮 Western</button><button onclick="UI.setPersona('eastern')" class="persona-btn" id="btn-eastern">☯️ Eastern</button></div><button onclick="UI.generateReport()" class="mt-4 bg-white text-black font-bold px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-transform flex items-center gap-2">Start Divination <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div><div id="oracle-result-view" class="hidden p-8 overflow-y-auto flex-1 text-white/90 md-render relative z-20 font-serif leading-relaxed text-lg"><div id="summary-ai-content"></div><button onclick="UI.resetOracle()" class="mt-8 text-xs opacity-50 hover:opacity-100 underline text-center w-full">Ask Again</button></div></div></div>
+    <div id="summary-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4"><div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="UI.closeWeeklySummary()"></div><div id="oracle-card" class="oracle-western w-full max-w-2xl h-[85vh] rounded-2xl relative z-10 border border-[var(--card-border)] flex flex-col shadow-2xl overflow-hidden transition-colors duration-500"><div class="oracle-decor-top"></div><div class="p-6 border-b border-white/10 flex justify-between items-center relative z-20"><h2 class="font-bold text-2xl text-white drop-shadow-md" data-i18n="ai_title">AI Oracle</h2><button onclick="UI.closeWeeklySummary()" class="text-white/70 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button></div><div id="oracle-input-view" class="p-8 flex flex-col items-center justify-center h-full relative z-20 space-y-6"><div class="text-center text-white/80 mb-4"><i data-lucide="sparkles" class="w-12 h-12 mx-auto mb-2 opacity-80"></i><p class="text-sm">Reveal the path of your week...</p></div><div class="w-full max-w-xs space-y-4"><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block" data-i18n="label_zodiac">Zodiac</label><input type="text" id="oracle-zodiac" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="e.g. Leo"></div><div><label class="text-[10px] uppercase font-bold text-white/60 mb-1 block" data-i18n="label_birth">Birth Date</label><input type="text" id="oracle-bazi" class="w-full bg-white/10 border border-white/20 rounded p-3 text-white text-sm focus:border-white outline-none text-center" placeholder="YYYY-MM-DD"></div></div><div class="flex gap-4 mt-4"><button onclick="UI.setPersona('western')" class="persona-btn active" id="btn-western">🔮 Western</button><button onclick="UI.setPersona('eastern')" class="persona-btn" id="btn-eastern">☯️ Eastern</button></div><button onclick="UI.generateReport()" class="mt-4 bg-white text-black font-bold px-8 py-3 rounded-full shadow-lg hover:scale-105 transition-transform flex items-center gap-2"><span data-i18n="btn_consult">Start Divination</span> <i data-lucide="arrow-right" class="w-4 h-4"></i></button></div><div id="oracle-result-view" class="hidden p-8 overflow-y-auto flex-1 text-white/90 md-render relative z-20 font-serif leading-relaxed text-lg"><div id="summary-ai-content"></div><button onclick="UI.resetOracle()" class="mt-8 text-xs opacity-50 hover:opacity-100 underline text-center w-full" data-i18n="btn_ask_again">Ask Again</button></div></div></div>
 
-    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div><div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--card-border)]"><div class="p-6 overflow-y-auto"><div class="flex justify-between items-start mb-4"><h2 class="text-2xl font-bold font-display text-[var(--text)]" id="detail-title"></h2><button onclick="UI.closeDetail()"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button></div><div class="text-xs font-bold text-[var(--text-sec)] mb-4 flex gap-2 items-center flex-wrap"><span id="detail-date"></span> <span id="detail-lunar" class="opacity-60 font-serif border-l border-[var(--line)] pl-2"></span> <span class="text-[var(--primary)]" id="detail-time"></span><span id="detail-calories" class="ml-auto text-orange-500 font-bold hidden"></span></div><div id="detail-image-container" class="mb-4 hidden"><img id="detail-image" class="w-full rounded-lg shadow-sm"></div><div id="detail-content" class="md-render text-[var(--text)] leading-loose"></div></div><div class="p-4 border-t border-[var(--line)] flex justify-between bg-[var(--card-bg)]"><button onclick="UI.confirmDeleteEntry()" class="text-red-500 text-xs font-bold uppercase">Delete</button><button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] text-xs font-bold uppercase">Edit</button></div></div></div>
-    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]"><div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div><div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center"><h3 class="text-lg font-bold text-[var(--text)] mb-2">Delete?</h3><p class="text-sm text-[var(--text-sec)] mb-6">Undone.</p><div class="flex gap-3 justify-center"><button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold">Cancel</button><button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold">Delete</button></div></div></div>
+    <div id="detail-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-50"><div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="UI.closeDetail()"></div><div class="bg-[var(--card-bg)] w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden relative z-50 flex flex-col max-h-[85vh] border border-[var(--card-border)]"><div class="p-6 overflow-y-auto"><div class="flex justify-between items-start mb-4"><h2 class="text-2xl font-bold text-[var(--text)]" id="detail-title"></h2><button onclick="UI.closeDetail()"><i data-lucide="x" class="w-5 h-5 text-[var(--text)]"></i></button></div><div class="text-xs font-bold text-[var(--text-sec)] mb-4 flex gap-2 items-center flex-wrap"><span id="detail-date"></span> <span id="detail-lunar" class="opacity-60 font-serif border-l border-[var(--line)] pl-2"></span> <span class="text-[var(--primary)]" id="detail-time"></span><span id="detail-calories" class="ml-auto text-orange-500 font-bold hidden"></span></div><div id="detail-image-container" class="mb-4 hidden"><img id="detail-image" class="w-full rounded-lg shadow-sm"></div><div id="detail-content" class="md-render text-[var(--text)] leading-loose"></div></div><div class="p-4 border-t border-[var(--line)] flex justify-between bg-[var(--card-bg)]"><button onclick="UI.confirmDeleteEntry()" class="text-red-500 text-xs font-bold uppercase" data-i18n="btn_delete">Delete</button><button onclick="UI.editCurrentEntry()" class="text-[var(--primary)] text-xs font-bold uppercase" data-i18n="btn_edit">Edit</button></div></div></div>
+    <div id="confirm-modal" class="modal-overlay fixed inset-0 hidden flex items-center justify-center p-4 z-[70]"><div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div><div class="bg-[var(--card-bg)] w-full max-w-sm rounded-xl p-6 relative z-50 border border-[var(--line)] shadow-2xl text-center"><h3 class="text-lg font-bold text-[var(--text)] mb-2" data-i18n="delete_title">Delete?</h3><p class="text-sm text-[var(--text-sec)] mb-6" data-i18n="delete_desc">Undone.</p><div class="flex gap-3 justify-center"><button onclick="document.getElementById('confirm-modal').classList.add('hidden')" class="px-4 py-2 rounded-lg border border-[var(--line)] text-[var(--text)] text-sm font-bold" data-i18n="btn_cancel">Cancel</button><button onclick="UI.executeDelete()" class="px-4 py-2 rounded-lg bg-red-500 text-white text-sm font-bold" data-i18n="btn_delete">Delete</button></div></div></div>
 
     <script src="db.js"></script>
     <script src="app.js"></script>
 </body>
-</html>
+</html> 
