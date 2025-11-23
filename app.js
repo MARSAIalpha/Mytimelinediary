@@ -269,7 +269,8 @@ const UI = {
             const div = document.createElement('div'); div.className = 'gallery-item'; div.innerHTML = `<img src="${e.img}" loading="lazy">`; div.onclick = () => UI.openDetail(e); c.appendChild(div);
         });
     },
-toggleSelectionMode: function() {
+// --- 1. 切换选择模式 (控制按钮显隐) ---
+    toggleSelectionMode: function() {
         this.state.selectionMode = !this.state.selectionMode;
         const btnText = document.getElementById('select-btn-text');
         const btnAll = document.getElementById('btn-select-all'); // 获取全选按钮
@@ -301,6 +302,8 @@ toggleSelectionMode: function() {
             document.getElementById('selected-count').innerText = '0';
         }
     },
+
+    // --- 2. 全选 / 取消全选 ---
     toggleSelectAll: async function() {
         const btnText = document.getElementById('btn-select-all-text');
         const allData = await DataManager.getAll();
@@ -319,7 +322,54 @@ toggleSelectionMode: function() {
         document.getElementById('selected-count').innerText = this.state.selectedIds.size;
         this.renderDataList(); // 重新渲染打钩状态
     },
- deleteSelectedEntries: async function() {
+
+    // --- 3. 批量删除 (核心修复) ---
+    deleteSelectedEntries: async function() {
+        if(this.state.selectedIds.size === 0) return alert("Please select items first.");
+        
+        if(confirm(`Delete ${this.state.selectedIds.size} items permanently?`)) {
+            const ids = Array.from(this.state.selectedIds);
+            
+            // 循环删除
+            for(let id of ids) {
+                await DataManager.delete(id); // 注意：DataManager.delete 里不要每次都 refreshAll，否则会慢
+            }
+            
+            // 删除完成后，手动刷新一次即可
+            await DataManager.updateStats();
+            
+            // 退出选择模式，回归正常状态
+            this.toggleSelectionMode(); 
+            
+            // 强制刷新所有视图
+            this.refreshAll();
+            if(!document.getElementById('data-container').classList.contains('hidden')) {
+                this.renderDataList(); // 如果在数据页，刷新列表
+            }
+            
+            alert("Deleted successfully.");
+        }
+    },
+
+    toggleSelectAll: async function() {
+        const btnText = document.getElementById('btn-select-all-text');
+        const allData = await DataManager.getAll();
+        
+        // 如果当前选中的数量少于总数，说明还没全选 -> 执行全选
+        if (this.state.selectedIds.size < allData.length) {
+            allData.forEach(e => this.state.selectedIds.add(e.id));
+            btnText.innerText = "None"; // 按钮变更为“全不选”
+        } else {
+            // 否则清空
+            this.state.selectedIds.clear();
+            btnText.innerText = "All";
+        }
+        
+        // 更新界面
+        document.getElementById('selected-count').innerText = this.state.selectedIds.size;
+        this.renderDataList(); // 重新渲染打钩状态
+    },
+deleteSelectedEntries: async function() {
         if(this.state.selectedIds.size === 0) return alert("Please select items first.");
         
         if(confirm(`Delete ${this.state.selectedIds.size} items permanently?`)) {
@@ -1605,65 +1655,89 @@ if (typeof DataManager !== 'undefined') {
 
 if (typeof DataManager !== 'undefined') {
     DataManager.saveFromEditor = async function() {
-        const id = document.getElementById('editor-id').value; 
-        const t = document.getElementById('editor-title').value || "Untitled"; 
-        const contentDiv = document.getElementById('editor-content');
-        const c = contentDiv.innerHTML; 
+        // 1. 【关键修复】获取保存按钮并禁用，防止双击/重复提交
+        // 这里使用 querySelector 查找带有特定 data-i18n 属性的按钮
+        // 或者是通过 modal 结构找
+        const btnSave = document.querySelector('#editor-panel button[onclick="DataManager.saveFromEditor()"]');
+        const originalText = btnSave ? btnSave.innerText : 'Save';
         
-        // 提取封面图
-        let coverImg = null;
-        const firstImg = contentDiv.querySelector('img');
-        if (firstImg) coverImg = firstImg.src;
-
-        const d = document.getElementById('editor-date').value; 
-        const tm = document.getElementById('editor-time').value; 
-        const cal = document.getElementById('editor-calories').value;
-        
-        const type = document.getElementById('editor-entry-type').value;
-        const taskCat = document.getElementById('editor-task-cat').value; // 获取分类(Exercise, Sleep...)
-        const recurrence = document.getElementById('editor-recurrence').value;
-        
-        let anni = (type === 'anni');
-        let isTask = (type === 'task');
-        let taskType = null; // 默认为空
-
-        // 【关键修复逻辑】
-        // 如果用户点了追踪按钮 (Exercise/Sleep/Focus/Meditation)
-        if (taskCat) {
-            isTask = true;
-            // 强制标记为 "开始节点"，这样 Timeline 渲染时才会出现 "End" 按钮
-            taskType = 'start'; 
-            // 实时追踪通常是当下的行为，强制设为不重复 (以免变成每天的打卡任务)
-            // 如果你确实想要每天重复且能追踪，可以去掉下面这行，但逻辑会变复杂
-            /* payload.recurrence = 'none'; */ 
+        if(btnSave) {
+            btnSave.disabled = true;
+            btnSave.innerText = "Saving...";
+            btnSave.classList.add('opacity-50', 'cursor-not-allowed');
         }
 
-        if(d) { 
-            const [y,m,day] = d.split('-').map(Number); 
-            const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; 
-            const ts = new Date(y,m-1,day,hr,min).getTime(); 
+        try {
+            const id = document.getElementById('editor-id').value; 
+            const t = document.getElementById('editor-title').value || "Untitled"; 
+            const contentDiv = document.getElementById('editor-content');
+            const c = contentDiv.innerHTML; 
             
-            const payload = { 
-                ts, 
-                h: hr, 
-                title: t, 
-                content: c, 
-                mood: UI.state.mood, 
-                weather: UI.state.weather, 
-                img: coverImg, 
-                calories: cal ? parseInt(cal) : null, 
-                anni, 
-                isTask,
-                taskCat, 
-                taskType, // 保存 start 标记
-                // 如果是手动选的 Routine 且没选分类，就用下拉框的重复设置；如果是追踪，就设为一次性
-                recurrence: (taskCat) ? 'none' : ((type === 'diary') ? 'none' : recurrence)
-            }; 
+            let coverImg = null;
+            const firstImg = contentDiv.querySelector('img');
+            if (firstImg) coverImg = firstImg.src;
+
+            const d = document.getElementById('editor-date').value; 
+            const tm = document.getElementById('editor-time').value; 
+            const cal = document.getElementById('editor-calories').value;
             
-            if (id) await this.update(id, payload); else await this.add(payload); 
-            UI.closeEditor(); 
-            UI.refreshAll();
-        } else { alert('Date required'); }
+            const type = document.getElementById('editor-entry-type').value;
+            const taskCat = document.getElementById('editor-task-cat').value; 
+            const recurrence = document.getElementById('editor-recurrence').value;
+            
+            let anni = (type === 'anni');
+            let isTask = (type === 'task');
+            let taskType = null; 
+
+            if (taskCat) {
+                isTask = true;
+                taskType = 'start'; 
+            }
+
+            if(d) { 
+                const [y,m,day] = d.split('-').map(Number); 
+                const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; 
+                const ts = new Date(y,m-1,day,hr,min).getTime(); 
+                
+                const payload = { 
+                    ts, 
+                    h: hr, 
+                    title: t, 
+                    content: c, 
+                    mood: UI.state.mood, 
+                    weather: UI.state.weather, 
+                    img: coverImg, 
+                    calories: cal ? parseInt(cal) : null, 
+                    anni, 
+                    isTask,
+                    taskCat, 
+                    taskType, 
+                    recurrence: (taskCat) ? 'none' : ((type === 'diary') ? 'none' : recurrence)
+                }; 
+                
+                // 执行数据库操作 (db.js 里的 onSuccess 会自动负责刷新列表)
+                if (id) await this.update(id, payload); 
+                else await this.add(payload); 
+                
+                // 关闭弹窗
+                UI.closeEditor(); 
+                
+                // 【关键修复】删除了这里的 UI.refreshAll()
+                // 因为 db.js 的 add/update 成功后已经调用过一次了，这里再调就是重复刷新
+            } else { 
+                alert('Date required'); 
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Save failed: " + e.message);
+        } finally {
+            // 无论成功失败，最后都要恢复按钮状态，以防下次打开时按钮还是灰的
+            if(btnSave) {
+                btnSave.disabled = false;
+                btnSave.innerText = originalText; // 恢复文字 (Save/保存)
+                btnSave.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
     };
 }
 }
