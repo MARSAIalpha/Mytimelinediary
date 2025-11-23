@@ -8,8 +8,20 @@
     --base-font-size: 16px;
 }
 /* Global Font: Lato + Noto Sans SC */
-body { font-family: 'Lato', 'Noto Sans SC', sans-serif; font-size: var(--base-font-size); width: 100vw; height: 100vh; overflow: hidden; background: linear-gradient(to bottom, var(--bg-start), var(--bg-end)); color: var(--text); transition: background 1.5s ease, color 1s ease; }
-
+body { 
+    font-family: 'Lato', 'Noto Sans SC', sans-serif; 
+    font-size: var(--base-font-size); 
+    width: 100vw; 
+    
+    /* 核心修改：先写 100vh 兼容旧手机，再写 100dvh */
+    height: 100vh; 
+    height: 100dvh; 
+    
+    overflow: hidden; /* 禁止 body 滚动，只让内部容器滚动 */
+    background: linear-gradient(to bottom, var(--bg-start), var(--bg-end)); 
+    color: var(--text); 
+    transition: background 1.5s ease, color 1s ease; 
+}
 /* Specific Logo Font */
 .font-logo { font-family: 'Cinzel', serif; font-weight: 400; }
 
@@ -44,8 +56,27 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 .guide-beam { position: absolute; left: 7rem; width: calc(var(--rail-x) - 7rem); height: 2px; background-color: var(--current-beam-color); opacity: 0.5; top: 0; transform: translateY(-50%); transition: background-color 0.3s ease; pointer-events: none; }
 .guide-cursor { position: absolute; left: var(--rail-x); top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--current-beam-color); transform: translate(-50%, -50%); box-shadow: 0 0 8px 1px var(--current-beam-color); transition: top 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94), background-color 0.3s, box-shadow 0.3s; opacity: 1; z-index: 30; pointer-events: none; }
 
-.timeline-rail-outer { position: fixed; left: 0; top: 0; bottom: 0; width: 100%; pointer-events: none; z-index: 1; mask-image: linear-gradient(to bottom, transparent 5%, black 20%, black 80%, transparent 95%); }
-.timeline-rail-container { position: absolute; left: var(--rail-x); top: 0; bottom: 0; width: 2px; transform: translateX(-50%); z-index: 1; }
+/* --- style.css --- */
+
+.timeline-rail-outer { 
+    /* 必须是 fixed */
+    position: fixed; 
+    left: 0; 
+    top: 0; 
+    
+    /* 强制占满高度，防止变成“一段” */
+    bottom: 0; 
+    height: 100%; 
+    height: 100dvh; /* 适配手机动态高度 */
+    
+    width: 100%; 
+    pointer-events: none; 
+    z-index: 1; /* 确保在背景之上，内容之下 */
+    
+    /* 如果之前修改过，保持只有边缘虚化 */
+    mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 5%, black 95%, transparent 100%);
+}.timeline-rail-container { position: absolute; left: var(--rail-x); top: 0; bottom: 0; width: 2px; transform: translateX(-50%); z-index: 1; }
 .timeline-rail-line { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: linear-gradient(to bottom, transparent, var(--rail-color) 20%, var(--rail-color) 80%, transparent); }
 .rail-center-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 4px; height: 60px; background: var(--current-beam-color); opacity: 0.4; filter: blur(4px); transition: background 0.3s ease; pointer-events: none; border-radius: 99px; }
 .timeline-rail-flow { position: absolute; top: 0; bottom: 0; left: 0; right: 0; background: linear-gradient(180deg, transparent, var(--primary), transparent); background-size: 100% 500px; background-repeat: repeat-y; opacity: 0.3; animation: flowLight 6s linear infinite; }
@@ -54,9 +85,39 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 @keyframes taskFlow { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 .task-line-label { position: absolute; font-weight: 700; font-size: 0.6rem; color: var(--text-sec); opacity: 0.7; white-space: nowrap; transform: translateX(-100%); left: -12px; }
 .label-mid { top: 50%; transform: translate(-100%, -50%); color: var(--current-beam-color); font-weight: 900; opacity: 1; }
-
-#main-container { position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: scroll; scroll-behavior: smooth; scroll-snap-type: y mandatory; touch-action: pan-y; }
-#diary-list { padding-top: 50vh; position: relative; z-index: 10; }
+#main-container { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    right: 0; 
+    bottom: 0; 
+    
+    /* 滚动设置 */
+    overflow-y: scroll; 
+    scroll-behavior: smooth; 
+    -webkit-overflow-scrolling: touch; 
+    
+    /* 保持这个，这是之前的“自动锁定”功能 */
+    scroll-snap-type: y mandatory; 
+    
+    overscroll-behavior-y: contain; 
+    
+    /* === ❌ 删除下面这一行！它是罪魁祸首 === */
+    /* transform: translate3d(0, 0, 0); */  
+    
+    /* === ✅ 保留这一行即可优化性能，不会破坏定位 === */
+    will-change: scroll-position;
+}
+#diary-list { 
+    /* 顶部留白 50vh 是为了让第一条能居中 */
+    padding-top: 50vh; 
+    
+    /* 核心修改：底部必须也留白 50vh，否则最后一条日记永远滚不到屏幕中间 */
+    padding-bottom: 50vh; 
+    
+    position: relative; 
+    z-index: 10; 
+}
 .entry-item { position: relative; width: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: flex; align-items: center; padding-block: 32px; pointer-events: none; }
 .timeline-node-wrapper { position: absolute; left: var(--rail-x); top: 50%; transform: translate(-50%, -50%); z-index: 21; pointer-events: none; }
 .timeline-node { width: 6px; height: 6px; border-radius: 50%; background-color: #9ca3af; opacity: 0.6; transition: all 0.3s ease; }
@@ -549,3 +610,131 @@ body[data-theme="night"] .fab-glass-amber {
     margin: 10px 0;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+/* --- style.css 底部添加 --- */
+@media (max-width: 640px) {
+    /* 手机端禁用卡片毛玻璃，改用纯色半透明，大幅提升滚动FPS */
+    .entry-card, .nav-capsule, #focus-hud, .modal-content {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+    /* 稍微增加背景不透明度作为补偿 */
+    body[data-theme="day"] .entry-card { background-color: rgba(255, 255, 255, 0.95); }
+    body[data-theme="night"] .entry-card { background-color: rgba(15, 23, 42, 0.95); }
+}
+/* --- 粘贴到 style.css 最底部 --- */
+
+/* 1. 编辑器顶部类型切换 (Diary/Routine/Anni) */
+.active-type {
+    background-color: var(--card-bg);
+    color: var(--text);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    opacity: 1 !important;
+}
+
+/* 2. 元数据胶囊 (日期/时间/卡路里) */
+.meta-pill {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--line);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-family: 'Noto Sans SC', sans-serif;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+}
+.meta-pill:hover {
+    background: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* 3. 快速追踪按钮 (运动/睡眠/专注/冥想) */
+.track-btn {
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    transition: all 0.2s;
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    color: var(--text-sec);
+}
+.track-btn:hover {
+    transform: translateY(-2px);
+}
+/* 激活状态：背景变成对应颜色，文字变白 */
+.track-btn.active {
+    background: currentColor; /* 妙用：背景色自动跟随文字颜色 */
+    color: white !important;
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+/* 电脑端变成横向排列，更节省空间 */
+@media (min-width: 640px) {
+    .track-btn { flex-direction: row; }
+}
+/* --- 粘贴到 style.css 最底部 --- */
+
+/* Tab 基础样式重置 */
+#type-diary, #type-task, #type-anni {
+    opacity: 0.6;
+    transition: all 0.2s;
+}
+
+/* 1. Diary (日记) - 浅蓝色 */
+#type-diary.active-type {
+    background-color: #e0f2fe; /* Sky-100 */
+    color: #0284c7;            /* Sky-600 */
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(2, 132, 199, 0.1);
+}
+
+/* 2. Routine (习惯) - 红色 */
+#type-task.active-type {
+    background-color: #fee2e2; /* Red-100 */
+    color: #dc2626;            /* Red-600 */
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+}
+
+/* 3. Anniversary (纪念日) - 金色 */
+#type-anni.active-type {
+    background-color: #fef3c7; /* Amber-100 */
+    color: #d97706;            /* Amber-600 */
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(217, 119, 6, 0.1);
+}
+
+/* 4. Track 按钮微调 (点击感更强) */
+.track-btn:active {
+    transform: scale(0.95);
+}
+/* --- style.css --- */
+
+.entry-card { 
+    background-color: var(--card-bg); 
+    border: 1px solid transparent; 
+    box-shadow: var(--card-shadow), var(--card-highlight); 
+    cursor: pointer; 
+    border-radius: 14px; 
+    backdrop-filter: blur(20px); 
+    display: flex; 
+    overflow: hidden; 
+    min-height: 90px; 
+    position: relative; 
+    transform-origin: left center; 
+    transition: transform 0.2s linear, border-color 0.3s; 
+    z-index: 50; 
+    margin-right: 1rem; 
+    
+    /* 【核心修复】加上 !important，强制允许点击 */
+    pointer-events: auto !important; 
+}
+/* --- 粘贴到 style.css 底部 --- */
+/* --- style.css 底部 --- */

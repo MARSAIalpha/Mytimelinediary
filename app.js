@@ -349,12 +349,35 @@ toggleSelectionMode: function() {
     exportSelectedMarkdown: async function() {
         if (this.state.selectedIds.size === 0) return alert("Select items first"); const allData = await DataManager.getAll(); const selected = allData.filter(e => this.state.selectedIds.has(e.id)); await DataManager.exportSelectedMarkdown(new Set(selected.map(e=>e.id)));
     },
+  // --- 在 app.js 中替换 renderTimeline ---
+   // --- 替换 app.js 中的 renderTimeline ---
     renderTimeline: async function() {
-        const c = document.getElementById('diary-list'); c.innerHTML = ''; const layer = document.getElementById('task-lines-layer'); if(layer) layer.innerHTML = ''; else { const l = document.createElement('div'); l.id = 'task-lines-layer'; l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; c.appendChild(l); }
-        const allData = await DataManager.getAll(); let entries = allData.sort((a, b) => b.ts - a.ts); entries = entries.filter(e => { if(e.isHoliday) return this.state.filters.holiday; if(e.anni) return this.state.filters.anni; return this.state.filters.normal; });
+        const c = document.getElementById('diary-list'); 
+        c.innerHTML = ''; 
+        
+        // 绘制任务连线层
+        const layer = document.getElementById('task-lines-layer'); 
+        if(layer) layer.innerHTML = ''; 
+        else { 
+            const l = document.createElement('div'); 
+            l.id = 'task-lines-layer'; 
+            l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; 
+            c.appendChild(l); 
+        }
+        
+        const allData = await DataManager.getAll(); 
+        let entries = allData.sort((a, b) => b.ts - a.ts); 
+        
+        // 过滤器
+        entries = entries.filter(e => { 
+            if(e.isHoliday) return this.state.filters.holiday; 
+            if(e.anni) return this.state.filters.anni; 
+            return this.state.filters.normal; 
+        });
+        
         if(entries.length === 0) { c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; return; }
         
-        // Mood Style Configuration
+        // 心情图标样式
         const MOOD_STYLES = {
             smile:    { color: '#f59e0b', fill: '#fef3c7', icon: 'smile' },
             meh:      { color: '#64748b', fill: '#f1f5f9', icon: 'meh' },
@@ -367,15 +390,31 @@ toggleSelectionMode: function() {
         const now = Date.now();
         
         entries.forEach(i => {
-            const d = new Date(i.ts); const div = document.createElement('div'); div.className = `entry-item`; div.dataset.ts = i.ts; div.id = `entry-${i.id}`; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
+            const d = new Date(i.ts); 
+            const div = document.createElement('div'); 
+            div.className = `entry-item`; 
+            div.dataset.ts = i.ts; 
+            div.id = `entry-${i.id}`; 
+            // HUD 数据
+            div.dataset.hour = d.getHours(); 
+            div.dataset.day = d.getDate(); 
+            div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); 
+            div.dataset.year = d.getFullYear(); 
+            div.dataset.time = this.formatTime(d); 
+            div.dataset.weather = i.weather || 'sun';
+            
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
             
-            let activeColor = '#f59e0b'; let extraHtml = ''; let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
+            let activeColor = '#f59e0b'; 
+            let extraHtml = ''; 
+            let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
             let cardClass = '';
+            
             if (i.mood === 'sparkles') cardClass += ' glow-purple';
             
-            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+='card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
-            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+='card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
+            // 标签
+            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+=' card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
+            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+=' card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
             
             if (i.anni) {
                 const diffTime = i.ts - now;
@@ -384,9 +423,23 @@ toggleSelectionMode: function() {
                 else extraHtml += `<div class="anni-badge anni-past-badge">${Math.abs(diffDays)} Days Since</div>`;
             }
 
-            if (i.isTask) { if (i.taskCat === 'Exercise') activeColor = '#ef4444'; if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; if (i.taskCat === 'Focus') activeColor = '#10b981'; if (i.taskCat === 'Meditation') activeColor = '#a855f7'; }
+            // 任务颜色
+            if (i.isTask) { 
+                if (i.taskCat === 'Exercise') activeColor = '#ef4444'; 
+                if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; 
+                if (i.taskCat === 'Focus') activeColor = '#10b981'; 
+                if (i.taskCat === 'Meditation') activeColor = '#a855f7'; 
+            }
+            
             if (i.calories) { extraHtml += `<div class="inline-block bg-orange-100 text-orange-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="utensils" class="inline w-3 h-3"></i> ${i.calories} kcal</div>`; }
-            if (i.isTask && !catState[i.taskCat]) { catState[i.taskCat] = i.taskType; if (i.taskType === 'start') { extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; } }
+            
+            // End 按钮
+            if (i.isTask && !catState[i.taskCat]) { 
+                catState[i.taskCat] = i.taskType; 
+                if (i.taskType === 'start') { 
+                    extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; 
+                } 
+            }
             
             div.style.setProperty('--node-active-color', activeColor);
             
@@ -395,27 +448,107 @@ toggleSelectionMode: function() {
                 <i data-lucide="${mStyle.icon}" style="width:1.2rem; height:1.2rem; color:${mStyle.color}; fill:${mStyle.fill}; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></i>
             </div>`;
 
-            div.innerHTML = `<div class="timeline-node-wrapper"><div class="timeline-node"></div></div><div class="entry-card-wrapper"><div class="entry-card ${cardClass}" onclick="UI.handleEntryClick(${i.id})" style="${!i.img ? 'padding-left:1.2rem' : ''}">${thumbHtml}<div class="card-main-col">${moodHtml}<div class="flex flex-wrap gap-2 mb-1">${extraHtml}</div><h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2 pr-6">${i.title}</h3><p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${i.content.replace(/<[^>]*>/g, '').substring(0,80)}</p></div></div></div>`;
+            // 【关键修复】
+            // 1. class 里加上 pointer-events-auto
+            // 2. onclick 里给 ID 加上单引号 '${i.id}'，确保字符串ID也能点
+            div.innerHTML = `
+                <div class="timeline-node-wrapper"><div class="timeline-node"></div></div>
+                <div class="entry-card-wrapper">
+                    <div class="entry-card ${cardClass} pointer-events-auto" onclick="UI.handleEntryClick('${i.id}')" style="${!i.img ? 'padding-left:1.2rem' : ''}">
+                        ${thumbHtml}
+                        <div class="card-main-col">
+                            ${moodHtml}
+                            <div class="flex flex-wrap gap-2 mb-1">${extraHtml}</div>
+                            <h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2 pr-6">${i.title}</h3>
+                            <p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${i.content.replace(/<[^>]*>/g, '').substring(0,80)}</p>
+                        </div>
+                    </div>
+                </div>`;
             c.appendChild(div);
         });
+        
         lucide.createIcons(); 
         this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
         setTimeout(() => { this.handleScroll(); this.drawTaskConnectors(); }, 150);
     },
-    drawTaskConnectors: function() {
-        const layer = document.getElementById('task-lines-layer'); if (!layer) return; layer.innerHTML = ''; const entries = this.cachedEntryItems; if (!entries.length) return; const catColors = { 'Exercise': 'linear-gradient(to bottom, #ef4444, #fca5a5)', 'Sleep': 'linear-gradient(to bottom, #3b82f6, #93c5fd)', 'Focus': 'linear-gradient(to bottom, #10b981, #6ee7b7)', 'Meditation': 'linear-gradient(to bottom, #a855f7, #d8b4fe)' }; const getCenterY = (el) => { return el.offsetTop + el.offsetHeight / 2; }; 
-        entries.forEach(endNode => { if (endNode.dataset.taskType === 'end') { const cat = endNode.dataset.taskCat; let startNode = null; for(let i = entries.indexOf(endNode) + 1; i < entries.length; i++) { const candidate = entries[i]; if (candidate.dataset.taskType === 'start' && candidate.dataset.taskCat === cat) { startNode = candidate; break; } if (candidate.dataset.taskType === 'end' && candidate.dataset.taskCat === cat) break; } if (startNode) { const endY = getCenterY(endNode); const startY = getCenterY(startNode); const height = Math.abs(startY - endY); const diffMs = parseInt(endNode.dataset.ts) - parseInt(startNode.dataset.ts); const hrs = Math.floor(diffMs / 3600000); const mins = Math.round((diffMs % 3600000) / 60000); const line = document.createElement('div'); line.className = 'task-highlight-line'; line.style.top = `${endY}px`; line.style.height = `${height}px`; line.style.background = catColors[cat] || '#ccc'; line.innerHTML = `<div class="task-line-label label-mid">${hrs > 0 ? hrs + 'h ' : ''}${mins}m</div>`; layer.appendChild(line); } } });
-    },
-    initScrollObserver: function() { const main = document.getElementById('main-container'); let ticking = false; main.addEventListener('scroll', () => { if (!ticking) { window.requestAnimationFrame(() => { this.handleScroll(); ticking = false; }); ticking = true; } }, { passive: true }); },
+/* --- app.js 中的 initScrollObserver --- */
+
+initScrollObserver: function() { 
+    const main = document.getElementById('main-container'); 
+    let ticking = false; 
+
+    main.addEventListener('scroll', () => { 
+        if (!ticking) { 
+            window.requestAnimationFrame(() => { 
+                this.handleScroll(); 
+                ticking = false; 
+            }); 
+            ticking = true; 
+        } 
+    }, { 
+        passive: true // 保持这个，这告诉浏览器“我不阻止默认滚动”，能极大提升流畅度
+    }); 
+},
     handleScroll: function() {
-        const entries = this.cachedEntryItems; if(!entries || entries.length === 0) return; const viewCenter = window.innerHeight / 2; let closest = null; let minDiff = Infinity; let closestRawDiff = 0;
-        entries.forEach(el => { const rect = el.getBoundingClientRect(); const dist = Math.abs(rect.top + rect.height/2 - viewCenter); if(dist < minDiff) { minDiff = dist; closest = el; closestRawDiff = rect.top + rect.height/2 - viewCenter; } el.classList.remove('active-focus'); const card = el.querySelector('.entry-card'); const range = 400; let scale = 0.85; let opacity = 0.5; if (dist < range) { const ratio = 1 - (dist / range); const ease = ratio * ratio; scale = 0.85 + (ease * 0.2); opacity = 0.5 + (ease * 0.5); } if (card) { 
-             if(!card.classList.contains('selected')) { card.style.transform = `scale(${scale})`; card.style.opacity = opacity; card.style.zIndex = dist < 60 ? 50 : 1; } else { card.style.opacity = 1; card.style.zIndex = 50; }
-        } });
+        // --- 【关键修复】如果缓存为空，立刻重新获取一次 ---
+        if (!this.cachedEntryItems || this.cachedEntryItems.length === 0) {
+            this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item'));
+        }
+        
+        const entries = this.cachedEntryItems; 
+        // 如果还是没有条目，那说明真的没有日记，直接返回
+        if (!entries || entries.length === 0) return; 
+
+        const viewCenter = window.innerHeight / 2; 
+        let closest = null; 
+        let minDiff = Infinity; 
+        
+        entries.forEach(el => { 
+            const rect = el.getBoundingClientRect(); 
+            const dist = Math.abs(rect.top + rect.height/2 - viewCenter); 
+            
+            if(dist < minDiff) { 
+                minDiff = dist; 
+                closest = el; 
+            } 
+            
+            // 重置非焦点状态
+            el.classList.remove('active-focus'); 
+            const card = el.querySelector('.entry-card'); 
+            
+            // 计算缩放淡入效果
+            const range = 400; 
+            let scale = 0.85; 
+            let opacity = 0.5; 
+            if (dist < range) { 
+                const ratio = 1 - (dist / range); 
+                const ease = ratio * ratio; 
+                scale = 0.85 + (ease * 0.2); 
+                opacity = 0.5 + (ease * 0.5); 
+            } 
+            
+            if (card) { 
+                 if(!card.classList.contains('selected')) { 
+                     card.style.transform = `scale(${scale})`; 
+                     card.style.opacity = opacity; 
+                     // 离得近的层级高，防止遮挡
+                     card.style.zIndex = dist < 60 ? 50 : 1; 
+                 } else { 
+                     card.style.opacity = 1; 
+                     card.style.zIndex = 50; 
+                 }
+            } 
+        });
+
+        // 如果找到了最近的条目，执行“锁定”视觉效果
         if(closest) {
-            closest.classList.add('active-focus'); const cursor = document.getElementById('beam-cursor'); 
+            closest.classList.add('active-focus'); 
+            const cursor = document.getElementById('beam-cursor'); 
+            
+            // 光标磁吸效果
             const rect = closest.getBoundingClientRect();
             const magnetY = rect.top + rect.height/2 - viewCenter;
+            
             if (Math.abs(magnetY) < 50) {
                 cursor.style.top = `calc(50% + ${magnetY}px)`;
                 document.getElementById('center-guide-layer').style.transform = `translateY(${magnetY}px)`; 
@@ -424,14 +557,64 @@ toggleSelectionMode: function() {
                 document.getElementById('center-guide-layer').style.transform = `translateY(0px)`;
             }
             
-            const activeColor = closest.style.getPropertyValue('--node-active-color') || '#f59e0b'; document.documentElement.style.setProperty('--current-beam-color', activeColor);
-            const day = String(closest.dataset.day).padStart(2, '0'); document.getElementById('hud-day').innerText = day; document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; const timeEl = document.getElementById('hud-time'); const newTime = closest.dataset.time; if (timeEl.innerText !== newTime) { timeEl.classList.add('hud-time-updating'); setTimeout(() => { timeEl.innerText = newTime; timeEl.classList.remove('hud-time-updating'); }, 150); }
-            this.updateCelestialPosition(parseInt(closest.dataset.hour)); if(closest.dataset.weather) ParticleSystem.setWeather(closest.dataset.weather);
+            // 更新 HUD 时间和颜色
+            const activeColor = closest.style.getPropertyValue('--node-active-color') || '#f59e0b'; 
+            document.documentElement.style.setProperty('--current-beam-color', activeColor);
+            
+            const day = String(closest.dataset.day).padStart(2, '0'); 
+            document.getElementById('hud-day').innerText = day; 
+            document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; 
+            
+            const timeEl = document.getElementById('hud-time'); 
+            const newTime = closest.dataset.time; 
+            if (timeEl.innerText !== newTime) { 
+                timeEl.classList.add('hud-time-updating'); 
+                setTimeout(() => { 
+                    timeEl.innerText = newTime; 
+                    timeEl.classList.remove('hud-time-updating'); 
+                }, 150); 
+            }
+            
+            this.updateCelestialPosition(parseInt(closest.dataset.hour)); 
+            if(closest.dataset.weather) ParticleSystem.setWeather(closest.dataset.weather);
         }
     },
     quickSaveTask: async function(category) { const payload = { ts: Date.now(), title: `${category} Started`, content: `Started ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'start', taskCat: category, img: null }; await DataManager.add(payload); UI.closeEditor(); },
-    endTask: async function(category) { if(confirm(`End ${category} session?`)) { const payload = { ts: Date.now(), title: `${category} Finished`, content: `Completed ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'end', taskCat: category, img: null }; await DataManager.add(payload); } },
-    updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
+// --- 找到 UI 对象里的 endTask 方法，替换为这个智能版 ---
+    
+    endTask: async function(category) {
+        if(confirm(`End ${category} session?`)) {
+            
+            // 1. 智能查找：先找到最近的一个“开始”记录
+            const allData = await DataManager.getAll();
+            const lastStart = allData
+                .filter(e => e.isTask && e.taskCat === category && e.taskType === 'start')
+                .sort((a,b) => b.ts - a.ts)[0]; // 按时间倒序，取第一个（最新的）
+
+            let newTs = Date.now();
+
+            // 2. 逻辑修正：如果“现在的结束时间”竟然早于“开始时间”
+            // (通常是因为手动选了未来时间，或者秒数差异)
+            // 我们强制把结束时间设定为：开始时间 + 1秒
+            if (lastStart && newTs <= lastStart.ts) {
+                newTs = lastStart.ts + 1000; 
+            }
+
+            const payload = {
+                ts: newTs, 
+                title: `${category} Finished`,
+                content: `Completed ${category} session.`,
+                mood: 'smile',
+                weather: UI.state.weather,
+                isTask: true,
+                taskType: 'end',
+                taskCat: category,
+                img: null
+            };
+            
+            await DataManager.add(payload);
+        }
+    },    updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
     // In app.js - locate the UI.analyzeFoodImage method and replace it with:
 
 
@@ -477,26 +660,59 @@ generateReport: async function() {
     const bazi = document.getElementById('oracle-bazi').value || "Unknown";
     const container = document.getElementById('summary-ai-content');
     const lang = this.state.lang; // 'zh' or 'en'
-    
-    // 1. 切换视图 & 显示加载动画 (带有一点仪式感的文案)
+    const currentPersona = this.state.persona || 'western'; // 获取当前选择的角色
+
+    // 1. 切换视图 & 显示动态加载动画 (根据角色定制)
     document.getElementById('oracle-input-view').classList.add('hidden');
     document.getElementById('oracle-result-view').classList.remove('hidden');
-    
-    const loadingTexts = lang === 'zh' 
-        ? ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响..."] 
-        : ["Lighting the incense...", "Reading the star chart...", "Resonating with your energy...", "Listening to time's echo..."];
-    const randomText = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
 
-    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-50 space-y-6">
+    // --- 【新增】角色专属加载配置 ---
+    const LOADERS = {
+        western: {
+            icon: 'sparkles', // 星星/魔法
+            color: 'text-purple-600',
+            glow: 'bg-purple-500',
+            textColor: 'text-purple-900',
+            texts: lang === 'zh' 
+                ? ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响..."] 
+                : ["Lighting the incense...", "Reading the star chart...", "Resonating with energy...", "Listening to time's echo..."]
+        },
+        eastern: {
+            icon: 'scroll', // 卷轴/道经
+            color: 'text-emerald-700', // 墨绿/道家感
+            glow: 'bg-emerald-500',
+            textColor: 'text-emerald-900',
+            texts: lang === 'zh' 
+                ? ["道长正在起卦...", "推演五行生克...", "感应气场流动...", "正在烹茶待客..."] 
+                : ["Casting the hexagram...", "Calculating Five Elements...", "Sensing the Qi flow...", "Brewing tea for you..."]
+        },
+        coach: {
+            icon: 'activity', // 心率/分析/图表
+            color: 'text-blue-600', // 商务蓝/理性
+            glow: 'bg-blue-500',
+            textColor: 'text-blue-900',
+            texts: lang === 'zh' 
+                ? ["正在分析行为模式...", "连接思维断点...", "正在构建行动方案...", "深度回顾本周数据..."] 
+                : ["Analyzing patterns...", "Connecting the dots...", "Building action plan...", "Reviewing data points..."]
+        }
+    };
+
+    // 获取当前主题，如果获取不到则默认用 western
+    const theme = LOADERS[currentPersona] || LOADERS.western;
+    const randomText = theme.texts[Math.floor(Math.random() * theme.texts.length)];
+
+    // 渲染加载界面
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60 space-y-6">
         <div class="relative">
-            <div class="absolute inset-0 bg-purple-500 blur-xl opacity-20 animate-pulse"></div>
-            <i data-lucide="feather" class="relative z-10 w-8 h-8 animate-bounce text-purple-600"></i>
+            <div class="absolute inset-0 ${theme.glow} blur-xl opacity-20 animate-pulse"></div>
+            <i data-lucide="${theme.icon}" class="relative z-10 w-10 h-10 animate-bounce ${theme.color}"></i>
         </div>
-        <p class="text-xs font-bold tracking-[0.3em] animate-pulse text-purple-900 font-serif">${randomText}</p>
+        <p class="text-xs font-bold tracking-[0.3em] animate-pulse ${theme.textColor} font-serif">${randomText}</p>
     </div>`;
+    
     if(typeof lucide !== 'undefined') lucide.createIcons();
     
-    // 2. 准备数据
+    // 2. 准备数据 (保持原有逻辑)
     const allData = await DataManager.getAll();
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
     const recentData = allData
@@ -512,7 +728,7 @@ generateReport: async function() {
 
     const dataContext = recentData.length > 10 ? recentData : (lang === 'zh' ? "（用户本周很安静，依靠直觉感受ta的能量）" : "(User was quiet this week, rely on intuition.)");
 
-    // 3. 定义沉浸式信件 Prompt
+    // 3. 定义沉浸式信件 Prompt (保持原有逻辑)
     const PERSONA_PROMPTS = {
         western: {
             zh: `角色设定：你不是AI，你是一位名为“Luna”的神秘占星师。
@@ -571,7 +787,7 @@ Requirements:
     const selectedPersona = PERSONA_PROMPTS[this.state.persona] || PERSONA_PROMPTS.western;
     const langPrompt = selectedPersona[lang];
 
-    // 4. 构建最终 Prompt
+    // 4. 构建最终 Prompt (保持原有逻辑)
     const finalPrompt = `
 ${langPrompt}
 
@@ -589,11 +805,11 @@ Write the response in ${lang === 'zh' ? 'Chinese' : 'English'}.
 - Length: Approx 200-250 words.
 `;
 
-    // 5. 调用 API 并清洗数据
+    // 5. 调用 API 并清洗数据 (保持原有逻辑)
     try {
         let report = await DataManager.callDeepseek(finalPrompt, 1000);
         
-        // --- 关键修复：清洗 AI 可能返回的代码块标记 ---
+        // 清洗 AI 可能返回的代码块标记
         report = report.replace(/```markdown/g, '').replace(/```/g, '').trim();
         
         container.innerHTML = marked.parse(report);
@@ -645,33 +861,79 @@ closeWeeklySummary: function() {
         alert("Report saved to Timeline!");
         this.closeWeeklySummary();
     },
+    // --- 找到 renderDashboardTasks，完全替换为以下内容 ---
+
     renderDashboardTasks: function(allData) {
-        const container = document.getElementById('dashboard-todo-list'); container.innerHTML = '';
-        const today = new Date(); const dayOfWeek = today.getDay(); const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const container = document.getElementById('dashboard-todo-list'); 
+        container.innerHTML = '';
+        
+        const today = new Date();
+        const todayStr = today.toDateString(); // 获取今天的日期字符串 (例如 "Mon Nov 24 2025")
+        const dayOfWeek = today.getDay();
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+
+        // 1. 筛选出所有设置了重复的任务 (Routine)
         const tasks = allData.filter(e => e.recurrence && e.recurrence !== 'none');
-        const activeTasks = tasks.filter(t => { if (t.recurrence === 'daily') return true; if (t.recurrence === 'weekly') return new Date(t.ts).getDay() === dayOfWeek; if (t.recurrence === 'workday') return !isWeekend; if (t.recurrence === 'yearly') return new Date(t.ts).getDate() === today.getDate() && new Date(t.ts).getMonth() === today.getMonth(); return false; });
-        if(activeTasks.length === 0) { container.innerHTML = '<div class="text-sm opacity-50 p-2">No pending tasks.</div>'; return; }
+        
+        // 2. 筛选出“今天”应该做的任务
+        const activeTasks = tasks.filter(t => {
+            if (t.recurrence === 'daily') return true;
+            if (t.recurrence === 'weekly') return new Date(t.ts).getDay() === dayOfWeek; // 每周几重复
+            if (t.recurrence === 'workday') return !isWeekend; // 工作日
+            if (t.recurrence === 'yearly') { // 每年
+                const d = new Date(t.ts);
+                return d.getDate() === today.getDate() && d.getMonth() === today.getMonth();
+            }
+            return false;
+        });
+
+        if(activeTasks.length === 0) { 
+            container.innerHTML = '<div class="text-sm opacity-50 p-2 italic">No routines for today.</div>'; 
+            return; 
+        }
+
+        // 3. 渲染列表
         activeTasks.forEach(t => { 
             const div = document.createElement('div'); 
-            div.className = 'todo-item cursor-pointer'; 
-            div.innerHTML = `<div class="todo-check"><i data-lucide="circle" class="w-4 h-4"></i></div><div class="todo-text">${t.title}</div>`; 
-            div.onclick = () => { 
-                const checkEl = div.querySelector('.todo-check');
-                const textEl = div.querySelector('.todo-text');
+            div.className = 'todo-item cursor-pointer group hover:bg-[var(--line)]/30 transition-colors rounded-lg px-2'; 
+            
+            // 核心逻辑：检查“最后完成时间”是不是今天
+            // 如果 lastCompleted 存在且是今天，说明今天做完了
+            const isDoneToday = t.lastCompleted && new Date(t.lastCompleted).toDateString() === todayStr;
+            
+            const icon = isDoneToday 
+                ? '<i data-lucide="check-circle" class="w-5 h-5 text-green-500 fill-green-100"></i>' 
+                : '<i data-lucide="circle" class="w-5 h-5 text-[var(--text-sec)] group-hover:text-[var(--primary)]"></i>';
+            
+            const textClass = isDoneToday ? 'todo-done opacity-50 line-through transition-all' : 'font-bold transition-all';
+
+            div.innerHTML = `
+                <div class="todo-check mr-3">${icon}</div>
+                <div class="todo-text ${textClass} flex-1 py-3 text-sm">${t.title}</div>
+            `; 
+            
+            // 4. 点击事件：更新数据库状态
+            div.onclick = async () => { 
+                // 如果今天是完成状态，点击则“取消完成” (设为 null)
+                // 如果今天是未完成，点击则“标记完成” (设为现在的时间戳)
+                const newStatus = isDoneToday ? null : Date.now();
                 
-                if (textEl.classList.contains('todo-done')) {
-                    // Uncheck
-                    textEl.classList.remove('todo-done');
-                    checkEl.innerHTML = '<i data-lucide="circle" class="w-4 h-4"></i>';
-                } else {
-                    // Check
-                    textEl.classList.add('todo-done');
-                    checkEl.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i>';
-                }
-                lucide.createIcons();
+                // 视觉反馈 (不等数据库，先变样式，更跟手)
+                div.querySelector('.todo-text').classList.toggle('line-through');
+                div.querySelector('.todo-text').classList.toggle('opacity-50');
+                
+                // 写入数据库
+                await DataManager.update(t.id, { lastCompleted: newStatus });
+                
+                // 刷新列表 (确保逻辑正确)
+                // 稍微延迟一点，让用户看到点击动画
+                setTimeout(() => this.renderDashboardTasks(allData), 200);
             }; 
+            
             container.appendChild(div); 
         });
+        
+        if(typeof lucide !== 'undefined') lucide.createIcons();
     },
     // --- 语言切换 (含指南内容切换) ---
     setLanguage: function(lang) { 
@@ -728,28 +990,196 @@ closeWeeklySummary: function() {
             }
         });
     },
-    setEditorType: function(t) {
-        document.getElementById('editor-entry-type').value = t;
-        ['diary','task','anni'].forEach(k => { 
+   // --- 1. 切换编辑器类型 (适配彩色 Tab) ---
+  // --- 替换 app.js 中的 setEditorType ---
+    
+   // --- 替换 app.js 中的 setEditorType ---
+    
+    setEditorType: function(type) {
+        document.getElementById('editor-entry-type').value = type;
+        
+        // 1. Tab 按钮视觉切换
+        ['diary', 'task', 'anni'].forEach(k => {
             const btn = document.getElementById(`type-${k}`);
-            btn.classList.replace('bg-[var(--card-bg)]', 'hover:bg-[var(--card-bg)]/50'); 
-            btn.classList.remove('shadow-sm', 'text-[var(--text)]'); 
-            btn.classList.add('text-[var(--text-sec)]'); 
+            if (k === type) btn.classList.add('active-type');
+            else btn.classList.remove('active-type');
         });
+
+        // 2. 获取界面元素
+        const guideText = document.getElementById('editor-guide-text');
+        const extSettings = document.getElementById('editor-ext-settings');
+        const trackButtons = document.getElementById('track-buttons');
+        const recurrenceSelect = document.getElementById('editor-recurrence');
+        const titleInput = document.getElementById('editor-title');
         
-        const activeBtn = document.getElementById(`type-${t}`);
-        activeBtn.classList.remove('hover:bg-[var(--card-bg)]/50', 'text-[var(--text-sec)]');
-        activeBtn.classList.add('bg-[var(--card-bg)]', 'shadow-sm', 'text-[var(--text)]');
+        const metaRow = document.getElementById('editor-meta-row'); 
+        const moodRow = document.getElementById('editor-mood-row'); 
+        const richArea = document.getElementById('editor-rich-area'); 
         
-      const settingsPanel = document.getElementById('task-settings');
-if (t === 'task' || t === 'anni') {
-  settingsPanel.classList.remove('hidden');
-  const sel = document.getElementById('editor-recurrence');
-  if (t === 'anni' && sel.value === 'none') sel.value = 'yearly';
-  if (t === 'task' && sel.value === 'yearly') sel.value = 'daily';
-} else {
-  settingsPanel.classList.add('hidden');
-}
+        const pillDate = document.getElementById('pill-date');
+        const pillTime = document.getElementById('pill-time');
+        const pillCals = document.getElementById('pill-cals');
+
+        recurrenceSelect.innerHTML = '';
+        guideText.classList.remove('hidden');
+
+        // === 场景化逻辑 ===
+        if (type === 'diary') {
+            // [日记模式]：全显
+            guideText.classList.add('hidden'); 
+            extSettings.classList.add('hidden');
+            
+            metaRow.classList.remove('hidden');
+            pillDate.classList.remove('hidden');
+            pillTime.classList.remove('hidden');
+            pillCals.classList.remove('hidden');
+            
+            moodRow.classList.remove('hidden');
+            richArea.classList.remove('hidden');
+            
+            titleInput.placeholder = "Title...";
+        } 
+        else if (type === 'task') { 
+            // [习惯模式]：极简 + 日期 + 时间
+            extSettings.classList.remove('hidden');
+            trackButtons.classList.remove('hidden');
+            
+            // 【修改点】显示元数据行，显示日期和时间，只隐藏卡路里
+            metaRow.classList.remove('hidden'); 
+            pillDate.classList.remove('hidden');
+            pillTime.classList.remove('hidden'); // <--- 开启时间显示
+            pillCals.classList.add('hidden');    // 保持卡路里隐藏
+
+            moodRow.classList.add('hidden');
+            richArea.classList.add('hidden');
+            
+            titleInput.placeholder = "Habit Name (e.g., Read Book)";
+            
+            const opts = [
+                {v:'daily', t:'Daily (每天)'},
+                {v:'workday', t:'Workdays (工作日)'},
+                {v:'weekly', t:'Weekly (每周)'},
+                {v:'yearly', t:'Yearly (每年)'},
+                {v:'none', t:'One-off (一次性)'}
+            ];
+            opts.forEach(o => recurrenceSelect.add(new Option(o.t, o.v)));
+        } 
+        else { 
+            // [纪念日模式]：极简 + 日期 (不需要时间)
+            extSettings.classList.remove('hidden');
+            trackButtons.classList.add('hidden');
+            
+            // 显示日期，隐藏时间、卡路里
+            metaRow.classList.remove('hidden');
+            pillDate.classList.remove('hidden');
+            pillTime.classList.add('hidden');
+            pillCals.classList.add('hidden');
+            
+            moodRow.classList.add('hidden');
+            richArea.classList.add('hidden');
+            
+            titleInput.placeholder = "Event Name (e.g., Birthday)";
+            
+            const opts = [
+                {v:'yearly', t:'Annual (一年一度)'},
+                {v:'none', t:'One-time Event (一次性)'}
+            ];
+            opts.forEach(o => recurrenceSelect.add(new Option(o.t, o.v)));
+        }
+    },
+
+    // --- 2. 快速追踪：点击即开始 (Instant Start) ---
+    setTaskCat: async function(cat) {
+        // 1. 获取用户输入的标题 (如果没写，就自动生成)
+        let customTitle = document.getElementById('editor-title').value;
+        const finalTitle = customTitle.trim() ? customTitle : `${cat} Session`;
+
+        // 2. 构造数据 (自动设为 Start 节点)
+        const payload = {
+            id: Date.now(),
+            ts: Date.now(), // 立即开始，使用当前时间
+            title: finalTitle, 
+            content: `Started ${cat} tracking.`, // 简单备注
+            mood: UI.state.mood || 'smile',
+            weather: UI.state.weather || 'sun',
+            img: null,
+            
+            // 关键标记
+            isTask: true,
+            taskCat: cat,       // Exercise, Sleep, etc.
+            taskType: 'start',  // 标记为开始
+            recurrence: 'none'  // 实时追踪通常是一次性的，不设自动重复
+        };
+
+        // 3. 视觉反馈 (让按钮闪一下)
+        const btn = document.getElementById(`btn-cat-${cat}`);
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i> OK`;
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+
+        // 4. 立即保存并关闭
+        setTimeout(async () => {
+            await DataManager.add(payload);
+            UI.closeEditor(); 
+            // 恢复按钮文字，以防下次打开变了
+            btn.innerHTML = originalText;
+        }, 300); // 稍微延迟 0.3秒 给用户看一眼“OK”
+    },
+
+    // --- 3. 打开编辑器 (初始化) ---
+ // --- 2. 打开编辑器 (修复赋值顺序) ---
+    openEditor: function(dStr, exist) { 
+        const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); 
+        const edit = document.getElementById('editor-content');
+        
+        // 清空旧状态
+        edit.innerHTML = '<div><br></div>'; 
+        document.getElementById('editor-task-cat').value = '';
+        document.querySelectorAll('.track-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('editor-calories').value = '';
+
+        if(exist) { 
+            // === 编辑模式 ===
+            document.getElementById('editor-id').value = exist.id; 
+            document.getElementById('editor-title').value = exist.title; 
+            document.getElementById('editor-content').innerHTML = exist.content; 
+            
+            const d = new Date(exist.ts); 
+            document.getElementById('editor-date').value = d.toISOString().split('T')[0]; 
+            document.getElementById('editor-time').value = this.formatTime(d); 
+            document.getElementById('editor-calories').value = exist.calories || '';
+            
+            // 1. 先判断并设置类型 (这会生成对应的下拉选项)
+            let type = 'diary';
+            if (exist.anni) type = 'anni';
+            else if (exist.recurrence && exist.recurrence !== 'none') type = 'task';
+            else if (exist.isTask) type = 'task'; // 处理之前的一键Track
+            
+            this.setEditorType(type);
+
+            // 2. 类型确定后，再回填具体的值
+            // 如果是 Track 按钮生成的，恢复按钮高亮
+            if (exist.taskCat) this.setTaskCat(exist.taskCat); 
+            
+            // 恢复重复设置 (注意：如果现有值不在当前类型的选项里，比如Anni里存了daily，这里会自动变回默认)
+            document.getElementById('editor-recurrence').value = exist.recurrence || 'none';
+            
+        } else { 
+            // === 新建模式 ===
+            const n = new Date(); 
+            document.getElementById('editor-id').value = ''; 
+            document.getElementById('editor-title').value = ''; 
+            document.getElementById('editor-date').value = dStr || n.toISOString().split('T')[0]; 
+            document.getElementById('editor-time').value = n.toTimeString().slice(0,5); 
+            
+            // 默认设为日记
+            this.setEditorType('diary');
+            // 如果初始化就想切到别的，可以在这里改，比如 this.setEditorType('task');
+        } 
+        
+        m.classList.remove('hidden'); 
+        setTimeout(() => p.classList.remove('translate-y-full'), 10); 
+        if(typeof lucide !== 'undefined') lucide.createIcons();
     },
     setFontSize: function(size) { document.body.setAttribute('data-font', size); },
   // --- 辅助功能 ---
@@ -817,44 +1247,17 @@ if (t === 'task' || t === 'anni') {
             btn.classList.add('bg-purple-100', 'text-purple-600');
         }
     },
-    openEditor: function(dStr, exist) { 
-        const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); 
-        const edit = document.getElementById('editor-content');
-        
-        // 重置内容
-        edit.innerHTML = '<div><br></div>'; 
-
-        if(exist) { 
-            document.getElementById('editor-id').value=exist.id; 
-            document.getElementById('editor-title').value=exist.title; 
-            // 填入内容 (支持 HTML 图片)
-            document.getElementById('editor-content').innerHTML = exist.content; 
-            
-            const d=new Date(exist.ts); 
-            document.getElementById('editor-date').value=d.toISOString().split('T')[0]; 
-            document.getElementById('editor-time').value=this.formatTime(d); 
-            document.getElementById('editor-calories').value = exist.calories || '';
-            if(exist.recurrence && exist.recurrence !== 'none') { this.setEditorType('task'); document.getElementById('editor-recurrence').value = exist.recurrence; } else if (exist.anni) { this.setEditorType('anni'); } else { this.setEditorType('diary'); }
-        } else { 
-            const n=new Date(); 
-            document.getElementById('editor-id').value=''; 
-            document.getElementById('editor-title').value=''; 
-            document.getElementById('editor-calories').value=''; 
-            document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; 
-            document.getElementById('editor-time').value=n.toTimeString().slice(0,5); 
-            this.setEditorType('diary');
-        } 
-        m.classList.remove('hidden'); 
-        setTimeout(()=>p.classList.remove('translate-y-full'),10); 
-    },
+  
     closeEditor: function() { document.getElementById('editor-panel').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('editor-modal').classList.add('hidden'),300); },
     selectMood: function(m) { this.state.mood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`mood-${m}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
     selectWeather: function(w) { this.state.weather = w; document.querySelectorAll('.weather-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`weather-${w}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); ParticleSystem.setWeather(w); },
     triggerImageUpload: () => document.getElementById('image-input').click(),
     handleImageUpload: function(i) { if(i.files[0]) { const r = new FileReader(); r.onload=(e)=>{this.state.tempImage=e.target.result; document.getElementById('preview-img').src=e.target.result; document.getElementById('image-preview-area').classList.remove('hidden');}; r.readAsDataURL(i.files[0]); } i.value=''; },
     clearImage: function() { this.state.tempImage = null; document.getElementById('image-preview-area').classList.add('hidden'); },
-    openDetailById: async function(id) { this.openDetail(await DataManager.getById(id)); },
-    openDetail: function(i) { 
+openDetailById: async function(id) { 
+        const entry = await DataManager.getById(id);
+        if (entry) this.openDetail(entry); 
+    },    openDetail: function(i) { 
         if(!i) return; this.state.currentDetailId = i.id; document.getElementById('detail-title').innerText = i.title || 'Untitled'; document.getElementById('detail-date').innerText = new Date(i.ts).toLocaleDateString(); document.getElementById('detail-time').innerText = this.formatTime(new Date(i.ts)); document.getElementById('detail-content').innerHTML = marked.parse(i.content || '');
         const d = new Date(i.ts); try { const lunar = Solar.fromYmd(d.getFullYear(), d.getMonth()+1, d.getDate()).getLunar(); document.getElementById('detail-lunar').innerText = `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`; } catch(e) {}
         const calEl = document.getElementById('detail-calories'); if (i.calories) { calEl.innerText = `${i.calories} kcal`; calEl.classList.remove('hidden'); } else { calEl.classList.add('hidden'); }
@@ -1067,46 +1470,68 @@ closeInfo: function() {
 if (typeof DataManager !== 'undefined') {
   // --- 放在 app.js 最底部 ---
 
+// --- 找到 app.js 最底部的 DataManager.saveFromEditor，完全替换为以下内容 ---
+
 if (typeof DataManager !== 'undefined') {
     DataManager.saveFromEditor = async function() {
         const id = document.getElementById('editor-id').value; 
         const t = document.getElementById('editor-title').value || "Untitled"; 
-        
-        // 1. 获取内容 (HTML格式，包含图片代码)
         const contentDiv = document.getElementById('editor-content');
         const c = contentDiv.innerHTML; 
         
-        // 2. 自动提取第一张图作为封面
+        // 提取封面图
         let coverImg = null;
         const firstImg = contentDiv.querySelector('img');
-        if (firstImg) {
-            coverImg = firstImg.src;
-        }
+        if (firstImg) coverImg = firstImg.src;
 
         const d = document.getElementById('editor-date').value; 
         const tm = document.getElementById('editor-time').value; 
         const cal = document.getElementById('editor-calories').value;
+        
         const type = document.getElementById('editor-entry-type').value;
+        const taskCat = document.getElementById('editor-task-cat').value; // 获取分类(Exercise, Sleep...)
+        const recurrence = document.getElementById('editor-recurrence').value;
         
-        let anni = false, anniType = null, recurrence = 'none';
-        if (type === 'anni') { anni = true; recurrence = document.getElementById('editor-recurrence').value; }
-        if (type === 'task') { recurrence = document.getElementById('editor-recurrence').value; }
-        
+        let anni = (type === 'anni');
+        let isTask = (type === 'task');
+        let taskType = null; // 默认为空
+
+        // 【关键修复逻辑】
+        // 如果用户点了追踪按钮 (Exercise/Sleep/Focus/Meditation)
+        if (taskCat) {
+            isTask = true;
+            // 强制标记为 "开始节点"，这样 Timeline 渲染时才会出现 "End" 按钮
+            taskType = 'start'; 
+            // 实时追踪通常是当下的行为，强制设为不重复 (以免变成每天的打卡任务)
+            // 如果你确实想要每天重复且能追踪，可以去掉下面这行，但逻辑会变复杂
+            /* payload.recurrence = 'none'; */ 
+        }
+
         if(d) { 
             const [y,m,day] = d.split('-').map(Number); 
             const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; 
             const ts = new Date(y,m-1,day,hr,min).getTime(); 
             
-            // payload 中 img 字段自动使用刚才提取的 coverImg
-            const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: coverImg, calories: cal ? parseInt(cal) : null, anni, anniType, recurrence }; 
+            const payload = { 
+                ts, 
+                h: hr, 
+                title: t, 
+                content: c, 
+                mood: UI.state.mood, 
+                weather: UI.state.weather, 
+                img: coverImg, 
+                calories: cal ? parseInt(cal) : null, 
+                anni, 
+                isTask,
+                taskCat, 
+                taskType, // 保存 start 标记
+                // 如果是手动选的 Routine 且没选分类，就用下拉框的重复设置；如果是追踪，就设为一次性
+                recurrence: (taskCat) ? 'none' : ((type === 'diary') ? 'none' : recurrence)
+            }; 
             
             if (id) await this.update(id, payload); else await this.add(payload); 
             UI.closeEditor(); 
-            if(document.getElementById('view-calendar').classList.contains('active-view')) {
-               UI.renderCalendar(); 
-               if(document.getElementById('btn-sub-data').classList.contains('active')) UI.renderDataList();
-               if(document.getElementById('btn-sub-gallery').classList.contains('active')) UI.renderGallery();
-            }
+            UI.refreshAll();
         } else { alert('Date required'); }
     };
 }
