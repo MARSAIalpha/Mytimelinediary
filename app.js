@@ -351,11 +351,17 @@ toggleSelectionMode: function() {
     },
   // --- 在 app.js 中替换 renderTimeline ---
    // --- 替换 app.js 中的 renderTimeline ---
+    // --- 替换 app.js 中的 renderTimeline ---
     renderTimeline: async function() {
         const c = document.getElementById('diary-list'); 
+        const mainContainer = document.getElementById('main-container');
+        
+        // 1. 【关键技巧】渲染前，暂时关闭 scroll-snap，防止浏览器在内容变化时“锁死”
+        if(mainContainer) mainContainer.style.scrollSnapType = 'none';
+
         c.innerHTML = ''; 
         
-        // 绘制任务连线层
+        // 重置连线层
         const layer = document.getElementById('task-lines-layer'); 
         if(layer) layer.innerHTML = ''; 
         else { 
@@ -366,18 +372,28 @@ toggleSelectionMode: function() {
         }
         
         const allData = await DataManager.getAll(); 
-        let entries = allData.sort((a, b) => b.ts - a.ts); 
         
-        // 过滤器
+        // 2. 【关键修复】稳定排序：如果时间(ts)相同，就比较 ID。
+        // 这能彻底解决“同一分钟条目冲突”导致的跳动问题
+        let entries = allData.sort((a, b) => {
+            const timeDiff = b.ts - a.ts;
+            if (timeDiff !== 0) return timeDiff;
+            // 如果时间完全一样，按 ID 字符串降序排，保证顺序永远固定
+            return String(b.id).localeCompare(String(a.id));
+        }); 
+        
+        // 过滤器逻辑
         entries = entries.filter(e => { 
             if(e.isHoliday) return this.state.filters.holiday; 
             if(e.anni) return this.state.filters.anni; 
             return this.state.filters.normal; 
         });
         
-        if(entries.length === 0) { c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; return; }
+        if(entries.length === 0) { 
+            c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; 
+            return; 
+        }
         
-        // 心情图标样式
         const MOOD_STYLES = {
             smile:    { color: '#f59e0b', fill: '#fef3c7', icon: 'smile' },
             meh:      { color: '#64748b', fill: '#f1f5f9', icon: 'meh' },
@@ -390,12 +406,16 @@ toggleSelectionMode: function() {
         const now = Date.now();
         
         entries.forEach(i => {
+            // 确保 ID 是字符串且无特殊字符
+            const safeId = String(i.id).replace(/[^a-zA-Z0-9-_]/g, '');
+            
             const d = new Date(i.ts); 
             const div = document.createElement('div'); 
             div.className = `entry-item`; 
             div.dataset.ts = i.ts; 
-            div.id = `entry-${i.id}`; 
-            // HUD 数据
+            // 给 DOM ID 加个前缀，防止纯数字 ID 导致的 querySelector 报错
+            div.id = `entry-${safeId}`; 
+            
             div.dataset.hour = d.getHours(); 
             div.dataset.day = d.getDate(); 
             div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); 
@@ -412,7 +432,6 @@ toggleSelectionMode: function() {
             
             if (i.mood === 'sparkles') cardClass += ' glow-purple';
             
-            // 标签
             if (i.isHoliday) { activeColor = '#22c55e'; cardClass+=' card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
             if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+=' card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
             
@@ -423,7 +442,6 @@ toggleSelectionMode: function() {
                 else extraHtml += `<div class="anni-badge anni-past-badge">${Math.abs(diffDays)} Days Since</div>`;
             }
 
-            // 任务颜色
             if (i.isTask) { 
                 if (i.taskCat === 'Exercise') activeColor = '#ef4444'; 
                 if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; 
@@ -433,10 +451,10 @@ toggleSelectionMode: function() {
             
             if (i.calories) { extraHtml += `<div class="inline-block bg-orange-100 text-orange-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="utensils" class="inline w-3 h-3"></i> ${i.calories} kcal</div>`; }
             
-            // End 按钮
             if (i.isTask && !catState[i.taskCat]) { 
                 catState[i.taskCat] = i.taskType; 
                 if (i.taskType === 'start') { 
+                    // 注意：onclick 里的 ID 也用了 safeId
                     extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; 
                 } 
             }
@@ -448,9 +466,7 @@ toggleSelectionMode: function() {
                 <i data-lucide="${mStyle.icon}" style="width:1.2rem; height:1.2rem; color:${mStyle.color}; fill:${mStyle.fill}; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></i>
             </div>`;
 
-            // 【关键修复】
-            // 1. class 里加上 pointer-events-auto
-            // 2. onclick 里给 ID 加上单引号 '${i.id}'，确保字符串ID也能点
+            // 使用 safeId
             div.innerHTML = `
                 <div class="timeline-node-wrapper"><div class="timeline-node"></div></div>
                 <div class="entry-card-wrapper">
@@ -469,7 +485,14 @@ toggleSelectionMode: function() {
         
         lucide.createIcons(); 
         this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
-        setTimeout(() => { this.handleScroll(); this.drawTaskConnectors(); }, 150);
+        
+        // 3. 【关键技巧】等 DOM 渲染完毕后，稍微延迟一下再把吸附功能开回来
+        // 这就像给车换挡时踩离合，避免硬碰硬
+        setTimeout(() => { 
+            if(mainContainer) mainContainer.style.scrollSnapType = 'y mandatory';
+            this.handleScroll(); 
+            this.drawTaskConnectors(); 
+        }, 100);
     },
 /* --- app.js 中的 initScrollObserver --- */
 
@@ -489,22 +512,31 @@ initScrollObserver: function() {
         passive: true // 保持这个，这告诉浏览器“我不阻止默认滚动”，能极大提升流畅度
     }); 
 },
-    handleScroll: function() {
-        // --- 【关键修复】如果缓存为空，立刻重新获取一次 ---
+   handleScroll: function() {
         if (!this.cachedEntryItems || this.cachedEntryItems.length === 0) {
             this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item'));
         }
         
         const entries = this.cachedEntryItems; 
-        // 如果还是没有条目，那说明真的没有日记，直接返回
         if (!entries || entries.length === 0) return; 
 
         const viewCenter = window.innerHeight / 2; 
         let closest = null; 
         let minDiff = Infinity; 
         
-        entries.forEach(el => { 
+        // 优化循环：不需要 forEach 所有，找到最近的就行
+        // 这里保留 forEach 但内部逻辑简化
+        for (let el of entries) {
             const rect = el.getBoundingClientRect(); 
+            
+            // 性能优化：如果元素已经飞出屏幕太远，直接跳过计算样式
+            // 上下 800px 以外的都不管
+            if (rect.bottom < -300 || rect.top > window.innerHeight + 300) {
+                // 确保不可见的元素恢复默认，防止状态残留
+                /* 可选：如果需要极致性能，这里可以不操作 DOM，但在快速滚动时可能会有残影 */
+                continue; 
+            }
+
             const dist = Math.abs(rect.top + rect.height/2 - viewCenter); 
             
             if(dist < minDiff) { 
@@ -512,67 +544,60 @@ initScrollObserver: function() {
                 closest = el; 
             } 
             
-            // 重置非焦点状态
             el.classList.remove('active-focus'); 
             const card = el.querySelector('.entry-card'); 
             
-            // 计算缩放淡入效果
-            const range = 400; 
-            let scale = 0.85; 
-            let opacity = 0.5; 
-            if (dist < range) { 
-                const ratio = 1 - (dist / range); 
-                const ease = ratio * ratio; 
-                scale = 0.85 + (ease * 0.2); 
-                opacity = 0.5 + (ease * 0.5); 
-            } 
-            
             if (card) { 
+                 // 只有靠近中心的才做缩放计算，远的直接定死
+                 const range = 400; 
+                 let scale = 0.85; 
+                 let opacity = 0.5; 
+                 
+                 if (dist < range) { 
+                     const ratio = 1 - (dist / range); 
+                     const ease = ratio * ratio; 
+                     scale = 0.85 + (ease * 0.2); 
+                     opacity = 0.5 + (ease * 0.5); 
+                 } 
+                 
                  if(!card.classList.contains('selected')) { 
                      card.style.transform = `scale(${scale})`; 
                      card.style.opacity = opacity; 
-                     // 离得近的层级高，防止遮挡
                      card.style.zIndex = dist < 60 ? 50 : 1; 
                  } else { 
                      card.style.opacity = 1; 
                      card.style.zIndex = 50; 
                  }
             } 
-        });
+        }
 
-        // 如果找到了最近的条目，执行“锁定”视觉效果
         if(closest) {
             closest.classList.add('active-focus'); 
             const cursor = document.getElementById('beam-cursor'); 
+            const guideLayer = document.getElementById('center-guide-layer');
             
-            // 光标磁吸效果
             const rect = closest.getBoundingClientRect();
             const magnetY = rect.top + rect.height/2 - viewCenter;
             
-            if (Math.abs(magnetY) < 50) {
+            // 只有非常接近时才吸附光标，避免光标乱飞
+            if (Math.abs(magnetY) < 100) {
                 cursor.style.top = `calc(50% + ${magnetY}px)`;
-                document.getElementById('center-guide-layer').style.transform = `translateY(${magnetY}px)`; 
+                if(guideLayer) guideLayer.style.transform = `translateY(${magnetY}px)`; 
             } else {
                 cursor.style.top = `50%`;
-                document.getElementById('center-guide-layer').style.transform = `translateY(0px)`;
+                if(guideLayer) guideLayer.style.transform = `translateY(0px)`;
             }
             
-            // 更新 HUD 时间和颜色
             const activeColor = closest.style.getPropertyValue('--node-active-color') || '#f59e0b'; 
             document.documentElement.style.setProperty('--current-beam-color', activeColor);
             
-            const day = String(closest.dataset.day).padStart(2, '0'); 
-            document.getElementById('hud-day').innerText = day; 
+            document.getElementById('hud-day').innerText = String(closest.dataset.day).padStart(2, '0'); 
             document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; 
             
             const timeEl = document.getElementById('hud-time'); 
             const newTime = closest.dataset.time; 
             if (timeEl.innerText !== newTime) { 
-                timeEl.classList.add('hud-time-updating'); 
-                setTimeout(() => { 
-                    timeEl.innerText = newTime; 
-                    timeEl.classList.remove('hud-time-updating'); 
-                }, 150); 
+                timeEl.innerText = newTime; 
             }
             
             this.updateCelestialPosition(parseInt(closest.dataset.hour)); 

@@ -115,9 +115,13 @@ const DataManager = {
         });
     },
 
+   // --- 替换 db.js 中的 add 函数 ---
     add: async function(entry) {
         return new Promise((resolve, reject) => {
-            entry.id = entry.id || Date.now();
+            // 【关键修复】生成绝对唯一的 ID：时间戳 + 随机数
+            // 这样即使一秒钟点三次，ID 也不会重复
+            entry.id = entry.id || (Date.now() + '-' + Math.floor(Math.random() * 10000));
+            
             const request = this.getStore('readwrite').add(entry);
             request.onsuccess = () => { this.updateStats(); UI.refreshAll(); resolve(entry); };
             request.onerror = () => reject(request.error);
