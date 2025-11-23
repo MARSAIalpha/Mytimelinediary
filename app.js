@@ -23,7 +23,22 @@ const I18N = {
         type_diary: "Diary", type_routine: "Routine", type_anni: "Anniversary",
         label_recurrence: "Recurrence", rec_none: "One-off", rec_daily: "Daily", rec_weekly: "Weekly", rec_workday: "Workdays", rec_yearly: "Yearly",
         label_track: "Track:", ph_title: "Title...", ph_content: "Start writing...", btn_ask_again: "Ask Again", label_est: "Est. 2025",
-        btn_coach: "Life Coach"
+        btn_coach: "Life Coach",oracle_title: "THE ORACLE",
+        oracle_subtitle: "Weekly Celestial Guidance",
+        oracle_intro: "The AI sage reads your past 7 days to reveal the path ahead.",
+        lbl_persona: "Choose Your Guide",
+        p_western: "Astrologer",
+        p_eastern: "Taoist Sage",
+        p_coach: "Life Coach",
+        lbl_zodiac: "Zodiac Sign",
+        lbl_bazi: "Birth Date / Bazi",
+        ph_zodiac: "e.g. Scorpio",
+        ph_bazi: "e.g. 1995-05-20",
+        btn_consult: "Reveal Prophecy",
+        btn_ask_again: "Consult Again",
+        btn_save_oracle: "Seal into Timeline",
+        oracle_thinking: "Reading the stars...",
+        
     }, 
     zh: { 
         btn_timeline: "时间轴", btn_calendar: "日历", btn_dashboard: "仪表盘", 
@@ -48,7 +63,21 @@ const I18N = {
         type_diary: "日记", type_routine: "习惯", type_anni: "纪念日",
         label_recurrence: "重复", rec_none: "一次性", rec_daily: "每天", rec_weekly: "每周", rec_workday: "工作日", rec_yearly: "每年",
         label_track: "追踪:", ph_title: "标题...", ph_content: "开始记录...", btn_ask_again: "再次询问", label_est: "始于 2025",
-        btn_coach: "人生教练"
+        btn_coach: "人生教练",oracle_title: "命运织机",
+        oracle_subtitle: "本周星象启示",
+        oracle_intro: "AI 智者将读取你过去 7 天的记忆，为你指引迷津。",
+        lbl_persona: "选择指引者",
+        p_western: "星相女巫",
+        p_eastern: "隐世道长",
+        p_coach: "人生教练",
+        lbl_zodiac: "你的星座",
+        lbl_bazi: "生辰八字 / 生日",
+        ph_zodiac: "例如：天蝎座",
+        ph_bazi: "例如：1995年5月20日",
+        btn_consult: "开始推演",
+        btn_ask_again: "再次询问",
+        btn_save_oracle: "铭刻至时间轴",
+        oracle_thinking: "正在观星...",
     } 
 };
 
@@ -396,10 +425,9 @@ const UI = {
     quickSaveTask: async function(category) { const payload = { ts: Date.now(), title: `${category} Started`, content: `Started ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'start', taskCat: category, img: null }; await DataManager.add(payload); UI.closeEditor(); },
     endTask: async function(category) { if(confirm(`End ${category} session?`)) { const payload = { ts: Date.now(), title: `${category} Finished`, content: `Completed ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'end', taskCat: category, img: null }; await DataManager.add(payload); } },
     updateCelestialPosition: function(hour) { const isMoonTime = (hour >= 19 || hour < 5); const targetAngle = isMoonTime ? 180 : 0; let delta = targetAngle - (this.state.currentRotation % 360); if (delta > 180) delta -= 360; if (delta < -180) delta += 360; this.state.currentRotation += delta; const wheel = document.getElementById('orbit-wheel'); if(wheel) wheel.style.transform = `rotate(${this.state.currentRotation}deg)`; let themeKey = (hour >= 5 && hour < 7) ? 'dawn' : (hour >= 7 && hour < 17) ? 'day' : (hour >= 17 && hour < 19) ? 'dusk' : 'night'; if(document.body.getAttribute('data-theme') !== themeKey) { document.body.setAttribute('data-theme', themeKey); ParticleSystem.switchTheme(themeKey); } },
-    analyzeFoodImage: async function() {
-        const img = UI.state.tempImage; if (!img) return alert("Upload an image first."); const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY; const btn = document.querySelector('button[onclick="UI.analyzeFoodImage()"]'); const originalText = btn.innerText; btn.innerText = "...";
-        try { const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({contents:[{parts:[{text: `Identify food. Return JSON: {"food": "Name", "calories": 500, "desc": "Short description"}. No markdown.`},{inlineData: {mimeType: img.split(';')[0].split(':')[1], data: img.split(',')[1]}}]}]}) }); const json = await res.json(); const txt = json.candidates[0].content.parts[0].text.replace(/```json|```/g, '').trim(); const data = JSON.parse(txt); document.getElementById('editor-title').value = data.food; document.getElementById('editor-content').value = data.desc; document.getElementById('editor-calories').value = data.calories; alert(`Identified: ${data.food} (~${data.calories} kcal)`); } catch(e) { console.error(e); alert("AI Analysis Failed"); } finally { btn.innerText = originalText; }
-    },
+    // In app.js - locate the UI.analyzeFoodImage method and replace it with:
+
+
     renderDashboard: async function() {
         const allData = await DataManager.getAll(); const now = new Date(); const weekData = allData.filter(e => e.ts > (now.getTime() - 604800000)); const chrono = [...weekData].sort((a,b) => a.ts - b.ts);
         const calculateDuration = (cat) => { let total = 0; chrono.forEach((e, idx) => { if(e.isTask && e.taskCat === cat && e.taskType === 'end') { for(let i=idx-1; i>=0; i--) { if(chrono[i].isTask && chrono[i].taskCat === cat && chrono[i].taskType === 'start') { total += (e.ts - chrono[i].ts); break; } } } }); return total; };
@@ -431,69 +459,177 @@ const UI = {
         this.renderDashboardTasks(allData); lucide.createIcons();
     },
     
-    generateReport: async function() {
-        const k = document.getElementById('user-api-key').value || UI.DEFAULT_KEY;
-        const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
-        const bazi = document.getElementById('oracle-bazi').value || "Unknown";
-        const container = document.getElementById('summary-ai-content');
-        const userLang = this.state.lang === 'zh' ? 'Chinese' : 'English';
-        
-        document.getElementById('oracle-input-view').classList.add('hidden');
-        document.getElementById('oracle-result-view').classList.remove('hidden');
-        container.innerHTML = '<div class="text-center mt-10"><p class="opacity-70 text-lg">Connecting...</p></div>';
-        
-        const allData = await DataManager.getAll();
-        const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
-        const recentData = allData.filter(e => e.ts > sevenDaysAgo).map(e => `[${new Date(e.ts).toLocaleDateString()}] ${e.title}: ${e.content}`).join('\n');
+    // In app.js, replace the generateReport function with this:
 
-        let personaPrompt = '';
-        
-        if (this.state.persona === 'western') {
-            if (this.state.lang === 'zh') {
-                personaPrompt = `角色：神秘优雅的西方占星师。语调：如诗般优美，提及星辰轨迹。根据星座: ${zodiac}。`;
-            } else {
-                personaPrompt = `Role: Mystical Western Astrologer. Tone: Poetic, mentioning stars and alignments. Zodiac: ${zodiac}.`;
-            }
-        } else if (this.state.persona === 'eastern') {
-            if (this.state.lang === 'zh') {
-                personaPrompt = `角色：隐居山林的得道高人。语调：古朴透彻，自称“贫道”，引用自然意象（风、水）。生辰: ${bazi}。`;
-            } else {
-                personaPrompt = `Role: Wise Taoist Hermit. Tone: Profound, ancient wisdom, nature metaphors. Birth info: ${bazi}.`;
-            }
-        } else {
-            if (this.state.lang === 'zh') {
-                personaPrompt = `角色：顶级人生教练。语调：科学、干练、鼓舞人心。基于行为心理学。`;
-            } else {
-                personaPrompt = `Role: Elite Life Coach. Tone: Scientific, direct, empowering. Based on behavioral psychology.`;
-            }
+// --- 将此函数完全替换 app.js 中的 generateReport ---
+
+// 找到 app.js 中的 generateReport 函数，完全替换为以下内容：
+
+// --- 替换 app.js 中的 generateReport 函数 ---
+
+generateReport: async function() {
+    const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
+    const bazi = document.getElementById('oracle-bazi').value || "Unknown";
+    const container = document.getElementById('summary-ai-content');
+    const lang = this.state.lang; 
+    const currentPersona = this.state.persona || 'western'; // 获取当前角色
+
+    // 1. 切换视图
+    document.getElementById('oracle-input-view').classList.add('hidden');
+    document.getElementById('oracle-result-view').classList.remove('hidden');
+    
+    // --- 核心修改：不同角色的 Loading 配置 ---
+    const LOADING_CONFIG = {
+        western: { // 🔮 占星师 (神秘、魔法)
+            icons: ['moon', 'star', 'sparkles', 'feather', 'eye'],
+            texts: {
+                zh: ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响...", "正在链接水晶能量..."],
+                en: ["Lighting the incense...", "Reading the star charts...", "Resonating with your energy...", "Listening to time's echo...", "Connecting crystal power..."]
+            },
+            color: "text-purple-600"
+        },
+        eastern: { // ☯️ 道士 (自然、清静)
+            icons: ['scroll', 'leaf', 'cloud', 'wind', 'flower-2'],
+            texts: {
+                zh: ["贫道正在温茶...", "正在起卦推演...", "正在观云望气...", "正在感应天地气场...", "正在入定冥想..."],
+                en: ["Brewing the tea...", "Casting the hexagram...", "Observing the Qi flow...", "Sensing nature's rhythm...", "Entering meditation..."]
+            },
+            color: "text-emerald-600" // 道士用翠绿色，更自然
+        },
+        coach: { // 🧬 教练 (科技、犀利)
+            icons: ['brain-circuit', 'zap', 'target', 'activity', 'fingerprint'],
+            texts: {
+                zh: ["正在分析行为数据...", "正在连接神经突触...", "正在回顾你的奋斗...", "正在构建认知模型...", "正在扫描潜意识模式..."],
+                en: ["Analyzing behavioral data...", "Connecting neural synapses...", "Reviewing your hustle...", "Building cognitive models...", "Scanning subconscious patterns..."]
+            },
+            color: "text-blue-600" // 教练用科技蓝
         }
+    };
 
-        const prompt = `
-        ${personaPrompt}
-        
-        Task: Write a personalized letter to the user based on their last 7 days:
-        ${recentData.substring(0, 1500)}
-        
-        Requirements:
-        1. **Language**: Strictly ${userLang}.
-        2. **Format**: ONE continuous narrative. NO headings like "Part 1" or "Review".
-        3. **Flow**: Start by gently reflecting on their past week's journey (achievements or struggles). Then, naturally weave in guidance and predictions for the coming week based on your persona.
-        4. **Style**: Immersive and convincing. Make the user feel seen.
-        5. **Length**: Concise (approx 150-200 words).
-        `;
+    // 获取当前角色的配置（如果没有就默认用 western）
+    const config = LOADING_CONFIG[currentPersona] || LOADING_CONFIG.western;
+    
+    // 随机选择一个图标和一个文案
+    const randomIcon = config.icons[Math.floor(Math.random() * config.icons.length)];
+    const randomText = config.texts[lang][Math.floor(Math.random() * config.texts[lang].length)];
 
-        try {
-            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${k}`, { 
-                method:'POST', headers:{'Content-Type':'application/json'}, 
-                body:JSON.stringify({contents:[{parts:[{text: prompt}]}]}) 
-            });
-            const json = await res.json();
-            const mdText = json.candidates[0].content.parts[0].text;
-            container.innerHTML = marked.parse(mdText);
-        } catch(e) {
-            container.innerHTML = "<p class='text-center text-red-400'>Connection faded.</p>";
+    // 渲染 Loading 界面
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60 space-y-6">
+        <div class="relative">
+            <div class="absolute inset-0 ${config.color.replace('text', 'bg')} blur-2xl opacity-20 animate-pulse"></div>
+            <i data-lucide="${randomIcon}" class="relative z-10 w-10 h-10 animate-bounce ${config.color}"></i>
+        </div>
+        <p class="text-xs font-bold tracking-[0.2em] animate-pulse ${config.color.replace('600', '900')} font-serif">${randomText}</p>
+    </div>`;
+    
+    // 必须刷新图标，否则新插入的 i 标签不显示
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+    
+    // 2. 准备数据 (保持不变)
+    const allData = await DataManager.getAll();
+    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    const recentData = allData
+        .filter(e => e.ts > sevenDaysAgo)
+        .sort((a,b) => a.ts - b.ts)
+        .map(e => {
+            const d = new Date(e.ts);
+            const weekDay = d.toLocaleDateString(lang==='zh'?'zh-CN':'en-US', {weekday: 'long'});
+            return `[${weekDay}] ${e.title} (Mood:${e.mood}, Weather:${e.weather}): ${e.content}`;
+        })
+        .join('\n');
+
+    const dataContext = recentData.length > 10 ? recentData : (lang === 'zh' ? "（用户本周很安静，依靠直觉感受ta的能量）" : "(User was quiet this week, rely on intuition.)");
+
+    // 3. 定义 Prompt (保持你之前的沉浸式设定)
+    const PERSONA_PROMPTS = {
+        western: {
+            zh: `角色设定：你不是AI，你是一位名为“Luna”的神秘占星师。
+场景：深夜，壁炉旁，你正坐在用户对面，手里捧着一杯热茶。
+语气：温柔、深邃、像多年未见的知己。
+任务：写一封【私人信件】。
+要求：
+1. 必须引用日记里的具体细节（如“我看到周二那天雨很大...”）来证明你在倾听。
+2. 将这些细节与星座[${zodiac}]的当前能量联系起来。
+3. 不要用枯燥的标题。用 ## 这种 Markdown 格式来区分段落重点，但要融入信件的流利感。`,
+            en: `Role: You are "Luna," a mystic astrologer.
+Scene: Late night, by the fireplace. You are sitting across from the user.
+Tone: Intimate, poetic, deep. Like an old soulmate.
+Task: Write a **Personal Letter**.
+Requirements:
+1. Cite specific details from their diary to show empathy.
+2. Connect these details to cosmic energy of [${zodiac}].
+3. Use ## Markdown for gentle emphasis, but keep the flow of a letter.`
+        },
+        eastern: {
+            zh: `角色设定：你是一位隐居山林的“云游道长”。
+场景：松树下，一壶清茶，你与用户对坐论道。
+语气：通透、淡然、充满东方的哲理与抚慰感。
+任务：写一封【手书】。
+要求：
+1. 从日记细节中捕捉“气”的变化（如“周三你的焦虑，其实是心火...”）。
+2. 结合生辰[${bazi}]，给出顺势而为的建议。
+3. 结尾送一句像“护身符”一样的短句。`,
+            en: `Role: A Taoist Hermit.
+Scene: Under a pine tree, drinking tea.
+Tone: Wise, calm, full of Eastern philosophy.
+Task: Write a **Handwritten Letter**.
+Requirements:
+1. Interpret diary details through "Qi" and nature metaphors.
+2. Give advice based on flow and balance.
+3. End with a "Mantra" for protection.`
+        },
+        coach: {
+            zh: `角色设定：你是一位顶级人生导师。
+场景：私人工作室，只有你们两人，灯光柔和，进行深度对话。
+语气：真诚、有力、不仅是分析，更是情感上的共鸣与鼓舞。
+任务：写一封【深度反馈信】。
+要求：
+1. 敏锐地指出日记细节背后隐藏的心理模式（潜意识的恐惧或渴望）。
+2. 像朋友一样拍拍肩膀，给出下一步的具体行动。`,
+            en: `Role: Elite Life Coach.
+Scene: Private studio, deep conversation.
+Tone: Sincere, powerful, empathetic yet sharp.
+Task: Write a **Deep Feedback Letter**.
+Requirements:
+1. Point out psychological patterns hidden in diary details.
+2. Like a supportive friend, give one specific next step.`
         }
-    },
+    };
+
+    const selectedPersona = PERSONA_PROMPTS[currentPersona] || PERSONA_PROMPTS.western;
+    const langPrompt = selectedPersona[lang];
+
+    // 4. 构建 Prompt & 调用 API (保持不变)
+    const finalPrompt = `
+${langPrompt}
+
+=== THE MEMORY STREAM (User's Week) ===
+${dataContext}
+=======================================
+
+Write the response in ${lang === 'zh' ? 'Chinese' : 'English'}.
+**CRITICAL FORMATTING RULES:**
+- Use **Markdown** syntax.
+- Start with a warm, personal salutation.
+- Use **Bold** for key emotions or objects.
+- Use "## " (H2) for thematic transitions (NOT rigid headers).
+- **DO NOT** wrap the output in a code block.
+- Length: Approx 200-250 words.
+`;
+
+    try {
+        let report = await DataManager.callDeepseek(finalPrompt, 1000);
+        // 清洗代码块
+        report = report.replace(/```markdown/g, '').replace(/```/g, '').trim();
+        container.innerHTML = marked.parse(report);
+    } catch(e) {
+        console.error(e);
+        container.innerHTML = `<div class="text-center text-red-800 bg-red-50 p-4 rounded-xl">
+            <p class="font-bold">Connection Faded</p>
+            <p class="text-xs opacity-70">${e.message}</p>
+        </div>`;
+    }
+},
     openWeeklySummary: function() { 
         document.getElementById('summary-modal').classList.remove('hidden'); 
         document.querySelector('.fab-ai-btn').classList.add('hidden');
@@ -555,17 +691,51 @@ const UI = {
             container.appendChild(div); 
         });
     },
+    // --- 语言切换 (含指南内容切换) ---
     setLanguage: function(lang) { 
-        this.state.lang = lang; localStorage.setItem('app_lang', lang); const t = I18N[lang]; 
+        this.state.lang = lang; 
+        localStorage.setItem('app_lang', lang); 
+        const t = I18N[lang]; 
+        
+        // 1. 更新所有带 data-i18n 属性的普通文本
         document.querySelectorAll('[data-i18n]').forEach(el => { 
             const k = el.getAttribute('data-i18n'); if (t[k]) el.innerText = t[k]; 
         }); 
         document.querySelectorAll('[data-placeholder]').forEach(el => { 
             const k = el.getAttribute('data-placeholder'); if (t[k]) el.placeholder = t[k]; 
         });
-        document.getElementById('lang-en').className = lang === 'en' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
-        document.getElementById('lang-zh').className = lang === 'zh' ? "px-4 py-1 rounded-full bg-[var(--primary)] text-white text-xs font-bold" : "px-4 py-1 rounded-full border border-[var(--line)] hover:bg-[var(--primary)] hover:text-white transition-colors text-xs font-bold"; 
-        this.renderCalendar(); this.renderTimeline(); 
+
+        // 2. 更新切换按钮样式
+        const btnEn = document.getElementById('lang-en');
+        const btnZh = document.getElementById('lang-zh');
+        if(btnEn && btnZh) {
+            if(lang === 'en') {
+                btnEn.className = "px-5 py-1.5 rounded-full bg-[var(--primary)] text-white text-xs font-bold shadow-md transform scale-105 transition-all";
+                btnZh.className = "px-5 py-1.5 rounded-full border border-[var(--line)] hover:bg-[var(--line)] text-xs font-bold transition-all opacity-60";
+            } else {
+                btnZh.className = "px-5 py-1.5 rounded-full bg-[var(--primary)] text-white text-xs font-bold shadow-md transform scale-105 transition-all";
+                btnEn.className = "px-5 py-1.5 rounded-full border border-[var(--line)] hover:bg-[var(--line)] text-xs font-bold transition-all opacity-60";
+            }
+        }
+
+        // 3. 【关键】切换指南内容的显示
+        const guideEn = document.getElementById('guide-en');
+        const guideZh = document.getElementById('guide-zh');
+        
+        if (guideEn && guideZh) {
+            if (lang === 'en') {
+                guideEn.classList.remove('hidden');
+                guideZh.classList.add('hidden');
+            } else {
+                guideEn.classList.add('hidden');
+                guideZh.classList.remove('hidden');
+            }
+        }
+
+        // 4. 刷新视图
+        this.renderCalendar(); 
+        this.renderTimeline(); 
+        if(typeof lucide !== 'undefined') lucide.createIcons();
     },
     setPersona: function(p) { this.state.persona = p; 
         ['western', 'eastern', 'coach'].forEach(k => {
@@ -589,31 +759,111 @@ const UI = {
         activeBtn.classList.remove('hover:bg-[var(--card-bg)]/50', 'text-[var(--text-sec)]');
         activeBtn.classList.add('bg-[var(--card-bg)]', 'shadow-sm', 'text-[var(--text)]');
         
-        const settingsPanel = document.getElementById('task-settings');
-        if (t === 'task' || t === 'anni') {
-            settingsPanel.style.display = 'block';
-            if (t === 'anni') {
-                document.getElementById('editor-recurrence').value = 'yearly';
-            } else {
-                if(document.getElementById('editor-recurrence').value === 'yearly') {
-                     document.getElementById('editor-recurrence').value = 'daily';
-                }
-            }
-        } else {
-            settingsPanel.style.display = 'none';
-        }
+      const settingsPanel = document.getElementById('task-settings');
+if (t === 'task' || t === 'anni') {
+  settingsPanel.classList.remove('hidden');
+  const sel = document.getElementById('editor-recurrence');
+  if (t === 'anni' && sel.value === 'none') sel.value = 'yearly';
+  if (t === 'task' && sel.value === 'yearly') sel.value = 'daily';
+} else {
+  settingsPanel.classList.add('hidden');
+}
     },
     setFontSize: function(size) { document.body.setAttribute('data-font', size); },
+  // --- 辅助功能 ---
+    insertText: function(text) { document.getElementById('editor-content').focus(); document.execCommand('insertText', false, text); },
+    execCmd: function(cmd) { document.execCommand(cmd, false, null); },
+
+    // --- 处理图片插入 ---
+    handleInlineImage: function(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64 = e.target.result;
+            // 在光标处插入图片 HTML
+            const imgHtml = `<img src="${base64}" style="max-width: 90%; max-height: 350px; border-radius: 8px; margin: 10px 0; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">`;
+            document.getElementById('editor-content').focus();
+            document.execCommand('insertHTML', false, `<br>${imgHtml}<br>`);
+            input.value = ''; // 清空以允许重复选图
+        };
+        reader.readAsDataURL(file);
+    },
+    // --- 切换 MD 预览模式 ---
+    // --- 修复版：切换 MD 预览模式 ---
+    togglePreviewMode: function() {
+        const editor = document.getElementById('editor-content');
+        const preview = document.getElementById('editor-md-preview');
+        const btn = document.getElementById('btn-preview-toggle');
+        
+        // 检查是否已经在预览
+        const isPreviewing = !preview.classList.contains('hidden');
+
+        if (isPreviewing) {
+            // [切回编辑模式]
+            preview.classList.add('hidden');
+            editor.classList.remove('hidden');
+            
+            // 按钮变灰
+            btn.classList.remove('bg-purple-100', 'text-purple-600');
+        } else {
+            // [切到预览模式]
+            
+            // 1. 【关键修改】使用 innerText 获取纯文本！
+            // 这样能把编辑器里的 <div> 换行自动变成 \n，marked 才能识别
+            let rawText = editor.innerText;
+            
+            // 2. 检查 marked 库
+            if(typeof marked !== 'undefined') {
+                try {
+                    // 转换 Markdown -> HTML
+                    preview.innerHTML = marked.parse(rawText);
+                } catch(e) { 
+                    console.error(e);
+                    preview.innerHTML = "<p class='text-red-500'>解析出错，请检查控制台</p>"; 
+                }
+            } else {
+                alert("❌ 错误：lib/marked.min.js 未加载，请检查文件！");
+                return;
+            }
+            
+            // 3. 切换显示
+            editor.classList.add('hidden');
+            preview.classList.remove('hidden');
+            
+            // 按钮高亮 (紫色)
+            btn.classList.add('bg-purple-100', 'text-purple-600');
+        }
+    },
     openEditor: function(dStr, exist) { 
-        const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); this.state.tempImage=null; document.getElementById('image-preview-area').classList.add('hidden'); 
+        const m = document.getElementById('editor-modal'), p = document.getElementById('editor-panel'); 
+        const edit = document.getElementById('editor-content');
+        
+        // 重置内容
+        edit.innerHTML = '<div><br></div>'; 
+
         if(exist) { 
-            const d=new Date(exist.ts); document.getElementById('editor-id').value=exist.id; document.getElementById('editor-title').value=exist.title; document.getElementById('editor-content').value=exist.content; document.getElementById('editor-date').value=d.toISOString().split('T')[0]; document.getElementById('editor-time').value=this.formatTime(d); document.getElementById('editor-calories').value = exist.calories || '';
+            document.getElementById('editor-id').value=exist.id; 
+            document.getElementById('editor-title').value=exist.title; 
+            // 填入内容 (支持 HTML 图片)
+            document.getElementById('editor-content').innerHTML = exist.content; 
+            
+            const d=new Date(exist.ts); 
+            document.getElementById('editor-date').value=d.toISOString().split('T')[0]; 
+            document.getElementById('editor-time').value=this.formatTime(d); 
+            document.getElementById('editor-calories').value = exist.calories || '';
             if(exist.recurrence && exist.recurrence !== 'none') { this.setEditorType('task'); document.getElementById('editor-recurrence').value = exist.recurrence; } else if (exist.anni) { this.setEditorType('anni'); } else { this.setEditorType('diary'); }
-            if(exist.img){ this.state.tempImage=exist.img; document.getElementById('preview-img').src=exist.img; document.getElementById('image-preview-area').classList.remove('hidden'); } 
         } else { 
-            const n=new Date(); document.getElementById('editor-id').value=''; document.getElementById('editor-title').value=''; document.getElementById('editor-content').value=''; document.getElementById('editor-calories').value=''; document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; document.getElementById('editor-time').value=n.toTimeString().slice(0,5); this.setEditorType('diary');
+            const n=new Date(); 
+            document.getElementById('editor-id').value=''; 
+            document.getElementById('editor-title').value=''; 
+            document.getElementById('editor-calories').value=''; 
+            document.getElementById('editor-date').value=dStr||n.toISOString().split('T')[0]; 
+            document.getElementById('editor-time').value=n.toTimeString().slice(0,5); 
+            this.setEditorType('diary');
         } 
-        m.classList.remove('hidden'); setTimeout(()=>p.classList.remove('translate-y-full'),10); 
+        m.classList.remove('hidden'); 
+        setTimeout(()=>p.classList.remove('translate-y-full'),10); 
     },
     closeEditor: function() { document.getElementById('editor-panel').classList.add('translate-y-full'); setTimeout(()=>document.getElementById('editor-modal').classList.add('hidden'),300); },
     selectMood: function(m) { this.state.mood = m; document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('bg-[var(--primary)]', 'text-white', 'shadow-md')); document.getElementById(`mood-${m}`)?.classList.add('bg-[var(--primary)]', 'text-white', 'shadow-md'); },
@@ -633,12 +883,148 @@ const UI = {
     confirmDeleteEntry: function() { document.getElementById('confirm-modal').classList.remove('hidden'); },
     executeDelete: async function() { if(this.state.currentDetailId) { await DataManager.delete(this.state.currentDetailId); document.getElementById('confirm-modal').classList.add('hidden'); this.closeDetail(); } },
     editCurrentEntry: async function() { const id = this.state.currentDetailId; this.closeDetail(); this.openEditor(null, await DataManager.getById(id)); },
-    editorInsertMD: function(syntax) { const t = document.getElementById('editor-content'); const start = t.selectionStart; const end = t.selectionEnd; const text = t.value; t.value = text.substring(0, start) + syntax + text.substring(end); t.focus(); t.selectionStart = t.selectionEnd = start + syntax.length; },
-    editorInsertWrap: function(startSyntax, endSyntax) { 
-        const t = document.getElementById('editor-content'); const start = t.selectionStart; const end = t.selectionEnd; const text = t.value; const selection = text.substring(start, end); 
-        if(selection) { t.value = text.substring(0, start) + startSyntax + selection + endSyntax + text.substring(end); t.selectionStart = start; t.selectionEnd = end + startSyntax.length + endSyntax.length; } 
-        else { t.value = text.substring(0, start) + startSyntax + "text" + endSyntax + text.substring(end); t.selectionStart = start + startSyntax.length; t.selectionEnd = start + startSyntax.length + 4; }
-        t.focus();
+editorInsertMD: function(text) {
+        this.insertText(text);
+    },    
+    toggleEditorPreview: function() {
+        const editor = document.getElementById('editor-content');
+        const preview = document.getElementById('editor-preview');
+        const btn = document.getElementById('btn-preview-toggle');
+        const isPreviewing = preview.classList.contains('active-preview');
+        
+        if (isPreviewing) {
+            preview.classList.remove('active-preview'); preview.style.display = 'none';
+            editor.classList.remove('hidden-editor');
+            btn.classList.remove('active'); btn.querySelector('i').style.color = 'var(--text)';
+        } else {
+            preview.innerHTML = marked.parse(editor.value || '*No content*');
+            editor.classList.add('hidden-editor');
+            preview.classList.add('active-preview'); preview.style.display = 'block';
+            btn.classList.add('active'); btn.querySelector('i').style.color = '#fff';
+        }
+    },
+    // --- 处理文内图片/视频 (引用式写法) ---
+   // --- 修复版：支持多张图片插入 ---
+    handleInlineMedia: function(input, type) {
+        const file = input.files[0];
+        if (!file) return;
+
+        // 1. 限制视频大小 (10MB)
+        if (type === 'video' && file.size > 10 * 1024 * 1024) {
+            alert("❌ 视频太大，请上传 10MB 以内的短视频。");
+            input.value = ''; 
+            return;
+        }
+
+        const editor = document.getElementById('editor-content');
+        
+        // 2. 生成绝对唯一的 ID (防止第二张图覆盖第一张)
+        // 使用 时间戳 + 随机数
+        const uniqueId = `${type}-${Date.now()}-${Math.floor(Math.random() * 999)}`;
+        
+        // 3. 在光标位置插入“上传中”占位符
+        const loadingTag = ` [Uploading...] `;
+        
+        // 只有 textarea 支持这种光标插入
+        if (editor.tagName === 'TEXTAREA') {
+            const start = editor.selectionStart;
+            const end = editor.selectionEnd;
+            const text = editor.value;
+            // 把“上传中”塞到光标中间
+            editor.value = text.substring(0, start) + loadingTag + text.substring(end);
+            // 恢复光标位置
+            editor.selectionStart = editor.selectionEnd = start + loadingTag.length;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const base64 = e.target.result;
+            let currentContent = editor.value;
+            
+            if (type === 'image') {
+                // --- 图片逻辑：引用式写法 ---
+                
+                // 1. 放在文字中间的“短标签” (前后加换行，保证不和文字粘连)
+                const shortTag = `\n![Image][${uniqueId}]\n`;
+                
+                // 2. 放在文章最底部的“长代码” (数据源)
+                // 注意：这里用了 \n\n 强制换行，防止和上一段代码粘在一起
+                const footerCode = `\n\n[${uniqueId}]: ${base64}`;
+                
+                // 执行替换：
+                // A. 把“上传中”变成“短标签”
+                currentContent = currentContent.replace(loadingTag, shortTag);
+                // B. 把“长代码”追加到全文的最最后面
+                currentContent += footerCode;
+
+            } else {
+                // --- 视频逻辑：直接插入 ---
+                // 视频不支持引用式，只能把代码放中间
+                const videoTag = `\n<video src="${base64}" controls></video>\n`;
+                currentContent = currentContent.replace(loadingTag, videoTag);
+            }
+
+            // 更新编辑器内容
+            editor.value = currentContent;
+            
+            // 【关键】手动触发一次输入事件，让预览框立刻更新！
+            if(editor.oninput) editor.oninput();
+            
+            // 清空文件选择器，允许重复选同一张图
+            input.value = '';
+        };
+        reader.readAsDataURL(file);
+    },
+    toggleEditorPreview: function() {
+        const editor = document.getElementById('editor-content');
+        const preview = document.getElementById('editor-preview');
+        const btn = document.getElementById('btn-preview-toggle');
+        const isPreviewing = preview.classList.contains('active-preview');
+        
+        if (isPreviewing) {
+            preview.classList.remove('active-preview'); preview.style.display = 'none';
+            editor.classList.remove('hidden-editor');
+            btn.classList.remove('active'); btn.querySelector('i').style.color = 'var(--text)';
+        } else {
+            // 这里使用了你 lib 文件夹里的 marked.min.js
+            preview.innerHTML = marked.parse(editor.value || '*No content*');
+            editor.classList.add('hidden-editor');
+            preview.classList.add('active-preview'); preview.style.display = 'block';
+            btn.classList.add('active'); btn.querySelector('i').style.color = '#fff';
+        }
+    },
+    toggleEditorPreview: function() {
+        const editor = document.getElementById('editor-content');
+        const preview = document.getElementById('editor-preview');
+        const btn = document.getElementById('btn-preview-toggle');
+        
+        // 检查是否已经是预览模式
+        const isPreviewing = preview.classList.contains('active-preview');
+        
+        if (isPreviewing) {
+            // 切换回编辑模式
+            preview.classList.remove('active-preview');
+            preview.style.display = 'none';
+            editor.classList.remove('hidden-editor');
+            btn.classList.remove('active');
+            btn.querySelector('i').style.color = 'var(--text)';
+        } else {
+            // 切换到预览模式
+            const mdText = editor.value;
+            preview.innerHTML = marked.parse(mdText || '<em class="opacity-50">Nothing to preview</em>');
+            
+            editor.classList.add('hidden-editor');
+            preview.classList.add('active-preview');
+            preview.style.display = 'block';
+            btn.classList.add('active');
+            btn.querySelector('i').style.color = 'var(--primary)'; // 激活时变色
+        }
+    },
+editorInsertWrap: function(start, end) {
+        // 获取选中的文字
+        const selection = window.getSelection().toString();
+        // 插入：前缀 + 文字 + 后缀
+        this.insertText(start + selection + end);
     },
     openInfo: function() { DataManager.updateStats(); document.getElementById('info-modal')?.classList.remove('hidden'); },
     closeInfo: function() { document.getElementById('info-modal')?.classList.add('hidden'); },
@@ -680,44 +1066,51 @@ const UI = {
 };
 
 if (typeof DataManager !== 'undefined') {
-    DataManager.saveFromEditor = function() {
+  // --- 放在 app.js 最底部 ---
+
+if (typeof DataManager !== 'undefined') {
+    DataManager.saveFromEditor = async function() {
         const id = document.getElementById('editor-id').value; 
         const t = document.getElementById('editor-title').value || "Untitled"; 
-        const c = document.getElementById('editor-content').value; 
+        
+        // 1. 获取内容 (HTML格式，包含图片代码)
+        const contentDiv = document.getElementById('editor-content');
+        const c = contentDiv.innerHTML; 
+        
+        // 2. 自动提取第一张图作为封面
+        let coverImg = null;
+        const firstImg = contentDiv.querySelector('img');
+        if (firstImg) {
+            coverImg = firstImg.src;
+        }
+
         const d = document.getElementById('editor-date').value; 
         const tm = document.getElementById('editor-time').value; 
         const cal = document.getElementById('editor-calories').value;
         const type = document.getElementById('editor-entry-type').value;
         
         let anni = false, anniType = null, recurrence = 'none';
-        
-        if (type === 'anni') { 
-            anni = true; 
-            recurrence = document.getElementById('editor-recurrence').value;
-        }
-        if (type === 'task') { 
-            recurrence = document.getElementById('editor-recurrence').value; 
-        }
+        if (type === 'anni') { anni = true; recurrence = document.getElementById('editor-recurrence').value; }
+        if (type === 'task') { recurrence = document.getElementById('editor-recurrence').value; }
         
         if(d) { 
             const [y,m,day] = d.split('-').map(Number); 
             const [hr,min] = tm ? tm.split(':').map(Number) : [12,0]; 
             const ts = new Date(y,m-1,day,hr,min).getTime(); 
             
-            const save = async (processedImg) => { 
-                const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: processedImg, calories: cal ? parseInt(cal) : null, anni, anniType, recurrence }; 
-                if (id) await this.update(id, payload); else await this.add(payload); 
-                UI.closeEditor(); 
-                if(document.getElementById('view-calendar').classList.contains('active-view')) {
-                   UI.renderCalendar(); 
-                   if(document.getElementById('btn-sub-data').classList.contains('active')) UI.renderDataList();
-                   if(document.getElementById('btn-sub-gallery').classList.contains('active')) UI.renderGallery();
-                }
-            };
-            const img = UI.state.tempImage; 
-            if (img && img.startsWith('data:')) { this.compressImage(img, 1200, 0.8, save); } else { save(img); }
+            // payload 中 img 字段自动使用刚才提取的 coverImg
+            const payload = { ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, img: coverImg, calories: cal ? parseInt(cal) : null, anni, anniType, recurrence }; 
+            
+            if (id) await this.update(id, payload); else await this.add(payload); 
+            UI.closeEditor(); 
+            if(document.getElementById('view-calendar').classList.contains('active-view')) {
+               UI.renderCalendar(); 
+               if(document.getElementById('btn-sub-data').classList.contains('active')) UI.renderDataList();
+               if(document.getElementById('btn-sub-gallery').classList.contains('active')) UI.renderGallery();
+            }
         } else { alert('Date required'); }
     };
+}
 }
 
 window.onload = () => UI.init();
