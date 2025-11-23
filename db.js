@@ -108,13 +108,30 @@ const DataManager = {
         });
     },
 
-    getById: async function(id) {
+  getById: async function(id) {
         return new Promise((resolve) => {
-            const request = this.getStore().get(Number(id));
-            request.onsuccess = () => resolve(request.result);
+            const store = this.getStore();
+            // 1. 尝试直接用传进来的 ID (可能是字符串) 去找
+            const request = store.get(id);
+            
+            request.onsuccess = () => {
+                if (request.result) {
+                    resolve(request.result);
+                } else {
+                    // 2. 如果没找到，且这个 ID 看起来是个纯数字 (兼容旧数据)
+                    // 因为从 HTML onclick 传过来的 id 永远是字符串
+                    if (!isNaN(Number(id))) {
+                        const reqNum = store.get(Number(id));
+                        reqNum.onsuccess = () => resolve(reqNum.result);
+                        reqNum.onerror = () => resolve(null);
+                    } else {
+                        resolve(null);
+                    }
+                }
+            };
+            request.onerror = () => resolve(null);
         });
     },
-
    // --- 替换 db.js 中的 add 函数 ---
     add: async function(entry) {
         return new Promise((resolve, reject) => {
@@ -128,21 +145,39 @@ const DataManager = {
         });
     },
 
-    update: async function(id, updates) {
+   update: async function(id, updates) {
+        // 先获取完整的条目 (getById 已经修复了，所以这里能拿到了)
         const entry = await this.getById(id);
         if (!entry) return;
+        
         return new Promise((resolve, reject) => {
             const updatedEntry = { ...entry, ...updates };
+            // 使用 put 直接存对象，不需要手动指定 key (keyPath 会自动从对象里的 id 字段取)
             const request = this.getStore('readwrite').put(updatedEntry);
             request.onsuccess = () => { this.updateStats(); UI.refreshAll(); resolve(updatedEntry); };
             request.onerror = () => reject(request.error);
         });
     },
-
-    delete: async function(id) {
+   delete: async function(id) {
         return new Promise((resolve, reject) => {
-            const request = this.getStore('readwrite').delete(Number(id));
-            request.onsuccess = () => { this.updateStats(); UI.refreshAll(); resolve(true); };
+            const store = this.getStore('readwrite');
+            // 1. 尝试直接删除
+            const request = store.delete(id);
+            
+            request.onsuccess = () => { 
+                // 成功了就刷新
+                this.updateStats(); 
+                UI.refreshAll(); 
+                resolve(true); 
+            };
+            
+            // 2. 如果没删掉 (通常 delete 不会报错只是不生效，但为了保险)
+            // 这里其实不需要像 getById 那样做双重检查，因为调用 delete 前通常已经获取到对象了
+            // 但为了防止直接传个字符串数字进来删不掉旧数据：
+            if (!isNaN(Number(id))) {
+                 store.delete(Number(id)); // 顺手把数字类型的也尝试删一下
+            }
+            
             request.onerror = () => reject(request.error);
         });
     },

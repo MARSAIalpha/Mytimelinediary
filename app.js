@@ -272,39 +272,77 @@ const UI = {
 toggleSelectionMode: function() {
         this.state.selectionMode = !this.state.selectionMode;
         const btnText = document.getElementById('select-btn-text');
+        const btnAll = document.getElementById('btn-select-all'); // 获取全选按钮
         const t = I18N[this.state.lang];
         
         if (this.state.selectionMode) {
-            // === 开启选择模式 ===
-            btnText.innerText = t.btn_cancel_select || "Cancel";
-            document.getElementById('export-bar').classList.remove('hidden');
+            // [开启模式]
+            btnText.innerText = t.btn_cancel_select || "Done";
+            document.getElementById('export-bar').classList.remove('hidden'); // 显示底部操作栏
+            btnAll.classList.remove('hidden'); // 显示全选按钮
             
             // 按钮变红
             document.getElementById('btn-select-mode').classList.replace('bg-[var(--text)]', 'bg-red-500');
             document.getElementById('btn-select-mode').classList.replace('text-[var(--card-bg)]', 'text-white');
             
-            // 【关键修复】开启模式后，必须立刻刷新列表，让条目变成可勾选状态
-            this.renderDataList(); 
+            this.renderDataList(); // 刷新列表显示复选框
         } else {
-            // === 关闭选择模式 ===
+            // [关闭模式]
             this.state.selectedIds.clear();
             btnText.innerText = t.btn_select || "Select";
             document.getElementById('export-bar').classList.add('hidden');
+            btnAll.classList.add('hidden'); 
             
             // 按钮恢复
             document.getElementById('btn-select-mode').classList.replace('bg-red-500', 'bg-[var(--text)]');
             document.getElementById('btn-select-mode').classList.replace('text-white', 'text-[var(--card-bg)]');
             
-            // 刷新列表，恢复为普通点击打开详情
             this.renderDataList(); 
             document.getElementById('selected-count').innerText = '0';
         }
     },
-    deleteSelectedEntries: async function() {
-        if(this.state.selectedIds.size === 0) return;
-        if(confirm(`Delete ${this.state.selectedIds.size} entries?`)) {
-            for(let id of this.state.selectedIds) await DataManager.delete(id);
-            this.toggleSelectionMode();
+    toggleSelectAll: async function() {
+        const btnText = document.getElementById('btn-select-all-text');
+        const allData = await DataManager.getAll();
+        
+        // 如果当前选中的数量少于总数，说明还没全选 -> 执行全选
+        if (this.state.selectedIds.size < allData.length) {
+            allData.forEach(e => this.state.selectedIds.add(e.id));
+            btnText.innerText = "None"; // 按钮变更为“全不选”
+        } else {
+            // 否则清空
+            this.state.selectedIds.clear();
+            btnText.innerText = "All";
+        }
+        
+        // 更新界面
+        document.getElementById('selected-count').innerText = this.state.selectedIds.size;
+        this.renderDataList(); // 重新渲染打钩状态
+    },
+ deleteSelectedEntries: async function() {
+        if(this.state.selectedIds.size === 0) return alert("Please select items first.");
+        
+        if(confirm(`Delete ${this.state.selectedIds.size} items permanently?`)) {
+            const ids = Array.from(this.state.selectedIds);
+            
+            // 循环删除
+            for(let id of ids) {
+                await DataManager.delete(id); // 注意：DataManager.delete 里不要每次都 refreshAll，否则会慢
+            }
+            
+            // 删除完成后，手动刷新一次即可
+            await DataManager.updateStats();
+            
+            // 退出选择模式，回归正常状态
+            this.toggleSelectionMode(); 
+            
+            // 强制刷新所有视图
+            this.refreshAll();
+            if(!document.getElementById('data-container').classList.contains('hidden')) {
+                this.renderDataList(); // 如果在数据页，刷新列表
+            }
+            
+            alert("Deleted successfully.");
         }
     },
     handleEntryClick: function(id) {
@@ -603,6 +641,74 @@ initScrollObserver: function() {
             this.updateCelestialPosition(parseInt(closest.dataset.hour)); 
             if(closest.dataset.weather) ParticleSystem.setWeather(closest.dataset.weather);
         }
+    },
+    drawTaskConnectors: function() {
+        const layer = document.getElementById('task-lines-layer');
+        if(!layer) return;
+        layer.innerHTML = ''; // 清空旧线
+
+        // 1. 获取所有 DOM 元素并按位置排序
+        // 使用 Array.from 确保是数组
+        const items = Array.from(document.querySelectorAll('.entry-item'));
+        
+        // 2. 提取任务节点信息
+        const tasks = [];
+        items.forEach(el => {
+            if (el.dataset.isTask === 'true') {
+                const rect = el.querySelector('.timeline-node').getBoundingClientRect();
+                // 必须根据 main-container 的相对位置计算，因为它是滚动的
+                const containerRect = document.getElementById('main-container').getBoundingClientRect();
+                
+                tasks.push({
+                    id: el.id,
+                    type: el.dataset.taskType, // 'start' or 'end'
+                    cat: el.dataset.taskCat,   // 'Exercise', 'Sleep'...
+                    ts: parseInt(el.dataset.ts),
+                    // 计算相对于容器列表的绝对 Top 值
+                    top: el.offsetTop + (el.offsetHeight / 2), 
+                    dom: el
+                });
+            }
+        });
+
+        // 3. 配对逻辑：从上往下找 (时间倒序：上面是 End，下面是 Start)
+        // 我们遍历所有的 'end' 节点，去寻找它下面最近的一个同类型 'start' 节点
+        tasks.filter(t => t.type === 'end').forEach(endNode => {
+            // 在这个 end 节点之下（top 值比它大），且类型相同的最近一个 start
+            const startNode = tasks.find(t => 
+                t.cat === endNode.cat && 
+                t.type === 'start' && 
+                t.top > endNode.top
+            );
+
+            if (startNode) {
+                // --- A. 画线 ---
+                const height = startNode.top - endNode.top;
+                const line = document.createElement('div');
+                line.className = 'task-highlight-line';
+                
+                // 颜色映射
+                const colors = { 'Exercise':'#ef4444', 'Sleep':'#3b82f6', 'Focus':'#10b981', 'Meditation':'#a855f7' };
+                const color = colors[endNode.cat] || '#eab308';
+                
+                line.style.background = `linear-gradient(to bottom, ${color}, ${color})`;
+                line.style.top = `${endNode.top}px`;
+                line.style.height = `${height}px`;
+                line.style.backgroundColor = color; // 备用
+                
+                // --- B. 计算时长 ---
+                const diffMs = endNode.ts - startNode.ts;
+                const mins = Math.floor(diffMs / 60000);
+                const hrs = (diffMs / 3600000).toFixed(1);
+                let timeLabel = mins + 'm';
+                if (mins > 60) timeLabel = hrs + 'h';
+
+                // --- C. 添加标签 ---
+                line.innerHTML = `<div class="task-line-label label-mid" style="color:${color}">${timeLabel}</div>`;
+                
+                layer.appendChild(line);
+            }
+        });
     },
     quickSaveTask: async function(category) { const payload = { ts: Date.now(), title: `${category} Started`, content: `Started ${category} session.`, mood: 'smile', weather: UI.state.weather, isTask: true, taskType: 'start', taskCat: category, img: null }; await DataManager.add(payload); UI.closeEditor(); },
 // --- 找到 UI 对象里的 endTask 方法，替换为这个智能版 ---
