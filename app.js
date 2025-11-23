@@ -198,59 +198,52 @@ const UI = {
     refreshAll: function() { this.renderTimeline(); this.renderCalendar(); },
     toggleFilter: function(type) { this.state.filters[type] = !this.state.filters[type]; document.querySelector(`.f-${type}`).classList.toggle('active', this.state.filters[type]); this.renderTimeline(); },
     
-    switchView: function(v) {
-        ['timeline', 'calendar', 'dashboard'].forEach(k => document.getElementById(`btn-${k}`).classList.remove('active')); 
-        document.getElementById(`btn-${v}`).classList.add('active');
+   switchView: function(v) {
+    ['timeline', 'calendar', 'dashboard'].forEach(k => document.getElementById(`btn-${k}`).classList.remove('active')); 
+    document.getElementById(`btn-${v}`).classList.add('active');
+    
+    document.getElementById('view-timeline').classList.replace('active-view', 'hidden-view'); 
+    document.getElementById('view-calendar').classList.replace('active-view', 'hidden-view'); 
+    document.getElementById('view-dashboard').classList.replace('active-view', 'hidden-view'); 
+    document.getElementById('focus-hud').classList.add('opacity-0');
+
+    // 强制重置
+    this.state.selectionMode = false;
+    this.state.selectedIds.clear();
+    document.getElementById('export-bar').classList.add('hidden');
+
+    document.getElementById('main-container').scrollTop = 0;
+    
+    const isTl = (v === 'timeline');
+    document.getElementById('center-guide-layer').style.opacity = isTl ? '1' : '0'; 
+    
+    // --- 【关键修复】获取所有悬浮按钮 ---
+    const btnAi = document.getElementById('btn-ai-summary'); // 紫色 AI 按钮
+    const btnPen = document.querySelector('.fab-btn');       // 写日记按钮
+    const filterGroup = document.getElementById('filter-fab-group'); // 过滤器
+
+    if (isTl) {
+        // 在时间轴页面：显示它们
+        document.getElementById('view-timeline').classList.replace('hidden-view','active-view'); 
+        document.getElementById('focus-hud').classList.remove('opacity-0'); 
         
-        document.getElementById('view-timeline').classList.replace('active-view', 'hidden-view'); 
-        document.getElementById('view-calendar').classList.replace('active-view', 'hidden-view'); 
-        document.getElementById('view-dashboard').classList.replace('active-view', 'hidden-view'); 
-        document.getElementById('focus-hud').classList.add('opacity-0');
+        if(btnAi) btnAi.classList.remove('hidden');
+        if(btnPen) btnPen.classList.remove('hidden');
+        if(filterGroup) filterGroup.classList.remove('hidden');
 
-        // FORCE RESET SELECTION & HIDE EXPORT BAR
-        this.state.selectionMode = false;
-        this.state.selectedIds.clear();
-        document.getElementById('export-bar').classList.add('hidden');
-        if(document.getElementById('btn-select-mode')) {
-             const t = I18N[this.state.lang];
-             document.getElementById('select-btn-text').innerText = t.btn_select || "Select";
-             document.getElementById('btn-select-mode').classList.replace('bg-red-500', 'bg-[var(--text)]');
-             document.getElementById('btn-select-mode').classList.replace('text-white', 'text-[var(--card-bg)]');
-        }
+        setTimeout(() => { 
+            this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
+            this.handleScroll(); 
+            this.drawTaskConnectors(); 
+        }, 150); 
+    } 
+    else {
+        // 在其他页面：隐藏它们
+        if(btnAi) btnAi.classList.add('hidden');
+        if(btnPen) btnPen.classList.add('hidden');
+        if(filterGroup) filterGroup.classList.add('hidden');
 
-        document.getElementById('main-container').scrollTop = 0;
-        
-        const isTl = (v === 'timeline');
-        document.getElementById('center-guide-layer').style.opacity = isTl ? '1' : '0'; 
-        
-        // --- FIX: Toggle Visibility of FABs and Filter ---
-        const fabAi = document.querySelector('.fab-ai-btn');
-        const fabPen = document.querySelector('.fab-btn');
-        const filterGroup = document.getElementById('filter-fab-group');
-
-        if (isTl) {
-            fabAi?.classList.remove('hidden');
-            fabPen?.classList.remove('hidden');
-            filterGroup?.classList.remove('hidden');
-        } else {
-            fabAi?.classList.add('hidden');
-            fabPen?.classList.add('hidden');
-            filterGroup?.classList.add('hidden');
-        }
-        // -----------------------------------------------
-
-        if(isTl) { 
-            document.getElementById('view-timeline').classList.replace('hidden-view','active-view'); 
-            document.getElementById('focus-hud').classList.remove('opacity-0'); 
-            
-            // FIX: Delay slightly to allow CSS display:block to apply, THEN re-cache the elements
-            setTimeout(() => { 
-                this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
-                this.handleScroll(); 
-                this.drawTaskConnectors(); 
-            }, 150); 
-        } 
-        else if (v === 'calendar') { 
+        if (v === 'calendar') { 
             document.getElementById('view-calendar').classList.replace('hidden-view','active-view'); 
             this.renderCalendar(); 
         } 
@@ -258,7 +251,8 @@ const UI = {
             document.getElementById('view-dashboard').classList.replace('hidden-view','active-view'); 
             this.renderDashboard(); 
         }
-    },
+    }
+},
     switchSubView: function(v) { 
         ['grid','gallery','data'].forEach(k=>{document.getElementById(`btn-sub-${k}`).classList.remove('active');}); document.getElementById(`btn-sub-${v}`).classList.add('active');
         document.getElementById('calendar-container').classList.add('hidden'); document.getElementById('gallery-container').classList.add('hidden'); document.getElementById('data-container').classList.add('hidden');
@@ -275,22 +269,35 @@ const UI = {
             const div = document.createElement('div'); div.className = 'gallery-item'; div.innerHTML = `<img src="${e.img}" loading="lazy">`; div.onclick = () => UI.openDetail(e); c.appendChild(div);
         });
     },
-    toggleSelectionMode: function() {
+toggleSelectionMode: function() {
         this.state.selectionMode = !this.state.selectionMode;
         const btnText = document.getElementById('select-btn-text');
         const t = I18N[this.state.lang];
+        
         if (this.state.selectionMode) {
+            // === 开启选择模式 ===
             btnText.innerText = t.btn_cancel_select || "Cancel";
             document.getElementById('export-bar').classList.remove('hidden');
+            
+            // 按钮变红
             document.getElementById('btn-select-mode').classList.replace('bg-[var(--text)]', 'bg-red-500');
             document.getElementById('btn-select-mode').classList.replace('text-[var(--card-bg)]', 'text-white');
+            
+            // 【关键修复】开启模式后，必须立刻刷新列表，让条目变成可勾选状态
+            this.renderDataList(); 
         } else {
+            // === 关闭选择模式 ===
             this.state.selectedIds.clear();
             btnText.innerText = t.btn_select || "Select";
             document.getElementById('export-bar').classList.add('hidden');
+            
+            // 按钮恢复
             document.getElementById('btn-select-mode').classList.replace('bg-red-500', 'bg-[var(--text)]');
             document.getElementById('btn-select-mode').classList.replace('text-white', 'text-[var(--card-bg)]');
-            this.renderDataList(); document.getElementById('selected-count').innerText = '0';
+            
+            // 刷新列表，恢复为普通点击打开详情
+            this.renderDataList(); 
+            document.getElementById('selected-count').innerText = '0';
         }
     },
     deleteSelectedEntries: async function() {
@@ -465,67 +472,31 @@ const UI = {
 
 // 找到 app.js 中的 generateReport 函数，完全替换为以下内容：
 
-// --- 替换 app.js 中的 generateReport 函数 ---
-
 generateReport: async function() {
     const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
     const bazi = document.getElementById('oracle-bazi').value || "Unknown";
     const container = document.getElementById('summary-ai-content');
-    const lang = this.state.lang; 
-    const currentPersona = this.state.persona || 'western'; // 获取当前角色
-
-    // 1. 切换视图
+    const lang = this.state.lang; // 'zh' or 'en'
+    
+    // 1. 切换视图 & 显示加载动画 (带有一点仪式感的文案)
     document.getElementById('oracle-input-view').classList.add('hidden');
     document.getElementById('oracle-result-view').classList.remove('hidden');
     
-    // --- 核心修改：不同角色的 Loading 配置 ---
-    const LOADING_CONFIG = {
-        western: { // 🔮 占星师 (神秘、魔法)
-            icons: ['moon', 'star', 'sparkles', 'feather', 'eye'],
-            texts: {
-                zh: ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响...", "正在链接水晶能量..."],
-                en: ["Lighting the incense...", "Reading the star charts...", "Resonating with your energy...", "Listening to time's echo...", "Connecting crystal power..."]
-            },
-            color: "text-purple-600"
-        },
-        eastern: { // ☯️ 道士 (自然、清静)
-            icons: ['scroll', 'leaf', 'cloud', 'wind', 'flower-2'],
-            texts: {
-                zh: ["贫道正在温茶...", "正在起卦推演...", "正在观云望气...", "正在感应天地气场...", "正在入定冥想..."],
-                en: ["Brewing the tea...", "Casting the hexagram...", "Observing the Qi flow...", "Sensing nature's rhythm...", "Entering meditation..."]
-            },
-            color: "text-emerald-600" // 道士用翠绿色，更自然
-        },
-        coach: { // 🧬 教练 (科技、犀利)
-            icons: ['brain-circuit', 'zap', 'target', 'activity', 'fingerprint'],
-            texts: {
-                zh: ["正在分析行为数据...", "正在连接神经突触...", "正在回顾你的奋斗...", "正在构建认知模型...", "正在扫描潜意识模式..."],
-                en: ["Analyzing behavioral data...", "Connecting neural synapses...", "Reviewing your hustle...", "Building cognitive models...", "Scanning subconscious patterns..."]
-            },
-            color: "text-blue-600" // 教练用科技蓝
-        }
-    };
+    const loadingTexts = lang === 'zh' 
+        ? ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响..."] 
+        : ["Lighting the incense...", "Reading the star chart...", "Resonating with your energy...", "Listening to time's echo..."];
+    const randomText = loadingTexts[Math.floor(Math.random() * loadingTexts.length)];
 
-    // 获取当前角色的配置（如果没有就默认用 western）
-    const config = LOADING_CONFIG[currentPersona] || LOADING_CONFIG.western;
-    
-    // 随机选择一个图标和一个文案
-    const randomIcon = config.icons[Math.floor(Math.random() * config.icons.length)];
-    const randomText = config.texts[lang][Math.floor(Math.random() * config.texts[lang].length)];
-
-    // 渲染 Loading 界面
-    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60 space-y-6">
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-50 space-y-6">
         <div class="relative">
-            <div class="absolute inset-0 ${config.color.replace('text', 'bg')} blur-2xl opacity-20 animate-pulse"></div>
-            <i data-lucide="${randomIcon}" class="relative z-10 w-10 h-10 animate-bounce ${config.color}"></i>
+            <div class="absolute inset-0 bg-purple-500 blur-xl opacity-20 animate-pulse"></div>
+            <i data-lucide="feather" class="relative z-10 w-8 h-8 animate-bounce text-purple-600"></i>
         </div>
-        <p class="text-xs font-bold tracking-[0.2em] animate-pulse ${config.color.replace('600', '900')} font-serif">${randomText}</p>
+        <p class="text-xs font-bold tracking-[0.3em] animate-pulse text-purple-900 font-serif">${randomText}</p>
     </div>`;
-    
-    // 必须刷新图标，否则新插入的 i 标签不显示
     if(typeof lucide !== 'undefined') lucide.createIcons();
     
-    // 2. 准备数据 (保持不变)
+    // 2. 准备数据
     const allData = await DataManager.getAll();
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
     const recentData = allData
@@ -534,13 +505,14 @@ generateReport: async function() {
         .map(e => {
             const d = new Date(e.ts);
             const weekDay = d.toLocaleDateString(lang==='zh'?'zh-CN':'en-US', {weekday: 'long'});
+            // 包含天气和心情，帮助 AI 建立情感链接
             return `[${weekDay}] ${e.title} (Mood:${e.mood}, Weather:${e.weather}): ${e.content}`;
         })
         .join('\n');
 
     const dataContext = recentData.length > 10 ? recentData : (lang === 'zh' ? "（用户本周很安静，依靠直觉感受ta的能量）" : "(User was quiet this week, rely on intuition.)");
 
-    // 3. 定义 Prompt (保持你之前的沉浸式设定)
+    // 3. 定义沉浸式信件 Prompt
     const PERSONA_PROMPTS = {
         western: {
             zh: `角色设定：你不是AI，你是一位名为“Luna”的神秘占星师。
@@ -556,8 +528,8 @@ Scene: Late night, by the fireplace. You are sitting across from the user.
 Tone: Intimate, poetic, deep. Like an old soulmate.
 Task: Write a **Personal Letter**.
 Requirements:
-1. Cite specific details from their diary to show empathy.
-2. Connect these details to cosmic energy of [${zodiac}].
+1. Cite specific details from their diary (e.g., "I noticed on Tuesday you felt...") to show empathy.
+2. Connect these details to the current cosmic energy of [${zodiac}].
 3. Use ## Markdown for gentle emphasis, but keep the flow of a letter.`
         },
         eastern: {
@@ -570,11 +542,11 @@ Requirements:
 2. 结合生辰[${bazi}]，给出顺势而为的建议。
 3. 结尾送一句像“护身符”一样的短句。`,
             en: `Role: A Taoist Hermit.
-Scene: Under a pine tree, drinking tea.
+Scene: Under a pine tree, drinking tea with the user.
 Tone: Wise, calm, full of Eastern philosophy.
 Task: Write a **Handwritten Letter**.
 Requirements:
-1. Interpret diary details through "Qi" and nature metaphors.
+1. Interpret their diary details through "Qi" and nature metaphors.
 2. Give advice based on flow and balance.
 3. End with a "Mantra" for protection.`
         },
@@ -596,10 +568,10 @@ Requirements:
         }
     };
 
-    const selectedPersona = PERSONA_PROMPTS[currentPersona] || PERSONA_PROMPTS.western;
+    const selectedPersona = PERSONA_PROMPTS[this.state.persona] || PERSONA_PROMPTS.western;
     const langPrompt = selectedPersona[lang];
 
-    // 4. 构建 Prompt & 调用 API (保持不变)
+    // 4. 构建最终 Prompt
     const finalPrompt = `
 ${langPrompt}
 
@@ -610,18 +582,22 @@ ${dataContext}
 Write the response in ${lang === 'zh' ? 'Chinese' : 'English'}.
 **CRITICAL FORMATTING RULES:**
 - Use **Markdown** syntax.
-- Start with a warm, personal salutation.
+- Start with a warm, personal salutation (e.g., "My dear traveler," "亲爱的...").
 - Use **Bold** for key emotions or objects.
-- Use "## " (H2) for thematic transitions (NOT rigid headers).
-- **DO NOT** wrap the output in a code block.
+- Use "## " (H2) for distinct thematic transitions, NOT rigid headers like "Analysis". Make it flow.
+- **DO NOT** wrap the output in a code block (no \`\`\`markdown). Just raw text.
 - Length: Approx 200-250 words.
 `;
 
+    // 5. 调用 API 并清洗数据
     try {
         let report = await DataManager.callDeepseek(finalPrompt, 1000);
-        // 清洗代码块
+        
+        // --- 关键修复：清洗 AI 可能返回的代码块标记 ---
         report = report.replace(/```markdown/g, '').replace(/```/g, '').trim();
+        
         container.innerHTML = marked.parse(report);
+        
     } catch(e) {
         console.error(e);
         container.innerHTML = `<div class="text-center text-red-800 bg-red-50 p-4 rounded-xl">
@@ -630,18 +606,24 @@ Write the response in ${lang === 'zh' ? 'Chinese' : 'English'}.
         </div>`;
     }
 },
-    openWeeklySummary: function() { 
-        document.getElementById('summary-modal').classList.remove('hidden'); 
-        document.querySelector('.fab-ai-btn').classList.add('hidden');
-        document.querySelector('.fab-btn').classList.add('hidden');
-        document.getElementById('filter-fab-group').classList.add('hidden');
-    },
-    closeWeeklySummary: function() { 
-        document.getElementById('summary-modal').classList.add('hidden'); 
-        document.querySelector('.fab-ai-btn').classList.remove('hidden');
-        document.querySelector('.fab-btn').classList.remove('hidden');
-        document.getElementById('filter-fab-group').classList.remove('hidden');
-    },
+  openWeeklySummary: function() { 
+    document.getElementById('summary-modal').classList.remove('hidden'); 
+    // 隐藏紫色按钮本身、写日记按钮、过滤器
+    document.getElementById('btn-ai-summary')?.classList.add('hidden');
+    document.querySelector('.fab-btn')?.classList.add('hidden');
+    document.getElementById('filter-fab-group')?.classList.add('hidden');
+},
+
+// 3. 修复 closeWeeklySummary：关闭 AI 总结弹窗时，恢复按钮显示
+closeWeeklySummary: function() { 
+    document.getElementById('summary-modal').classList.add('hidden'); 
+    // 只有在时间轴视图下才恢复显示
+    if(document.getElementById('view-timeline').classList.contains('active-view')) {
+        document.getElementById('btn-ai-summary')?.classList.remove('hidden');
+        document.querySelector('.fab-btn')?.classList.remove('hidden');
+        document.getElementById('filter-fab-group')?.classList.remove('hidden');
+    }
+},
     resetOracle: function() {
         document.getElementById('oracle-input-view').classList.remove('hidden');
         document.getElementById('oracle-result-view').classList.add('hidden');
@@ -1026,8 +1008,25 @@ editorInsertWrap: function(start, end) {
         // 插入：前缀 + 文字 + 后缀
         this.insertText(start + selection + end);
     },
-    openInfo: function() { DataManager.updateStats(); document.getElementById('info-modal')?.classList.remove('hidden'); },
-    closeInfo: function() { document.getElementById('info-modal')?.classList.add('hidden'); },
+openInfo: function() { 
+        DataManager.updateStats(); 
+        document.getElementById('info-modal')?.classList.remove('hidden'); 
+        
+        // 隐藏干扰元素
+        document.getElementById('btn-ai-summary')?.classList.add('hidden');
+        document.querySelector('.fab-btn')?.classList.add('hidden');
+        document.getElementById('filter-fab-group')?.classList.add('hidden');
+    },    
+closeInfo: function() { 
+        document.getElementById('info-modal')?.classList.add('hidden'); 
+        
+        // 只有在时间轴视图下，才恢复显示这些按钮
+        if (document.getElementById('view-timeline').classList.contains('active-view')) {
+            document.getElementById('btn-ai-summary')?.classList.remove('hidden');
+            document.querySelector('.fab-btn')?.classList.remove('hidden');
+            document.getElementById('filter-fab-group')?.classList.remove('hidden');
+        }
+    },    
     changeMonth: function(o) { const d = new Date(this.state.calendarDate); d.setMonth(d.getMonth() + o); this.state.calendarDate = d; this.renderCalendar(); },
     resetCalendarToday: function() { this.state.calendarDate = new Date(); this.renderCalendar(); },
     renderCalendar: async function() { 

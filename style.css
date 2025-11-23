@@ -528,3 +528,24 @@ body[data-theme="night"] .fab-glass-amber {
     box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
     background: rgba(255, 251, 235, 1);
 }
+/* 1. 修复数据管理列表无法点击的问题 */
+.archive-item { 
+    /* 原本可能是 transparent border 等... */
+    border: 1px solid transparent; 
+    transition: all 0.2s; 
+    pointer-events: auto !important; /* 【关键修复】强制开启点击事件 */
+    cursor: pointer;
+}
+/* 3. 确保 AI 按钮和写日记按钮层级正确，不被遮挡 */
+#btn-ai-summary, .fab-btn, #filter-fab-group {
+    z-index: 60 !important;
+    pointer-events: auto !important;
+}
+
+/* 4. 详情页 Markdown 图片样式 (如果之前觉得图片太小/太乱) */
+#detail-content img {
+    max-width: 100%;
+    border-radius: 8px;
+    margin: 10px 0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
