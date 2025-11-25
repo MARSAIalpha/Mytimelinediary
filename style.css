@@ -790,3 +790,13 @@ body[data-theme="night"] .fab-glass-amber {
     align-items: center;
     justify-content: center;
 }
+/* 在 style.css 中找到 .entry-item */
+.entry-item {
+    /* ... 保持原有样式 ... */
+    
+    /* 【新增】内容可见性优化：
+       告诉浏览器，如果这个元素不在屏幕上，就别费劲去渲染它的内容了。
+       这能极大地降低内存占用和滚动卡顿。 */
+    content-visibility: auto; 
+    contain-intrinsic-size: 150px; /* 给个大致的高度估算值，防止滚动条跳动 */
+}

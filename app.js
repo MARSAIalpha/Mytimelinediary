@@ -473,72 +473,106 @@ deleteSelectedEntries: async function() {
   // --- 在 app.js 中替换 renderTimeline ---
    // --- 替换 app.js 中的 renderTimeline ---
     // --- 替换 app.js 中的 renderTimeline ---
+    // --- 极致性能版：初始化时间轴 ---
     renderTimeline: async function() {
         const c = document.getElementById('diary-list'); 
         const mainContainer = document.getElementById('main-container');
-        if(mainContainer) mainContainer.style.scrollSnapType = 'none'; // 暂时关闭吸附
+        
+        // 1. 暂时关闭滚动吸附，防止初始化跳动
+        if(mainContainer) mainContainer.style.scrollSnapType = 'none';
 
+        // 2. 清空画布
         c.innerHTML = ''; 
         const layer = document.getElementById('task-lines-layer'); 
         if(layer) layer.innerHTML = ''; else { const l = document.createElement('div'); l.id = 'task-lines-layer'; l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; c.appendChild(l); }
         
+        // 3. 数据准备 (内存操作，极快)
         const allData = await DataManager.getAll(); 
+        
+        // 排序：新 -> 旧
         let entries = allData.sort((a, b) => { const diff = b.ts - a.ts; return diff !== 0 ? diff : String(b.id).localeCompare(String(a.id)); }); 
         
+        // 过滤
         entries = entries.filter(e => { 
             if(e.isHoliday) return this.state.filters.holiday; 
             if(e.anni) return this.state.filters.anni; 
             return this.state.filters.normal; 
         });
-        
+
         if(entries.length === 0) { c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; return; }
+
+        // 【关键】存入全局缓存，重置指针
+        this.allSortedEntries = entries;
+        this.currentRenderIndex = 0; 
+        this.isRendering = false;
         
-        const MOOD_STYLES = { smile: {icon:'smile',color:'#f59e0b'}, meh: {icon:'meh',color:'#64748b'}, frown: {icon:'frown',color:'#3b82f6'}, heart: {icon:'heart',color:'#ec4899'}, sparkles: {icon:'sparkles',color:'#8b5cf6'} };
+        // 4. 启动渲染引擎 (第一批)
+        this.renderBatch(20);
+
+        // 5. 延迟恢复吸附效果
+        setTimeout(() => { 
+            if(mainContainer) mainContainer.style.scrollSnapType = 'y proximity';
+            // 初始化一下视觉状态
+            this.handleScroll(); 
+        }, 100);
+    },
+// --- 极致性能版：渲染引擎 ---
+    renderBatch: function(batchSize = 20) {
+        // 安全锁：如果数据没准备好或正在渲染，直接跳过
+        if (!this.allSortedEntries || this.isRendering) return;
+        
+        const c = document.getElementById('diary-list');
+        const main = document.getElementById('main-container');
+        const total = this.allSortedEntries.length;
+        
+        // 边界检查：全部渲染完毕
+        if (this.currentRenderIndex >= total) return;
+
+        this.isRendering = true; // 上锁
+
+        // 计算这一批的数据切片
+        const nextIndex = Math.min(this.currentRenderIndex + batchSize, total);
+        const batch = this.allSortedEntries.slice(this.currentRenderIndex, nextIndex);
+        
+        // 使用 DocumentFragment 在内存中构建，极快
         const fragment = document.createDocumentFragment();
-        
-        // 【新增】获取今天的日期字符串，用于比对
+        const MOOD_STYLES = { smile: {icon:'smile',color:'#f59e0b'}, meh: {icon:'meh',color:'#64748b'}, frown: {icon:'frown',color:'#3b82f6'}, heart: {icon:'heart',color:'#ec4899'}, sparkles: {icon:'sparkles',color:'#8b5cf6'} };
         const todayStr = new Date().toDateString();
 
-        entries.forEach(i => {
+        batch.forEach(i => {
             const safeId = String(i.id).replace(/[^a-zA-Z0-9-_]/g, '');
-            const d = new Date(i.ts); 
-            
-            // 【新增】判断是否是今天
+            const d = new Date(i.ts);
             const isToday = d.toDateString() === todayStr;
 
             const div = document.createElement('div'); 
             div.className = `entry-item`; 
-            div.dataset.ts = i.ts; 
-            div.id = `entry-${safeId}`; 
-            div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
+            // 移除 CSS 动画，减少合成层开销，提升上屏速度
+            
+            div.dataset.ts = i.ts; div.id = `entry-${safeId}`; div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
-            
-            let activeColor = '#f59e0b'; 
-            let extraHtml = ''; 
-            let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img" loading="lazy"></div>` : '';
-            let cardClass = ''; // 初始化为空
-            
-            // 【新增】如果是今天，添加高亮 CSS 类
-            if (isToday) cardClass += ' card-today-highlight';
 
+            let cardClass = isToday ? ' card-today-highlight' : '';
             if (i.mood === 'sparkles') cardClass += ' glow-purple';
-            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+=' card-holiday'; extraHtml += `<div class="holiday-badge anni-badge">Festival</div>`; }
-            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+=' card-task'; extraHtml += `<div class="anni-badge bg-yellow-100 text-yellow-600"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
-            if (i.anni) {
-                const diffTime = i.ts - Date.now();
-                const diffDays = Math.ceil(diffTime / 86400000); 
-                extraHtml += diffDays > 0 ? `<div class="anni-badge anni-future-badge">${diffDays} Days Left</div>` : `<div class="anni-badge anni-past-badge">${Math.abs(diffDays)} Days Ago</div>`;
-            }
-            if (i.isTask) { 
-                const colors = {'Exercise':'#ef4444', 'Sleep':'#3b82f6', 'Focus':'#10b981', 'Meditation':'#a855f7'};
-                activeColor = colors[i.taskCat] || '#f59e0b';
-                if (i.taskType === 'start') extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}">End ${i.taskCat}</button></div>`; 
-            }
-            if (i.calories) extraHtml += `<div class="anni-badge bg-orange-100 text-orange-600">${i.calories} kcal</div>`;
-            
-            div.style.setProperty('--node-active-color', activeColor);
+            if (i.isHoliday) cardClass += ' card-holiday';
+            if (i.recurrence && i.recurrence !== 'none') cardClass += ' card-task';
+
             const mStyle = MOOD_STYLES[i.mood] || MOOD_STYLES.smile;
             const rawContent = i.content ? i.content.replace(/<[^>]*>/g, '').replace(/!\[.*?\]\(.*?\)/g, '') : '';
+            const thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img" loading="lazy"></div>` : '';
+
+            // 拼接 HTML 字符串 (比 createElement 更快)
+            let activeColor = '#f59e0b';
+            let extraHtml = '';
+            if (i.isHoliday) { activeColor = '#22c55e'; extraHtml += `<div class="holiday-badge anni-badge">Festival</div>`; }
+            if (i.recurrence && i.recurrence!=='none') { activeColor = '#eab308'; extraHtml += `<div class="anni-badge bg-yellow-100 text-yellow-600"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
+            if (i.anni) { const days = Math.ceil((i.ts - Date.now())/86400000); extraHtml += days>0 ? `<div class="anni-badge anni-future-badge">${days} Days Left</div>` : `<div class="anni-badge anni-past-badge">${Math.abs(days)} Days Ago</div>`; }
+            if (i.calories) extraHtml += `<div class="anni-badge bg-orange-100 text-orange-600">${i.calories} kcal</div>`;
+            if (i.isTask && i.taskCat) { 
+               const cMap={'Exercise':'#ef4444','Sleep':'#3b82f6','Focus':'#10b981','Meditation':'#a855f7'}; 
+               activeColor=cMap[i.taskCat]||'#f59e0b'; 
+               if(i.taskType==='start') extraHtml+=`<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation();UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}">End ${i.taskCat}</button></div>`;
+            }
+            div.style.setProperty('--node-active-color', activeColor);
 
             div.innerHTML = `
                 <div class="timeline-node-wrapper"><div class="timeline-node"></div></div>
@@ -555,15 +589,30 @@ deleteSelectedEntries: async function() {
                 </div>`;
             fragment.appendChild(div);
         });
+
+        // 一次性插入 DOM
         c.appendChild(fragment);
-        lucide.createIcons(); 
-        this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
-        setTimeout(() => { 
-            if(mainContainer) mainContainer.style.scrollSnapType = 'y proximity';
-            this.handleScroll(); 
-            this.drawTaskConnectors(); 
-        }, 100);
+        
+        // 更新指针 & 解锁
+        this.currentRenderIndex = nextIndex;
+        this.isRendering = false;
+        
+        // 更新 UI 状态
+        if(typeof lucide !== 'undefined') lucide.createIcons();
+        this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); // 更新缓存
+        this.drawTaskConnectors();
+
+        // 【究极防卡死逻辑】
+        // 使用 setTimeout 将“检查是否填满”推迟到下一个事件循环。
+        // 这给了浏览器渲染线程宝贵的 50ms 去计算布局。
+        // 如果高度不够，自动加载下一批。
+        setTimeout(() => {
+            if (main && main.scrollHeight <= main.clientHeight + 100 && this.currentRenderIndex < total) {
+                this.renderBatch(10); 
+            }
+        }, 50);
     },
+    
 /* --- app.js 中的 initScrollObserver --- */
 
 initScrollObserver: function() { 
@@ -583,6 +632,26 @@ initScrollObserver: function() {
     }); 
 },
    handleScroll: function() {
+        // 使用 RAF 锁，防止在一帧内重复计算
+        if (this.scrollTick) return;
+        
+        this.scrollTick = true;
+        window.requestAnimationFrame(() => {
+            this.actualScrollLogic();
+            this.scrollTick = false;
+        });
+    },
+
+    actualScrollLogic: function() {
+        const main = document.getElementById('main-container');
+        if (!main) return;
+
+        // 1. 无限加载触发 (阈值设为 1000px，提前量大一点，用户无感知)
+        if (main.scrollHeight - main.scrollTop - main.clientHeight < 1000) {
+            this.renderBatch(10);
+        }
+
+        // 2. 视觉特效计算
         if (!this.cachedEntryItems || this.cachedEntryItems.length === 0) {
             this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item'));
         }
@@ -593,82 +662,65 @@ initScrollObserver: function() {
         const viewCenter = window.innerHeight / 2; 
         let closest = null; 
         let minDiff = Infinity; 
-        
-        // 优化循环：不需要 forEach 所有，找到最近的就行
-        // 这里保留 forEach 但内部逻辑简化
-        for (let el of entries) {
+        const viewportHeight = window.innerHeight;
+
+        // 【极速循环】
+        for (let i = 0; i < entries.length; i++) {
+            const el = entries[i];
             const rect = el.getBoundingClientRect(); 
-            
-            // 性能优化：如果元素已经飞出屏幕太远，直接跳过计算样式
-            // 上下 800px 以外的都不管
-            if (rect.bottom < -300 || rect.top > window.innerHeight + 300) {
-                // 确保不可见的元素恢复默认，防止状态残留
-                /* 可选：如果需要极致性能，这里可以不操作 DOM，但在快速滚动时可能会有残影 */
-                continue; 
-            }
+
+            // 【核心优化】视口剔除：屏幕上下 300px 以外的元素，完全不操作 DOM
+            if (rect.bottom < -300 || rect.top > viewportHeight + 300) continue;
 
             const dist = Math.abs(rect.top + rect.height/2 - viewCenter); 
             
-            if(dist < minDiff) { 
-                minDiff = dist; 
-                closest = el; 
-            } 
+            // 找最近的元素
+            if(dist < minDiff) { minDiff = dist; closest = el; } 
             
-            el.classList.remove('active-focus'); 
-            const card = el.querySelector('.entry-card'); 
-            
-            if (card) { 
-                 // 只有靠近中心的才做缩放计算，远的直接定死
-                 const range = 400; 
-                 let scale = 0.85; 
-                 let opacity = 0.5; 
-                 
-                 if (dist < range) { 
-                     const ratio = 1 - (dist / range); 
-                     const ease = ratio * ratio; 
-                     scale = 0.85 + (ease * 0.2); 
-                     opacity = 0.5 + (ease * 0.5); 
-                 } 
-                 
-                 if(!card.classList.contains('selected')) { 
-                     card.style.transform = `scale(${scale})`; 
-                     card.style.opacity = opacity; 
-                     card.style.zIndex = dist < 60 ? 50 : 1; 
-                 } else { 
-                     card.style.opacity = 1; 
-                     card.style.zIndex = 50; 
+            // 只有在屏幕中间区域 (距离中心 300px 内) 才做缩放，边缘不做
+            // 减少重绘区域
+            if (dist < 300) {
+                 const card = el.querySelector('.entry-card'); 
+                 if (card && !card.classList.contains('selected')) { 
+                     // 极简缩放算法
+                     const scale = 1; // 性能优先，暂时移除缩放，或者改回 0.95
+                     const opacity = dist < 250 ? 1 : 0.8; 
+                     
+                     // 只在值改变时才写入 DOM (虽然浏览器会优化，但我们可以做得更好)
+                     if (card.style.opacity != opacity) card.style.opacity = opacity;
                  }
-            } 
+            }
         }
 
-        if(closest) {
+        // 3. 更新 HUD (只在最近元素变化时更新)
+        if(closest && !closest.classList.contains('active-focus')) {
+            // 移除旧焦点的类
+            const oldFocus = document.querySelector('.entry-item.active-focus');
+            if(oldFocus) oldFocus.classList.remove('active-focus');
+            
             closest.classList.add('active-focus'); 
+            
+            // 更新光标
             const cursor = document.getElementById('beam-cursor'); 
-            const guideLayer = document.getElementById('center-guide-layer');
-            
-            const rect = closest.getBoundingClientRect();
-            const magnetY = rect.top + rect.height/2 - viewCenter;
-            
-            // 只有非常接近时才吸附光标，避免光标乱飞
-            if (Math.abs(magnetY) < 100) {
-                cursor.style.top = `calc(50% + ${magnetY}px)`;
-                if(guideLayer) guideLayer.style.transform = `translateY(${magnetY}px)`; 
-            } else {
-                cursor.style.top = `50%`;
-                if(guideLayer) guideLayer.style.transform = `translateY(0px)`;
+            if(cursor) {
+                const rect = closest.getBoundingClientRect();
+                const magnetY = rect.top + rect.height/2 - viewCenter;
+                // 只有非常靠近中间才吸附，否则居中
+                cursor.style.top = (Math.abs(magnetY) < 60) ? `calc(50% + ${magnetY}px)` : '50%';
             }
             
+            // 更新 HUD 文字
             const activeColor = closest.style.getPropertyValue('--node-active-color') || '#f59e0b'; 
             document.documentElement.style.setProperty('--current-beam-color', activeColor);
             
-            document.getElementById('hud-day').innerText = String(closest.dataset.day).padStart(2, '0'); 
-            document.getElementById('hud-month-year').innerText = `${closest.dataset.month} ${closest.dataset.year}`; 
+            // 缓存 DOM 查询
+            const hudDay = document.getElementById('hud-day');
+            const hudMeta = document.getElementById('hud-month-year');
+            const hudTime = document.getElementById('hud-time');
             
-            const timeEl = document.getElementById('hud-time'); 
-            const newTime = closest.dataset.time; 
-            if (timeEl.innerText !== newTime) { 
-                timeEl.innerText = newTime; 
-            }
+            if(hudDay.innerText !== closest.dataset.day) hudDay.innerText = String(closest.dataset.day).padStart(2, '0');
+            if(hudMeta.innerText !== `${closest.dataset.month} ${closest.dataset.year}`) hudMeta.innerText = `${closest.dataset.month} ${closest.dataset.year}`;
+            if(hudTime.innerText !== closest.dataset.time) hudTime.innerText = closest.dataset.time;
             
             this.updateCelestialPosition(parseInt(closest.dataset.hour)); 
             if(closest.dataset.weather) ParticleSystem.setWeather(closest.dataset.weather);
@@ -1508,38 +1560,64 @@ closeInfo: function() {
     resetCalendarToday: function() { this.state.calendarDate = new Date(); this.renderCalendar(); },
     renderCalendar: async function() { 
         const g = document.getElementById('calendar-grid'); 
+        if (!g) return;
         g.innerHTML = ''; 
-        const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); 
-        document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); 
-        document.getElementById('cal-year-display').innerText = y; 
         
-        const fd = new Date(y, m, 1).getDay();
-        const dim = new Date(y, m + 1, 0).getDate(); 
+        const y = this.state.calendarDate.getFullYear();
+        const m = this.state.calendarDate.getMonth(); 
+        
+        // 1. 更新标题
+        document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); 
+        
+        // 2. 更新年份（带刷新按钮）
+        const yearEl = document.getElementById('cal-year-display');
+        yearEl.innerHTML = `
+            ${y} 
+            <button onclick="event.stopPropagation(); DataManager.checkAndAddHolidays(true)" class="ml-2 opacity-50 hover:opacity-100 hover:text-[var(--primary)] transition-all cursor-pointer" title="Update Holidays">
+                <i data-lucide="refresh-cw" class="w-3 h-3 inline"></i>
+            </button>
+        `;
+
+        // 3. 计算日历结构
+        const fd = new Date(y, m, 1).getDay(); // 本月第一天是周几
+        const dim = new Date(y, m + 1, 0).getDate(); // 本月有多少天
         const allData = await DataManager.getAll();
         
-        // 【新增】获取今天的日期，用于标记特殊颜色
+        // 获取今天的日期，用于标记
         const today = new Date();
         const isCurrentMonth = today.getFullYear() === y && today.getMonth() === m;
         const todayDate = today.getDate();
 
-        for(let i=0; i<fd; i++) g.appendChild(document.createElement('div')); 
+        // 4. 填充空白格
+        for(let i=0; i<fd; i++) {
+            g.appendChild(document.createElement('div')); 
+        }
         
+        // 5. 填充日期格
         for(let i=1; i<=dim; i++) { 
             const d = document.createElement('div'); 
             d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; 
             
             // 农历计算
             let lunarText = ''; 
-            if (window.Lunar) { try { const solar = Solar.fromYmd(y, m+1, i); lunarText = solar.getLunar().getDayInChinese(); } catch(e){} }
+            if (window.Lunar) { 
+                try { 
+                    const solar = Solar.fromYmd(y, m+1, i); 
+                    lunarText = solar.getLunar().getDayInChinese(); 
+                } catch(e){} 
+            }
             
             // 查找这一天是否有日记
-            const dayEntries = allData.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); 
+            const dayEntries = allData.filter(x => { 
+                const t = new Date(x.ts); 
+                return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; 
+            }); 
             
             // 判断这格是不是今天
             const isTodayCell = isCurrentMonth && i === todayDate;
-            if (isTodayCell) d.classList.add('current-day'); // 加上原有的蓝色框框
+            if (isTodayCell) d.classList.add('current-day'); 
             
-            // 【核心修复】构建小圆点 HTML
+            // 构建小圆点 HTML
             let dotHtml = '';
             if (dayEntries.length > 0) {
                 // 如果是今天，用 cal-dot-today (红色)，否则用 cal-dot (灰色)
@@ -1555,7 +1633,15 @@ closeInfo: function() {
             d.innerHTML = `<span>${i}</span><span class="calendar-lunar">${lunarText}</span>${dotHtml}`;
             g.appendChild(d); 
         } 
-        this.renderArchiveList(allData.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); 
+        
+        // 6. 渲染底部的列表
+        this.renderArchiveList(allData.filter(x => { 
+            const t=new Date(x.ts); 
+            return t.getFullYear()===y && t.getMonth()===m; 
+        }).sort((a,b)=>b.ts-a.ts)); 
+
+        // 7. 刷新图标
+        if(typeof lucide !== 'undefined') lucide.createIcons();
     },
     renderArchiveList: function(entries) {
          const container = document.getElementById('month-entries'); const emptyState = document.getElementById('month-empty-state'); 
@@ -1584,44 +1670,41 @@ if (typeof DataManager !== 'undefined') {
 
 if (typeof DataManager !== 'undefined') {
     DataManager.saveFromEditor = async function() {
-        // 1. 【关键修复】获取保存按钮并禁用，防止双击/重复提交
-        // 这里使用 querySelector 查找带有特定 data-i18n 属性的按钮
-        // 或者是通过 modal 结构找
+        // 【核心修复】获取保存按钮
         const btnSave = document.querySelector('#editor-panel button[onclick="DataManager.saveFromEditor()"]');
-        const originalText = btnSave ? btnSave.innerText : 'Save';
         
+        // 1. 防止重复点击：如果按钮已经被禁用了，直接停止执行！
+        if (btnSave && btnSave.disabled) return;
+
+        // 2. 立即禁用按钮，改文字
+        const originalText = btnSave ? btnSave.innerText : 'Save';
         if(btnSave) {
             btnSave.disabled = true;
-            btnSave.innerText = "Saving...";
+            btnSave.innerHTML = '<i data-lucide="loader" class="w-3 h-3 animate-spin"></i> Saving...';
             btnSave.classList.add('opacity-50', 'cursor-not-allowed');
+            if(typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         try {
+            // ... (这里是你原有的保存逻辑，无需改动，为了节省篇幅我省略了中间取值的代码) ...
+            // 请保留原本的 id, t, content, d, tm 等获取逻辑 ...
             const id = document.getElementById('editor-id').value; 
             const t = document.getElementById('editor-title').value || "Untitled"; 
             const contentDiv = document.getElementById('editor-content');
             const c = contentDiv.innerHTML; 
-            
             let coverImg = null;
             const firstImg = contentDiv.querySelector('img');
             if (firstImg) coverImg = firstImg.src;
-
             const d = document.getElementById('editor-date').value; 
             const tm = document.getElementById('editor-time').value; 
             const cal = document.getElementById('editor-calories').value;
-            
             const type = document.getElementById('editor-entry-type').value;
             const taskCat = document.getElementById('editor-task-cat').value; 
             const recurrence = document.getElementById('editor-recurrence').value;
-            
             let anni = (type === 'anni');
             let isTask = (type === 'task');
             let taskType = null; 
-
-            if (taskCat) {
-                isTask = true;
-                taskType = 'start'; 
-            }
+            if (taskCat) { isTask = true; taskType = 'start'; }
 
             if(d) { 
                 const [y,m,day] = d.split('-').map(Number); 
@@ -1629,30 +1712,17 @@ if (typeof DataManager !== 'undefined') {
                 const ts = new Date(y,m-1,day,hr,min).getTime(); 
                 
                 const payload = { 
-                    ts, 
-                    h: hr, 
-                    title: t, 
-                    content: c, 
-                    mood: UI.state.mood, 
-                    weather: UI.state.weather, 
-                    img: coverImg, 
-                    calories: cal ? parseInt(cal) : null, 
-                    anni, 
-                    isTask,
-                    taskCat, 
-                    taskType, 
+                    ts, h: hr, title: t, content: c, mood: UI.state.mood, weather: UI.state.weather, 
+                    img: coverImg, calories: cal ? parseInt(cal) : null, 
+                    anni, isTask, taskCat, taskType, 
                     recurrence: (taskCat) ? 'none' : ((type === 'diary') ? 'none' : recurrence)
                 }; 
-                
-                // 执行数据库操作 (db.js 里的 onSuccess 会自动负责刷新列表)
+
+                // 数据库操作
                 if (id) await this.update(id, payload); 
                 else await this.add(payload); 
                 
-                // 关闭弹窗
                 UI.closeEditor(); 
-                
-                // 【关键修复】删除了这里的 UI.refreshAll()
-                // 因为 db.js 的 add/update 成功后已经调用过一次了，这里再调就是重复刷新
             } else { 
                 alert('Date required'); 
             }
@@ -1660,10 +1730,10 @@ if (typeof DataManager !== 'undefined') {
             console.error(e);
             alert("Save failed: " + e.message);
         } finally {
-            // 无论成功失败，最后都要恢复按钮状态，以防下次打开时按钮还是灰的
+            // 3. 无论成功失败，恢复按钮状态
             if(btnSave) {
                 btnSave.disabled = false;
-                btnSave.innerText = originalText; // 恢复文字 (Save/保存)
+                btnSave.innerText = originalText;
                 btnSave.classList.remove('opacity-50', 'cursor-not-allowed');
             }
         }
