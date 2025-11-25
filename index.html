@@ -37,10 +37,17 @@
         <div class="hud-meta" id="hud-month-year">---</div>
     </div>
 
-    <div id="filter-fab-group">
+  <div id="filter-fab-group">
         <div class="filter-row" onclick="UI.toggleFilter('anni')"><div class="filter-dot f-anni active"></div><span class="filter-label label-anni" data-i18n="filter_anni">ANN</span></div>
         <div class="filter-row" onclick="UI.toggleFilter('holiday')"><div class="filter-dot f-holiday active"></div><span class="filter-label label-holiday" data-i18n="filter_holiday">HOL</span></div>
         <div class="filter-row" onclick="UI.toggleFilter('normal')"><div class="filter-dot f-normal active"></div><span class="filter-label label-normal" data-i18n="filter_diary">DIARY</span></div>
+        
+        <div class="filter-row mt-6" onclick="UI.scrollToToday()">
+            <div class="filter-dot flex items-center justify-center bg-blue-600 border-none shadow-lg transform hover:scale-110 transition-transform">
+                <i data-lucide="arrow-down-to-line" class="w-3 h-3 text-white"></i>
+            </div>
+            <span class="filter-label font-bold text-[10px] tracking-wider text-[var(--text-sec)] opacity-80">TODAY</span>
+        </div>
     </div>
 
     <div id="center-guide-layer"><div class="guide-beam"></div><div class="guide-cursor" id="beam-cursor"></div></div>

@@ -182,30 +182,80 @@ const DataManager = {
         });
     },
 
-    checkAndAddHolidays: async function() {
-        const entries = await this.getAll();
-        const newEntries = [];
-        const HOLIDAYS_CHECK = [
-            { name: "春节", date: "2025-01-29" }, { name: "元宵节", date: "2025-02-12" },
-            { name: "清明节", date: "2025-04-04" }, { name: "端午节", date: "2025-05-31" },
-            { name: "七夕节", date: "2025-08-29" }, { name: "中秋节", date: "2025-10-06" },
-            { name: "国庆节", date: "2025-10-01" }, { name: "重阳节", date: "2025-10-29" },
-            { name: "圣诞节", date: "2025-12-25" }, { name: "元旦", date: "2026-01-01" },
-            { name: "除夕", date: "2026-02-16" }, { name: "春节", date: "2026-02-17" },
-            { name: "情人节", date: "2026-02-14" }, { name: "元宵节", date: "2026-03-03" }
-        ];
-        HOLIDAYS_CHECK.forEach(h => {
-            const hDate = new Date(h.date).toDateString();
-            if (!entries.some(e => e.title === h.name && new Date(e.ts).toDateString() === hDate)) {
-                 newEntries.push({ id: Date.now() + Math.random(), title: h.name, content: "Holiday", mood: 'smile', weather: 'sun', ts: new Date(h.date+"T09:00:00").getTime(), h: 9, anni: false, isHoliday: true });
-            }
-        });
-        if(newEntries.length > 0) {
-            const store = this.getStore('readwrite');
-            newEntries.forEach(e => store.add(e));
-            return new Promise(r => { store.transaction.oncomplete = () => r(); });
+    // --- 在 db.js 中替换 checkAndAddHolidays 函数 ---
+
+checkAndAddHolidays: async function() {
+    const entries = await this.getAll();
+    const store = this.getStore('readwrite');
+    const now = Date.now();
+    const oneDay = 86400000;
+
+    // 1. 【新增】自动清理过期的旧节日
+    // 逻辑：如果它是系统生成的节日(isHoliday=true)，且时间已过，且内容没被用户改过，就删掉
+    entries.forEach(e => {
+        if (e.isHoliday && e.ts < (now - oneDay) && e.content === "Holiday") {
+            // 直接调用 store.delete 避免 DataManager.delete 的刷新开销
+            store.delete(e.id);
         }
-    },
+    });
+
+    // 2. 【新增】自动补充未来一年的节日 (扩展了列表)
+    // 逻辑：如果数据库里没有这个日期的节日，就自动补上
+    const FUTURE_HOLIDAYS = [
+        // 2025
+        { name: "春节", date: "2025-01-29" }, { name: "元宵节", date: "2025-02-12" },
+        { name: "清明节", date: "2025-04-04" }, { name: "劳动节", date: "2025-05-01" },
+        { name: "端午节", date: "2025-05-31" }, { name: "七夕", date: "2025-08-29" },
+        { name: "中秋节", date: "2025-10-06" }, { name: "国庆节", date: "2025-10-01" },
+        { name: "平安夜", date: "2025-12-24" }, { name: "圣诞节", date: "2025-12-25" },
+        // 2026
+        { name: "元旦", date: "2026-01-01" }, { name: "除夕", date: "2026-02-16" },
+        { name: "春节", date: "2026-02-17" }, { name: "元宵节", date: "2026-03-03" },
+        { name: "清明节", date: "2026-04-05" }, { name: "劳动节", date: "2026-05-01" },
+        { name: "端午节", date: "2026-06-19" }, { name: "中秋节", date: "2026-09-25" },
+        { name: "国庆节", date: "2026-10-01" }
+    ];
+
+    let addedCount = 0;
+    FUTURE_HOLIDAYS.forEach(h => {
+        // 将日期转为当天的 09:00 时间戳
+        const hDate = new Date(h.date.replace(/-/g, '/') + " 09:00:00").getTime();
+        
+        // 检查是否已过期 (只加未来的)
+        if (hDate < (now - oneDay)) return;
+
+        // 检查数据库里是否已经有了这一天
+        // (容差半天时间，防止时区差异导致重复添加)
+        const exists = entries.some(e => Math.abs(e.ts - hDate) < 43200000 && (e.isHoliday || e.title === h.name));
+        
+        if (!exists) {
+            store.add({
+                id: 'sys-hol-' + hDate, // 使用特定前缀，方便管理
+                title: h.name,
+                content: "Holiday",
+                mood: 'smile',
+                weather: 'sun',
+                ts: hDate,
+                h: 9,
+                anni: false,
+                isHoliday: true
+            });
+            addedCount++;
+        }
+    });
+
+    // 如果有变动，就在事务完成后刷新界面
+    if (addedCount > 0) {
+        return new Promise(r => {
+            store.transaction.oncomplete = () => {
+                console.log(`Auto-added ${addedCount} holidays.`);
+                // 刷新一下视图以显示新节日
+                if (typeof UI !== 'undefined') UI.refreshAll();
+                r();
+            };
+        });
+    }
+},
 
     updateHolidays: async function() { await this.checkAndAddHolidays(); alert("Holidays Updated!"); UI.renderCalendar(); UI.renderTimeline(); },
 

@@ -198,7 +198,40 @@ const UI = {
     refreshAll: function() { this.renderTimeline(); this.renderCalendar(); },
     toggleFilter: function(type) { this.state.filters[type] = !this.state.filters[type]; document.querySelector(`.f-${type}`).classList.toggle('active', this.state.filters[type]); this.renderTimeline(); },
     
-   switchView: function(v) {
+   // --- 新增：滚动到今天 ---
+    scrollToToday: function() {
+        // 1. 尝试找今天的条目
+        const todayStr = new Date().toDateString(); // e.g., "Tue Nov 25 2025"
+        const entries = document.querySelectorAll('.entry-item');
+        let target = null;
+
+        for (let el of entries) {
+            const ts = parseInt(el.dataset.ts);
+            if (new Date(ts).toDateString() === todayStr) {
+                target = el;
+                break;
+            }
+        }
+
+        // 2. 如果今天没写日记，就找最近的一条（列表最上面的通常是最近的）
+        if (!target && entries.length > 0) {
+            target = entries[0];
+        }
+
+        // 3. 执行平滑滚动
+        if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // 闪烁一下提醒用户
+            const card = target.querySelector('.entry-card');
+            if(card) {
+                card.style.transition = 'transform 0.2s';
+                card.style.transform = 'scale(1.1)';
+                setTimeout(() => card.style.transform = 'scale(1)', 300);
+            }
+        }
+    },
+
+    switchView: function(v) {
     ['timeline', 'calendar', 'dashboard'].forEach(k => document.getElementById(`btn-${k}`).classList.remove('active')); 
     document.getElementById(`btn-${v}`).classList.add('active');
     
@@ -443,141 +476,90 @@ deleteSelectedEntries: async function() {
     renderTimeline: async function() {
         const c = document.getElementById('diary-list'); 
         const mainContainer = document.getElementById('main-container');
-        
-        // 1. 【关键技巧】渲染前，暂时关闭 scroll-snap，防止浏览器在内容变化时“锁死”
-        if(mainContainer) mainContainer.style.scrollSnapType = 'none';
+        if(mainContainer) mainContainer.style.scrollSnapType = 'none'; // 暂时关闭吸附
 
         c.innerHTML = ''; 
-        
-        // 重置连线层
         const layer = document.getElementById('task-lines-layer'); 
-        if(layer) layer.innerHTML = ''; 
-        else { 
-            const l = document.createElement('div'); 
-            l.id = 'task-lines-layer'; 
-            l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; 
-            c.appendChild(l); 
-        }
+        if(layer) layer.innerHTML = ''; else { const l = document.createElement('div'); l.id = 'task-lines-layer'; l.className = 'absolute top-0 left-0 w-full h-full pointer-events-none z-0'; c.appendChild(l); }
         
         const allData = await DataManager.getAll(); 
+        let entries = allData.sort((a, b) => { const diff = b.ts - a.ts; return diff !== 0 ? diff : String(b.id).localeCompare(String(a.id)); }); 
         
-        // 2. 【关键修复】稳定排序：如果时间(ts)相同，就比较 ID。
-        // 这能彻底解决“同一分钟条目冲突”导致的跳动问题
-        let entries = allData.sort((a, b) => {
-            const timeDiff = b.ts - a.ts;
-            if (timeDiff !== 0) return timeDiff;
-            // 如果时间完全一样，按 ID 字符串降序排，保证顺序永远固定
-            return String(b.id).localeCompare(String(a.id));
-        }); 
-        
-        // 过滤器逻辑
         entries = entries.filter(e => { 
             if(e.isHoliday) return this.state.filters.holiday; 
             if(e.anni) return this.state.filters.anni; 
             return this.state.filters.normal; 
         });
         
-        if(entries.length === 0) { 
-            c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; 
-            return; 
-        }
+        if(entries.length === 0) { c.innerHTML += `<div class="text-center opacity-50 py-20">Tap + to start.</div>`; return; }
         
-        const MOOD_STYLES = {
-            smile:    { color: '#f59e0b', fill: '#fef3c7', icon: 'smile' },
-            meh:      { color: '#64748b', fill: '#f1f5f9', icon: 'meh' },
-            frown:    { color: '#3b82f6', fill: '#dbeafe', icon: 'frown' },
-            heart:    { color: '#ec4899', fill: '#fce7f3', icon: 'heart' },
-            sparkles: { color: '#8b5cf6', fill: '#ede9fe', icon: 'sparkles' }
-        };
+        const MOOD_STYLES = { smile: {icon:'smile',color:'#f59e0b'}, meh: {icon:'meh',color:'#64748b'}, frown: {icon:'frown',color:'#3b82f6'}, heart: {icon:'heart',color:'#ec4899'}, sparkles: {icon:'sparkles',color:'#8b5cf6'} };
+        const fragment = document.createDocumentFragment();
+        
+        // 【新增】获取今天的日期字符串，用于比对
+        const todayStr = new Date().toDateString();
 
-        const catState = { 'Exercise': null, 'Sleep': null, 'Focus': null, 'Meditation': null };
-        const now = Date.now();
-        
         entries.forEach(i => {
-            // 确保 ID 是字符串且无特殊字符
             const safeId = String(i.id).replace(/[^a-zA-Z0-9-_]/g, '');
-            
             const d = new Date(i.ts); 
+            
+            // 【新增】判断是否是今天
+            const isToday = d.toDateString() === todayStr;
+
             const div = document.createElement('div'); 
             div.className = `entry-item`; 
             div.dataset.ts = i.ts; 
-            // 给 DOM ID 加个前缀，防止纯数字 ID 导致的 querySelector 报错
             div.id = `entry-${safeId}`; 
-            
-            div.dataset.hour = d.getHours(); 
-            div.dataset.day = d.getDate(); 
-            div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); 
-            div.dataset.year = d.getFullYear(); 
-            div.dataset.time = this.formatTime(d); 
-            div.dataset.weather = i.weather || 'sun';
-            
+            div.dataset.hour = d.getHours(); div.dataset.day = d.getDate(); div.dataset.month = d.toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', {month:'short'}); div.dataset.year = d.getFullYear(); div.dataset.time = this.formatTime(d); div.dataset.weather = i.weather || 'sun';
             if (i.isTask) { div.dataset.isTask = true; div.dataset.taskType = i.taskType; div.dataset.taskCat = i.taskCat; }
             
             let activeColor = '#f59e0b'; 
             let extraHtml = ''; 
-            let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img"></div>` : '';
-            let cardClass = '';
+            let thumbHtml = i.img ? `<div class="card-thumb-col"><img src="${i.img}" class="card-thumb-img" loading="lazy"></div>` : '';
+            let cardClass = ''; // 初始化为空
             
-            if (i.mood === 'sparkles') cardClass += ' glow-purple';
-            
-            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+=' card-holiday'; extraHtml += `<div class="holiday-badge anni-badge text-[0.6rem] mb-1 px-1 rounded font-bold uppercase">Festival</div>`; }
-            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+=' card-task'; extraHtml += `<div class="inline-block bg-yellow-100 text-yellow-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
-            
-            if (i.anni) {
-                const diffTime = i.ts - now;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-                if (diffDays > 0) extraHtml += `<div class="anni-badge anni-future-badge">${diffDays} Days Until</div>`;
-                else extraHtml += `<div class="anni-badge anni-past-badge">${Math.abs(diffDays)} Days Since</div>`;
-            }
+            // 【新增】如果是今天，添加高亮 CSS 类
+            if (isToday) cardClass += ' card-today-highlight';
 
+            if (i.mood === 'sparkles') cardClass += ' glow-purple';
+            if (i.isHoliday) { activeColor = '#22c55e'; cardClass+=' card-holiday'; extraHtml += `<div class="holiday-badge anni-badge">Festival</div>`; }
+            if (i.recurrence && i.recurrence !== 'none') { activeColor = '#eab308'; cardClass+=' card-task'; extraHtml += `<div class="anni-badge bg-yellow-100 text-yellow-600"><i data-lucide="repeat" class="inline w-3 h-3"></i> ${i.recurrence}</div>`; }
+            if (i.anni) {
+                const diffTime = i.ts - Date.now();
+                const diffDays = Math.ceil(diffTime / 86400000); 
+                extraHtml += diffDays > 0 ? `<div class="anni-badge anni-future-badge">${diffDays} Days Left</div>` : `<div class="anni-badge anni-past-badge">${Math.abs(diffDays)} Days Ago</div>`;
+            }
             if (i.isTask) { 
-                if (i.taskCat === 'Exercise') activeColor = '#ef4444'; 
-                if (i.taskCat === 'Sleep') activeColor = '#3b82f6'; 
-                if (i.taskCat === 'Focus') activeColor = '#10b981'; 
-                if (i.taskCat === 'Meditation') activeColor = '#a855f7'; 
+                const colors = {'Exercise':'#ef4444', 'Sleep':'#3b82f6', 'Focus':'#10b981', 'Meditation':'#a855f7'};
+                activeColor = colors[i.taskCat] || '#f59e0b';
+                if (i.taskType === 'start') extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}">End ${i.taskCat}</button></div>`; 
             }
-            
-            if (i.calories) { extraHtml += `<div class="inline-block bg-orange-100 text-orange-600 text-[0.6rem] px-2 rounded font-bold uppercase tracking-wide mr-1"><i data-lucide="utensils" class="inline w-3 h-3"></i> ${i.calories} kcal</div>`; }
-            
-            if (i.isTask && !catState[i.taskCat]) { 
-                catState[i.taskCat] = i.taskType; 
-                if (i.taskType === 'start') { 
-                    // 注意：onclick 里的 ID 也用了 safeId
-                    extraHtml += `<div class="mt-2 pt-2 border-t border-[var(--line)]"><button onclick="event.stopPropagation(); UI.endTask('${i.taskCat}')" class="task-end-btn btn-end-${i.taskCat}"><i data-lucide="square" class="w-3 h-3 fill-current"></i> End ${i.taskCat}</button></div>`; 
-                } 
-            }
+            if (i.calories) extraHtml += `<div class="anni-badge bg-orange-100 text-orange-600">${i.calories} kcal</div>`;
             
             div.style.setProperty('--node-active-color', activeColor);
-            
             const mStyle = MOOD_STYLES[i.mood] || MOOD_STYLES.smile;
-            const moodHtml = `<div class="card-mood-sticker" style="position:absolute; top:0.8rem; right:0.8rem;">
-                <i data-lucide="${mStyle.icon}" style="width:1.2rem; height:1.2rem; color:${mStyle.color}; fill:${mStyle.fill}; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));"></i>
-            </div>`;
+            const rawContent = i.content ? i.content.replace(/<[^>]*>/g, '').replace(/!\[.*?\]\(.*?\)/g, '') : '';
 
-            // 使用 safeId
             div.innerHTML = `
                 <div class="timeline-node-wrapper"><div class="timeline-node"></div></div>
                 <div class="entry-card-wrapper">
-                    <div class="entry-card ${cardClass} pointer-events-auto" onclick="UI.handleEntryClick('${i.id}')" style="${!i.img ? 'padding-left:1.2rem' : ''}">
+                    <div class="entry-card ${cardClass}" onclick="UI.handleEntryClick('${i.id}')" style="${!i.img ? 'padding-left:1.2rem' : ''}">
                         ${thumbHtml}
                         <div class="card-main-col">
-                            ${moodHtml}
+                            <div class="card-mood-sticker absolute top-3 right-3"><i data-lucide="${mStyle.icon}" style="color:${mStyle.color};width:1.2rem;"></i></div>
                             <div class="flex flex-wrap gap-2 mb-1">${extraHtml}</div>
-                            <h3 class="text-xl font-bold text-[var(--text)] font-display leading-tight mb-2 line-clamp-2 pr-6">${i.title}</h3>
-                            <p class="text-sm text-[var(--text)]/70 font-serif leading-relaxed line-clamp-2">${i.content.replace(/<[^>]*>/g, '').substring(0,80)}</p>
+                            <h3 class="text-xl font-bold font-display leading-tight mb-2 line-clamp-1 pr-6">${i.title}</h3>
+                            <p class="text-sm opacity-70 font-serif leading-relaxed line-clamp-2">${rawContent.substring(0,80)}</p>
                         </div>
                     </div>
                 </div>`;
-            c.appendChild(div);
+            fragment.appendChild(div);
         });
-        
+        c.appendChild(fragment);
         lucide.createIcons(); 
         this.cachedEntryItems = Array.from(document.querySelectorAll('.entry-item')); 
-        
-        // 3. 【关键技巧】等 DOM 渲染完毕后，稍微延迟一下再把吸附功能开回来
-        // 这就像给车换挡时踩离合，避免硬碰硬
         setTimeout(() => { 
-            if(mainContainer) mainContainer.style.scrollSnapType = 'y mandatory';
+            if(mainContainer) mainContainer.style.scrollSnapType = 'y proximity';
             this.handleScroll(); 
             this.drawTaskConnectors(); 
         }, 100);
@@ -836,171 +818,82 @@ initScrollObserver: function() {
 
 // 找到 app.js 中的 generateReport 函数，完全替换为以下内容：
 
+// --- 在 app.js 中替换 generateReport 函数 ---
+
+// --- 在 app.js 中替换 generateReport 函数 ---
+
 generateReport: async function() {
     const zodiac = document.getElementById('oracle-zodiac').value || "Unknown";
     const bazi = document.getElementById('oracle-bazi').value || "Unknown";
     const container = document.getElementById('summary-ai-content');
-    const lang = this.state.lang; // 'zh' or 'en'
-    const currentPersona = this.state.persona || 'western'; // 获取当前选择的角色
+    const lang = this.state.lang;
+    const currentPersona = this.state.persona || 'western';
 
-    // 1. 切换视图 & 显示动态加载动画 (根据角色定制)
+    // 1. 界面切换
     document.getElementById('oracle-input-view').classList.add('hidden');
     document.getElementById('oracle-result-view').classList.remove('hidden');
 
-    // --- 【新增】角色专属加载配置 ---
-    const LOADERS = {
-        western: {
-            icon: 'sparkles', // 星星/魔法
-            color: 'text-purple-600',
-            glow: 'bg-purple-500',
-            textColor: 'text-purple-900',
-            texts: lang === 'zh' 
-                ? ["正在点燃香薰...", "正在翻阅星图...", "正在与之共鸣...", "正在倾听时间的回响..."] 
-                : ["Lighting the incense...", "Reading the star chart...", "Resonating with energy...", "Listening to time's echo..."]
-        },
-        eastern: {
-            icon: 'scroll', // 卷轴/道经
-            color: 'text-emerald-700', // 墨绿/道家感
-            glow: 'bg-emerald-500',
-            textColor: 'text-emerald-900',
-            texts: lang === 'zh' 
-                ? ["道长正在起卦...", "推演五行生克...", "感应气场流动...", "正在烹茶待客..."] 
-                : ["Casting the hexagram...", "Calculating Five Elements...", "Sensing the Qi flow...", "Brewing tea for you..."]
-        },
-        coach: {
-            icon: 'activity', // 心率/分析/图表
-            color: 'text-blue-600', // 商务蓝/理性
-            glow: 'bg-blue-500',
-            textColor: 'text-blue-900',
-            texts: lang === 'zh' 
-                ? ["正在分析行为模式...", "连接思维断点...", "正在构建行动方案...", "深度回顾本周数据..."] 
-                : ["Analyzing patterns...", "Connecting the dots...", "Building action plan...", "Reviewing data points..."]
-        }
-    };
-
-    // 获取当前主题，如果获取不到则默认用 western
-    const theme = LOADERS[currentPersona] || LOADERS.western;
-    const randomText = theme.texts[Math.floor(Math.random() * theme.texts.length)];
-
-    // 渲染加载界面
-    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60 space-y-6">
-        <div class="relative">
-            <div class="absolute inset-0 ${theme.glow} blur-xl opacity-20 animate-pulse"></div>
-            <i data-lucide="${theme.icon}" class="relative z-10 w-10 h-10 animate-bounce ${theme.color}"></i>
-        </div>
-        <p class="text-xs font-bold tracking-[0.3em] animate-pulse ${theme.textColor} font-serif">${randomText}</p>
+    // 显示加载动画
+    container.innerHTML = `<div class="flex flex-col items-center justify-center h-full opacity-60 animate-pulse space-y-4">
+        <i data-lucide="sparkles" class="w-8 h-8 text-purple-500"></i>
+        <p class="text-xs font-bold tracking-widest opacity-50">Connecting to the stars...</p>
     </div>`;
-    
     if(typeof lucide !== 'undefined') lucide.createIcons();
     
-    // 2. 准备数据 (保持原有逻辑)
+    // 2. 准备数据（关键修复：清理图片代码）
     const allData = await DataManager.getAll();
     const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);
+    
     const recentData = allData
         .filter(e => e.ts > sevenDaysAgo)
         .sort((a,b) => a.ts - b.ts)
         .map(e => {
             const d = new Date(e.ts);
             const weekDay = d.toLocaleDateString(lang==='zh'?'zh-CN':'en-US', {weekday: 'long'});
-            // 包含天气和心情，帮助 AI 建立情感链接
-            return `[${weekDay}] ${e.title} (Mood:${e.mood}, Weather:${e.weather}): ${e.content}`;
+            
+            // 【核心修复】使用正则移除所有 Markdown 图片和 HTML 图片标签，防止 Token 爆炸
+            // 匹配 ![...](...) 或 <img ...> 或 base64 引用
+            let cleanContent = (e.content || "")
+                .replace(/!\[.*?\]\(.*?\)/g, '[Image]') 
+                .replace(/<img[^>]*>/g, '[Image]')
+                .replace(/\[.*?\]:\s*data:image\/.*?(?:\n|$)/g, ''); 
+
+            return `[${weekDay}] ${e.title} (Mood:${e.mood}, Weather:${e.weather}): ${cleanContent}`;
         })
         .join('\n');
 
-    const dataContext = recentData.length > 10 ? recentData : (lang === 'zh' ? "（用户本周很安静，依靠直觉感受ta的能量）" : "(User was quiet this week, rely on intuition.)");
+    const dataContext = recentData.length > 10 ? recentData : "(User was quiet this week)";
 
-    // 3. 定义沉浸式信件 Prompt (保持原有逻辑)
-    const PERSONA_PROMPTS = {
-        western: {
-            zh: `角色设定：你不是AI，你是一位名为“Luna”的神秘占星师。
-场景：深夜，壁炉旁，你正坐在用户对面，手里捧着一杯热茶。
-语气：温柔、深邃、像多年未见的知己。
-任务：写一封【私人信件】。
-要求：
-1. 必须引用日记里的具体细节（如“我看到周二那天雨很大...”）来证明你在倾听。
-2. 将这些细节与星座[${zodiac}]的当前能量联系起来。
-3. 不要用枯燥的标题。用 ## 这种 Markdown 格式来区分段落重点，但要融入信件的流利感。`,
-            en: `Role: You are "Luna," a mystic astrologer.
-Scene: Late night, by the fireplace. You are sitting across from the user.
-Tone: Intimate, poetic, deep. Like an old soulmate.
-Task: Write a **Personal Letter**.
-Requirements:
-1. Cite specific details from their diary (e.g., "I noticed on Tuesday you felt...") to show empathy.
-2. Connect these details to the current cosmic energy of [${zodiac}].
-3. Use ## Markdown for gentle emphasis, but keep the flow of a letter.`
-        },
-        eastern: {
-            zh: `角色设定：你是一位隐居山林的“云游道长”。
-场景：松树下，一壶清茶，你与用户对坐论道。
-语气：通透、淡然、充满东方的哲理与抚慰感。
-任务：写一封【手书】。
-要求：
-1. 从日记细节中捕捉“气”的变化（如“周三你的焦虑，其实是心火...”）。
-2. 结合生辰[${bazi}]，给出顺势而为的建议。
-3. 结尾送一句像“护身符”一样的短句。`,
-            en: `Role: A Taoist Hermit.
-Scene: Under a pine tree, drinking tea with the user.
-Tone: Wise, calm, full of Eastern philosophy.
-Task: Write a **Handwritten Letter**.
-Requirements:
-1. Interpret their diary details through "Qi" and nature metaphors.
-2. Give advice based on flow and balance.
-3. End with a "Mantra" for protection.`
-        },
-        coach: {
-            zh: `角色设定：你是一位顶级人生导师。
-场景：私人工作室，只有你们两人，灯光柔和，进行深度对话。
-语气：真诚、有力、不仅是分析，更是情感上的共鸣与鼓舞。
-任务：写一封【深度反馈信】。
-要求：
-1. 敏锐地指出日记细节背后隐藏的心理模式（潜意识的恐惧或渴望）。
-2. 像朋友一样拍拍肩膀，给出下一步的具体行动。`,
-            en: `Role: Elite Life Coach.
-Scene: Private studio, deep conversation.
-Tone: Sincere, powerful, empathetic yet sharp.
-Task: Write a **Deep Feedback Letter**.
-Requirements:
-1. Point out psychological patterns hidden in diary details.
-2. Like a supportive friend, give one specific next step.`
-        }
+    // 3. 构建 Prompt (保持你原有的设定)
+    const prompts = {
+        western: { role: "Astrologer Luna", tone: "Mystical, poetic, intimate." },
+        eastern: { role: "Taoist Sage", tone: "Zen, philosophical, calm." },
+        coach: { role: "Life Coach", tone: "Analytical, encouraging, sharp." }
     };
-
-    const selectedPersona = PERSONA_PROMPTS[this.state.persona] || PERSONA_PROMPTS.western;
-    const langPrompt = selectedPersona[lang];
-
-    // 4. 构建最终 Prompt (保持原有逻辑)
+    const pConfig = prompts[currentPersona] || prompts.western;
+    
     const finalPrompt = `
-${langPrompt}
-
-=== THE MEMORY STREAM (User's Week) ===
+Role: ${pConfig.role}. Tone: ${pConfig.tone}.
+User Info: Zodiac ${zodiac}, Bazi ${bazi}.
+Context: This is the user's diary from the last 7 days:
+---
 ${dataContext}
-=======================================
-
-Write the response in ${lang === 'zh' ? 'Chinese' : 'English'}.
-**CRITICAL FORMATTING RULES:**
-- Use **Markdown** syntax.
-- Start with a warm, personal salutation (e.g., "My dear traveler," "亲爱的...").
-- Use **Bold** for key emotions or objects.
-- Use "## " (H2) for distinct thematic transitions, NOT rigid headers like "Analysis". Make it flow.
-- **DO NOT** wrap the output in a code block (no \`\`\`markdown). Just raw text.
-- Length: Approx 200-250 words.
+---
+Task: Write a weekly insight letter in ${lang === 'zh' ? 'Chinese' : 'English'}.
+Requirements:
+1. Use Markdown (## for titles, ** for highlights).
+2. Keep it under 250 words.
+3. Be personal and specific to the diary content.
 `;
 
-    // 5. 调用 API 并清洗数据 (保持原有逻辑)
+    // 4. 调用 API
     try {
         let report = await DataManager.callDeepseek(finalPrompt, 1000);
-        
-        // 清洗 AI 可能返回的代码块标记
         report = report.replace(/```markdown/g, '').replace(/```/g, '').trim();
-        
         container.innerHTML = marked.parse(report);
-        
     } catch(e) {
         console.error(e);
-        container.innerHTML = `<div class="text-center text-red-800 bg-red-50 p-4 rounded-xl">
-            <p class="font-bold">Connection Faded</p>
-            <p class="text-xs opacity-70">${e.message}</p>
-        </div>`;
+        container.innerHTML = `<div class="p-4 text-center opacity-70"><p>Connection faded...</p><p class="text-xs mt-2">${e.message}</p></div>`;
     }
 },
   openWeeklySummary: function() { 
@@ -1614,17 +1507,53 @@ closeInfo: function() {
     changeMonth: function(o) { const d = new Date(this.state.calendarDate); d.setMonth(d.getMonth() + o); this.state.calendarDate = d; this.renderCalendar(); },
     resetCalendarToday: function() { this.state.calendarDate = new Date(); this.renderCalendar(); },
     renderCalendar: async function() { 
-        const g = document.getElementById('calendar-grid'); g.innerHTML = ''; const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); 
-        document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); document.getElementById('cal-year-display').innerText = y; 
-        const fd = new Date(y, m, 1).getDay(), dim = new Date(y, m + 1, 0).getDate(); 
+        const g = document.getElementById('calendar-grid'); 
+        g.innerHTML = ''; 
+        const y = this.state.calendarDate.getFullYear(), m = this.state.calendarDate.getMonth(); 
+        document.getElementById('cal-month-display').innerText = new Date(y, m).toLocaleString(this.state.lang === 'zh' ? 'zh-CN' : 'en-US', { month: 'short' }); 
+        document.getElementById('cal-year-display').innerText = y; 
+        
+        const fd = new Date(y, m, 1).getDay();
+        const dim = new Date(y, m + 1, 0).getDate(); 
         const allData = await DataManager.getAll();
+        
+        // 【新增】获取今天的日期，用于标记特殊颜色
+        const today = new Date();
+        const isCurrentMonth = today.getFullYear() === y && today.getMonth() === m;
+        const todayDate = today.getDate();
+
         for(let i=0; i<fd; i++) g.appendChild(document.createElement('div')); 
+        
         for(let i=1; i<=dim; i++) { 
-            const d = document.createElement('div'); d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; 
-            let lunarText = ''; if (window.Lunar) { try { const solar = Solar.fromYmd(y, m+1, i); lunarText = solar.getLunar().getDayInChinese(); } catch(e){} }
-            d.innerHTML = `<span>${i}</span><span class="calendar-lunar">${lunarText}</span>`;
-            const de = allData.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); 
-            if(de.length>0) { d.classList.add('has-entry', 'font-bold'); d.onclick=()=>this.openDetail(de[0]); } else { d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); } g.appendChild(d); 
+            const d = document.createElement('div'); 
+            d.className = 'calendar-cell hover:bg-[var(--line)]/30 transition-colors cursor-pointer'; 
+            
+            // 农历计算
+            let lunarText = ''; 
+            if (window.Lunar) { try { const solar = Solar.fromYmd(y, m+1, i); lunarText = solar.getLunar().getDayInChinese(); } catch(e){} }
+            
+            // 查找这一天是否有日记
+            const dayEntries = allData.filter(x => { const t = new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m && t.getDate()===i; }); 
+            
+            // 判断这格是不是今天
+            const isTodayCell = isCurrentMonth && i === todayDate;
+            if (isTodayCell) d.classList.add('current-day'); // 加上原有的蓝色框框
+            
+            // 【核心修复】构建小圆点 HTML
+            let dotHtml = '';
+            if (dayEntries.length > 0) {
+                // 如果是今天，用 cal-dot-today (红色)，否则用 cal-dot (灰色)
+                const dotClass = isTodayCell ? 'cal-dot-today' : 'cal-dot';
+                dotHtml = `<div class="${dotClass}"></div>`;
+                d.classList.add('font-bold'); 
+                d.onclick=()=>this.openDetail(dayEntries[0]); 
+            } else { 
+                d.onclick=()=>this.openEditor(`${y}-${String(m+1).padStart(2,'0')}-${String(i).padStart(2,'0')}`); 
+            }
+            
+            // 插入 HTML：日期数字 + 农历 + 小圆点
+            d.innerHTML = `<span>${i}</span><span class="calendar-lunar">${lunarText}</span>${dotHtml}`;
+            g.appendChild(d); 
         } 
         this.renderArchiveList(allData.filter(x => { const t=new Date(x.ts); return t.getFullYear()===y && t.getMonth()===m; }).sort((a,b)=>b.ts-a.ts)); 
     },

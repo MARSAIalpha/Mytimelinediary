@@ -118,7 +118,21 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
     position: relative; 
     z-index: 10; 
 }
-.entry-item { position: relative; width: 100%; scroll-snap-align: center; scroll-snap-stop: always; display: flex; align-items: center; padding-block: 32px; pointer-events: none; }
+.entry-item { 
+    position: relative; 
+    width: 100%; 
+    
+    /* 配合容器的 proximity */
+    scroll-snap-align: center; 
+    
+    /* 【核心修复】删除 scroll-snap-stop，防止快速滑动时被强制刹车 */
+    /* scroll-snap-stop: always;  <-- 这行必须删掉 */
+    
+    display: flex; 
+    align-items: center; 
+    padding-block: 32px; 
+    pointer-events: none; 
+}
 .timeline-node-wrapper { position: absolute; left: var(--rail-x); top: 50%; transform: translate(-50%, -50%); z-index: 21; pointer-events: none; }
 .timeline-node { width: 6px; height: 6px; border-radius: 50%; background-color: #9ca3af; opacity: 0.6; transition: all 0.3s ease; }
 .entry-item.active-focus .timeline-node { width: 14px; height: 14px; background-color: var(--node-active-color, var(--primary)); opacity: 1; transition: box-shadow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.1s, width 0.2s, height 0.2s; box-shadow: 0 0 0 3px var(--card-bg), 0 0 0 5px var(--node-active-color, var(--primary)); }
@@ -738,3 +752,41 @@ body[data-theme="night"] .fab-glass-amber {
 }
 /* --- 粘贴到 style.css 底部 --- */
 /* --- style.css 底部 --- */
+.card-today-highlight {
+    border: 2px solid var(--primary) !important; /* 强制边框颜色 */
+    box-shadow: 0 0 20px var(--glow-color) !important; /* 发光 */
+    animation: todayPulse 3s infinite ease-in-out; /* 呼吸动画 */
+}
+
+@keyframes todayPulse {
+    0% { box-shadow: 0 0 10px var(--glow-color); transform: scale(1); }
+    50% { box-shadow: 0 0 25px var(--glow-color); transform: scale(1.02); }
+    100% { box-shadow: 0 0 10px var(--glow-color); transform: scale(1); }
+}
+
+/* 2. 日历：小圆点样式修复 */
+.cal-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: var(--text-sec); /* 默认灰色 */
+    margin-top: 4px;
+    opacity: 0.6;
+}
+
+/* 3. 日历：今天的小圆点 (特别颜色) */
+.cal-dot-today {
+    background-color: #ef4444 !important; /* 鲜艳的红色 */
+    width: 6px;
+    height: 6px;
+    opacity: 1;
+    box-shadow: 0 0 5px rgba(239, 68, 68, 0.5);
+}
+
+/* 辅助：确保日历格子内容垂直居中 */
+.calendar-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
