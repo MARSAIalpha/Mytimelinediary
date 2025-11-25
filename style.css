@@ -85,40 +85,33 @@ body[data-theme="night"] { --text: #f8fafc; --text-sec: #94a3b8; --primary: #818
 @keyframes taskFlow { 0% {background-position: 0% 50%} 50% {background-position: 100% 50%} 100% {background-position: 0% 50%} }
 .task-line-label { position: absolute; font-weight: 700; font-size: 0.6rem; color: var(--text-sec); opacity: 0.7; white-space: nowrap; transform: translateX(-100%); left: -12px; }
 .label-mid { top: 50%; transform: translate(-100%, -50%); color: var(--current-beam-color); font-weight: 900; opacity: 1; }
-#main-container { 
-    position: absolute; 
+#main-container {
+    position: fixed; /* 改为 fixed 确保稳固 */
     top: 0; 
     left: 0; 
-    right: 0; 
-    bottom: 0; 
-    
-    /* 滚动设置 */
-    overflow-y: scroll; 
-    scroll-behavior: smooth; 
-    -webkit-overflow-scrolling: touch; 
-    
-    /* 保持这个，这是之前的“自动锁定”功能 */
-    scroll-snap-type: y mandatory; 
-    
-    overscroll-behavior-y: contain; 
-    
-    /* === ❌ 删除下面这一行！它是罪魁祸首 === */
-    /* transform: translate3d(0, 0, 0); */  
-    
-    /* === ✅ 保留这一行即可优化性能，不会破坏定位 === */
-    will-change: scroll-position;
+    width: 100vw; 
+    height: 100%;       /* 兼容旧浏览器 */
+    height: 100dvh;     /* 适配 iOS 动态状态栏 */
+    overflow-y: scroll !important; /* 强制开启滚动条 */
+    -webkit-overflow-scrolling: touch; /* 开启 iOS 惯性滚动 */
+    z-index: 10;
+    touch-action: pan-y; /* 允许垂直拖动 */
 }
-#diary-list { 
-    /* 顶部留白 50vh 是为了让第一条能居中 */
-    padding-top: 50vh; 
+#diary-list {
+    /* 保持原有的留白 */
+    padding-top: 45vh;
+    padding-bottom: 50vh;
     
-    /* 核心修改：底部必须也留白 50vh，否则最后一条日记永远滚不到屏幕中间 */
-    padding-bottom: 50vh; 
+    /* 【核心】强制最小高度为屏幕高度 + 1像素
+       这样永远都能滑得动，永远有回弹，不会被系统锁死 */
+    min-height: 101vh !important; 
     
-    position: relative; 
-    z-index: 10; 
+    position: relative;
+    z-index: 20;
+    pointer-events: auto; /* 确保能接收触摸事件 */
 }
 .entry-item { 
+    pointer-events: none; /* 让触摸穿透条目容器，直达列表背景 */
     position: relative; 
     width: 100%; 
     
@@ -799,4 +792,18 @@ body[data-theme="night"] .fab-glass-amber {
        这能极大地降低内存占用和滚动卡顿。 */
     content-visibility: auto; 
     contain-intrinsic-size: 150px; /* 给个大致的高度估算值，防止滚动条跳动 */
+}
+.entry-card, .fab-btn, #filter-fab-group, #btn-ai-summary {
+    pointer-events: auto !important; /* 只有卡片和按钮可以点击 */
+}
+
+/* 4. 修复时间轴线的定位，防止遮挡 */
+.timeline-rail-outer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 100%;
+    pointer-events: none !important; /* 绝对禁止它拦截触摸 */
+    z-index: 0; /* 放在最底层 */
 }
